@@ -1,8 +1,2 @@
 [phases.setup]
-nixPkgs = ["nodejs_20", "openssl"]
-
-[phases.install]
-cmds = ["npm ci --prefer-offline"]
-
-[start]
-cmd = "npx prisma migrate deploy && node server.js"
+nixPkgs = ["nodejs_20", "openssl_3"]
