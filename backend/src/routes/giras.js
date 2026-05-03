@@ -1,0 +1,289 @@
+import { Router } from 'express';
+import { PrismaClient } from '@prisma/client';
+import { authenticate, requireAdmin } from '../middleware/auth.js';
+
+const router = Router();
+const prisma = new PrismaClient();
+
+const giraFullInclude = {
+  entidades: { include: { entidade: true } },
+  musicas: { include: { musica: true } },
+  rotinas: { include: { rotina: true } },
+};
+
+// GET /api/giras - upcoming giras (data >= today)
+router.get('/', async (_req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const giras = await prisma.gira.findMany({
+      where: { data: { gte: today } },
+      orderBy: { data: 'asc' },
+    });
+
+    return res.json(giras);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /api/giras/all - all giras
+router.get('/all', async (_req, res) => {
+  try {
+    const giras = await prisma.gira.findMany({ orderBy: { data: 'asc' } });
+    return res.json(giras);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /api/giras/:id - with all relations
+router.get('/:id', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
+
+    const gira = await prisma.gira.findUnique({
+      where: { id },
+      include: giraFullInclude,
+    });
+
+    if (!gira) return res.status(404).json({ error: 'Gira not found' });
+
+    return res.json(gira);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /api/giras - admin only
+router.post('/', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { data, titulo, descricao, instrucoes } = req.body;
+
+    if (!data || !titulo) {
+      return res.status(400).json({ error: 'data and titulo are required' });
+    }
+
+    const gira = await prisma.gira.create({
+      data: {
+        data: new Date(data),
+        titulo,
+        descricao: descricao || null,
+        instrucoes: instrucoes || null,
+      },
+    });
+
+    return res.status(201).json(gira);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// PUT /api/giras/:id - admin only
+router.put('/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
+
+    const existing = await prisma.gira.findUnique({ where: { id } });
+    if (!existing) return res.status(404).json({ error: 'Gira not found' });
+
+    const { data, titulo, descricao, instrucoes } = req.body;
+    const updateData = {};
+
+    if (data !== undefined) updateData.data = new Date(data);
+    if (titulo !== undefined) updateData.titulo = titulo;
+    if (descricao !== undefined) updateData.descricao = descricao;
+    if (instrucoes !== undefined) updateData.instrucoes = instrucoes;
+
+    const gira = await prisma.gira.update({ where: { id }, data: updateData });
+    return res.json(gira);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// DELETE /api/giras/:id - admin only
+router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
+
+    const existing = await prisma.gira.findUnique({ where: { id } });
+    if (!existing) return res.status(404).json({ error: 'Gira not found' });
+
+    await prisma.gira.delete({ where: { id } });
+    return res.json({ message: 'Gira deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /api/giras/:id/entidades - add entity to gira
+router.post('/:id/entidades', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const giraId = parseInt(req.params.id);
+    if (isNaN(giraId)) return res.status(400).json({ error: 'Invalid ID' });
+
+    const gira = await prisma.gira.findUnique({ where: { id: giraId } });
+    if (!gira) return res.status(404).json({ error: 'Gira not found' });
+
+    const { entidadeIds } = req.body;
+    if (!entidadeIds || !Array.isArray(entidadeIds) || entidadeIds.length === 0) {
+      return res.status(400).json({ error: 'entidadeIds array is required' });
+    }
+
+    const records = entidadeIds.map((entidadeId) => ({ giraId, entidadeId: parseInt(entidadeId) }));
+    await prisma.giraEntidade.createMany({ data: records, skipDuplicates: true });
+
+    const updated = await prisma.gira.findUnique({
+      where: { id: giraId },
+      include: giraFullInclude,
+    });
+
+    return res.json(updated);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// DELETE /api/giras/:id/entidades/:entidadeId
+router.delete('/:id/entidades/:entidadeId', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const giraId = parseInt(req.params.id);
+    const entidadeId = parseInt(req.params.entidadeId);
+
+    if (isNaN(giraId) || isNaN(entidadeId)) {
+      return res.status(400).json({ error: 'Invalid ID' });
+    }
+
+    await prisma.giraEntidade.delete({
+      where: { giraId_entidadeId: { giraId, entidadeId } },
+    });
+
+    return res.json({ message: 'Entidade removed from gira' });
+  } catch (err) {
+    if (err.code === 'P2025') {
+      return res.status(404).json({ error: 'Association not found' });
+    }
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /api/giras/:id/musicas - add musica to gira
+router.post('/:id/musicas', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const giraId = parseInt(req.params.id);
+    if (isNaN(giraId)) return res.status(400).json({ error: 'Invalid ID' });
+
+    const gira = await prisma.gira.findUnique({ where: { id: giraId } });
+    if (!gira) return res.status(404).json({ error: 'Gira not found' });
+
+    const { musicaIds } = req.body;
+    if (!musicaIds || !Array.isArray(musicaIds) || musicaIds.length === 0) {
+      return res.status(400).json({ error: 'musicaIds array is required' });
+    }
+
+    const records = musicaIds.map((musicaId) => ({ giraId, musicaId: parseInt(musicaId) }));
+    await prisma.giraMusica.createMany({ data: records, skipDuplicates: true });
+
+    const updated = await prisma.gira.findUnique({
+      where: { id: giraId },
+      include: giraFullInclude,
+    });
+
+    return res.json(updated);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// DELETE /api/giras/:id/musicas/:musicaId
+router.delete('/:id/musicas/:musicaId', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const giraId = parseInt(req.params.id);
+    const musicaId = parseInt(req.params.musicaId);
+
+    if (isNaN(giraId) || isNaN(musicaId)) {
+      return res.status(400).json({ error: 'Invalid ID' });
+    }
+
+    await prisma.giraMusica.delete({
+      where: { giraId_musicaId: { giraId, musicaId } },
+    });
+
+    return res.json({ message: 'Musica removed from gira' });
+  } catch (err) {
+    if (err.code === 'P2025') {
+      return res.status(404).json({ error: 'Association not found' });
+    }
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /api/giras/:id/rotinas - add rotina to gira
+router.post('/:id/rotinas', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const giraId = parseInt(req.params.id);
+    if (isNaN(giraId)) return res.status(400).json({ error: 'Invalid ID' });
+
+    const gira = await prisma.gira.findUnique({ where: { id: giraId } });
+    if (!gira) return res.status(404).json({ error: 'Gira not found' });
+
+    const { rotinaIds } = req.body;
+    if (!rotinaIds || !Array.isArray(rotinaIds) || rotinaIds.length === 0) {
+      return res.status(400).json({ error: 'rotinaIds array is required' });
+    }
+
+    const records = rotinaIds.map((rotinaId) => ({ giraId, rotinaId: parseInt(rotinaId) }));
+    await prisma.giraRotina.createMany({ data: records, skipDuplicates: true });
+
+    const updated = await prisma.gira.findUnique({
+      where: { id: giraId },
+      include: giraFullInclude,
+    });
+
+    return res.json(updated);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// DELETE /api/giras/:id/rotinas/:rotinaId
+router.delete('/:id/rotinas/:rotinaId', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const giraId = parseInt(req.params.id);
+    const rotinaId = parseInt(req.params.rotinaId);
+
+    if (isNaN(giraId) || isNaN(rotinaId)) {
+      return res.status(400).json({ error: 'Invalid ID' });
+    }
+
+    await prisma.giraRotina.delete({
+      where: { giraId_rotinaId: { giraId, rotinaId } },
+    });
+
+    return res.json({ message: 'Rotina removed from gira' });
+  } catch (err) {
+    if (err.code === 'P2025') {
+      return res.status(404).json({ error: 'Association not found' });
+    }
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+export default router;
