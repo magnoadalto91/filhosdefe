@@ -12,55 +12,55 @@ const TABS = [
 
 /* ── Entity Card ─────────────────────────────────────────── */
 function EntityCard({ entity, onClick }) {
-  const [hovered, setHovered] = useState(false)
   return (
     <button
       onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       style={{
         width: '100%',
+        display: 'flex',
         textAlign: 'left',
         borderRadius: '8px',
         overflow: 'hidden',
         backgroundColor: '#ffffff',
         border: '1px solid #e5e0d8',
-        boxShadow: hovered ? '0 8px 28px rgba(0,0,0,0.14)' : '0 4px 20px rgba(0,0,0,0.10)',
-        transition: 'box-shadow 0.2s',
+        boxShadow: '0 2px 12px rgba(0,0,0,0.07)',
         cursor: 'pointer',
+        transition: 'box-shadow 0.2s, transform 0.2s',
         fontFamily: "'Poppins', sans-serif",
       }}
+      onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,0.14)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
+      onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.07)'; e.currentTarget.style.transform = 'translateY(0)' }}
     >
-      <div style={{ position: 'relative', aspectRatio: '1/1', backgroundColor: '#f8f5f0' }}>
-        {entity.fotoUrl ? (
-          <img
-            src={entity.fotoUrl}
-            alt={entity.nome}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-          />
-        ) : (
-          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Users size={40} style={{ color: '#e5e0d8' }} />
+      {/* Imagem */}
+      <div style={{ width: 110, flexShrink: 0, backgroundColor: '#f8f5f0', position: 'relative', overflow: 'hidden' }}>
+        {entity.fotoUrl
+          ? <img src={entity.fotoUrl} alt={entity.nome} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', minHeight: 110 }}/>
+          : <div style={{ width: '100%', minHeight: 110, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Users size={32} style={{ color: '#e5e0d8' }}/></div>}
+      </div>
+
+      {/* Conteúdo com seções */}
+      <div style={{ flex: 1, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0, textAlign: 'left' }}>
+        <div>
+          <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#c8972b', marginBottom: 2 }}>Nome</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#2c2c3e', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entity.nome}</div>
+        </div>
+
+        {entity.saudacao && (
+          <div>
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#c8972b', marginBottom: 2 }}>Saudação</div>
+            <div style={{ fontSize: 13, fontStyle: 'italic', color: '#6b7280' }}>"{entity.saudacao}"</div>
           </div>
         )}
-        <div
-          style={{
-            position: 'absolute',
-            top: 0, left: 0, right: 0,
-            padding: '14px 12px 32px',
-            background: 'linear-gradient(rgba(28,28,46,0.85) 0%, transparent 100%)',
-          }}
-        >
-          <div style={{ fontSize: '15px', fontWeight: 700, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>
-            {entity.nome}
+
+        {entity.historia && (
+          <div>
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#c8972b', marginBottom: 2 }}>História</div>
+            <div style={{ fontSize: 13, color: '#6b7280', lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              {entity.historia}
+            </div>
           </div>
-        </div>
+        )}
       </div>
-      {entity.saudacao && (
-        <div style={{ padding: '8px 10px' }}>
-          <div style={{ fontSize: '12px', fontStyle: 'italic', color: '#6b7280' }}>"{entity.saudacao}"</div>
-        </div>
-      )}
     </button>
   )
 }
@@ -199,49 +199,52 @@ function MusicCard({ music, onClick }) {
 }
 
 /* ── Entity Detail Modal ─────────────────────────────────── */
+const secLabel = txt => (
+  <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#c8972b', marginBottom: 6 }}>{txt}</div>
+)
+
 function EntityModal({ entity, onClose }) {
   if (!entity) return null
   return (
     <Modal isOpen={!!entity} onClose={onClose} title={entity.nome}>
+
       {entity.fotoUrl && (
-        <img
-          src={entity.fotoUrl}
-          alt={entity.nome}
-          style={{ width: '100%', borderRadius: '4px', marginBottom: '16px', objectFit: 'cover', maxHeight: '200px', display: 'block' }}
-        />
+        <img src={entity.fotoUrl} alt={entity.nome}
+          style={{ width: '100%', borderRadius: 6, marginBottom: 20, objectFit: 'cover', maxHeight: 220, display: 'block' }}/>
       )}
+
+      {/* Nome */}
+      <div style={{ marginBottom: 16 }}>
+        {secLabel('Nome')}
+        <div style={{ fontSize: 20, fontWeight: 800, color: '#2c2c3e' }}>{entity.nome}</div>
+      </div>
+
+      {/* Saudação */}
       {entity.saudacao && (
-        <div
-          style={{
-            padding: '12px 14px',
-            borderRadius: '4px',
-            marginBottom: '16px',
-            fontStyle: 'italic',
-            fontSize: '14px',
-            backgroundColor: 'rgba(200,151,43,0.08)',
-            border: '1px solid rgba(200,151,43,0.2)',
-            color: '#c8972b',
-          }}
-        >
-          "{entity.saudacao}"
+        <div style={{ marginBottom: 16 }}>
+          {secLabel('Saudação')}
+          <div style={{ padding: '10px 14px', borderRadius: 6, backgroundColor: 'rgba(200,151,43,0.08)', border: '1px solid rgba(200,151,43,0.2)', fontSize: 14, fontStyle: 'italic', color: '#c8972b' }}>
+            "{entity.saudacao}"
+          </div>
         </div>
       )}
+
+      {/* Cores das Velas */}
       {entity.coresVelas && (
-        <div style={{ marginBottom: '12px' }}>
-          <span style={{ fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#6b7280' }}>
-            Cores das velas:{' '}
-          </span>
-          <span style={{ fontSize: '14px', color: '#2c2c3e' }}>{entity.coresVelas}</span>
+        <div style={{ marginBottom: 16 }}>
+          {secLabel('Cores das Velas')}
+          <div style={{ fontSize: 14, color: '#2c2c3e' }}>{entity.coresVelas}</div>
         </div>
       )}
+
+      {/* História */}
       {entity.historia && (
         <div>
-          <div style={{ fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#6b7280', marginBottom: '8px' }}>
-            Historia
-          </div>
-          <p style={{ fontSize: '14px', lineHeight: 1.7, color: '#2c2c3e', whiteSpace: 'pre-wrap', margin: 0 }}>{entity.historia}</p>
+          {secLabel('História')}
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{entity.historia}</p>
         </div>
       )}
+
     </Modal>
   )
 }
@@ -389,7 +392,7 @@ export default function Aprenda() {
               data.entidades.length === 0
                 ? <EmptyState icon={Users} message="Nenhuma entidade cadastrada." />
                 : (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {data.entidades.map((e) => (
                       <EntityCard key={e.id} entity={e} onClick={() => setSelectedEntity(e)} />
                     ))}
