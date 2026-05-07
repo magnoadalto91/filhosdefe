@@ -1,5 +1,7 @@
 import Modal from './Modal'
 
+const btn = { padding:'10px 20px', borderRadius:6, fontSize:13, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.5px', cursor:'pointer', fontFamily:"'Poppins',sans-serif", transition:'all 0.15s', border:'none' }
+
 export default function ConfirmModal({ isOpen, onClose, onConfirm, title, message }) {
   return (
     <Modal
@@ -10,32 +12,24 @@ export default function ConfirmModal({ isOpen, onClose, onConfirm, title, messag
         <>
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-            style={{ border: '1px solid #2D1B69', color: '#A78BFA', background: 'transparent' }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#7C3AED'
-              e.currentTarget.style.color = '#F8F5FF'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#2D1B69'
-              e.currentTarget.style.color = '#A78BFA'
-            }}
+            style={{ ...btn, background:'transparent', border:'1px solid #e5e0d8', color:'#6b7280' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor='#2c2c3e'; e.currentTarget.style.color='#2c2c3e' }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor='#e5e0d8'; e.currentTarget.style.color='#6b7280' }}
           >
             Cancelar
           </button>
           <button
             onClick={() => { onConfirm(); onClose() }}
-            className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-            style={{ backgroundColor: '#dc2626', color: '#fff', border: '1px solid transparent' }}
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#b91c1c' }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#dc2626' }}
+            style={{ ...btn, backgroundColor:'#dc2626', color:'#fff' }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor='#b91c1c'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor='#dc2626'}
           >
             Confirmar
           </button>
         </>
       }
     >
-      <p className="text-sm leading-relaxed" style={{ color: '#A78BFA' }}>
+      <p style={{ margin:0, fontSize:14, color:'#6b7280', lineHeight:1.7 }}>
         {message || 'Tem certeza que deseja continuar?'}
       </p>
     </Modal>
