@@ -16,7 +16,7 @@ const hash = await bcrypt.hash(password, 10)
 
 const user = await prisma.user.upsert({
   where: { email },
-  update: { password: hash, role: 'ADMIN' },
+  update: { role: 'ADMIN' },           // não sobrescreve senha se já existe
   create: { email, password: hash, role: 'ADMIN' },
 })
 
