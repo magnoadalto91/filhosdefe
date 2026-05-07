@@ -94,7 +94,7 @@ router.put('/:id', authenticate, requireAdmin, async (req, res) => {
     const existing = await prisma.gira.findUnique({ where: { id } });
     if (!existing) return res.status(404).json({ error: 'Gira not found' });
 
-    const { data, titulo, descricao, instrucoes } = req.body;
+    const { data, titulo, descricao, instrucoes, entidades, musicas, rotinas } = req.body;
     const updateData = {};
 
     if (data !== undefined) updateData.data = new Date(data);
@@ -102,7 +102,37 @@ router.put('/:id', authenticate, requireAdmin, async (req, res) => {
     if (descricao !== undefined) updateData.descricao = descricao;
     if (instrucoes !== undefined) updateData.instrucoes = instrucoes;
 
-    const gira = await prisma.gira.update({ where: { id }, data: updateData });
+    await prisma.gira.update({ where: { id }, data: updateData });
+
+    if (Array.isArray(entidades)) {
+      await prisma.giraEntidade.deleteMany({ where: { giraId: id } });
+      if (entidades.length > 0) {
+        await prisma.giraEntidade.createMany({
+          data: entidades.map(entidadeId => ({ giraId: id, entidadeId: parseInt(entidadeId) })),
+          skipDuplicates: true,
+        });
+      }
+    }
+    if (Array.isArray(musicas)) {
+      await prisma.giraMusica.deleteMany({ where: { giraId: id } });
+      if (musicas.length > 0) {
+        await prisma.giraMusica.createMany({
+          data: musicas.map(musicaId => ({ giraId: id, musicaId: parseInt(musicaId) })),
+          skipDuplicates: true,
+        });
+      }
+    }
+    if (Array.isArray(rotinas)) {
+      await prisma.giraRotina.deleteMany({ where: { giraId: id } });
+      if (rotinas.length > 0) {
+        await prisma.giraRotina.createMany({
+          data: rotinas.map(rotinaId => ({ giraId: id, rotinaId: parseInt(rotinaId) })),
+          skipDuplicates: true,
+        });
+      }
+    }
+
+    const gira = await prisma.gira.findUnique({ where: { id }, include: giraFullInclude });
     return res.json(gira);
   } catch (err) {
     console.error(err);

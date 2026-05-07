@@ -10,7 +10,7 @@ const NAV = [
   { to: '/admin',           label: 'Dashboard',  Icon: LayoutDashboard, exact: true },
   { to: '/admin/musicas',   label: 'Músicas',    Icon: Music },
   { to: '/admin/ervas',     label: 'Ervas',      Icon: Leaf },
-  { to: '/admin/entidades', label: 'Entidades',  Icon: Users },
+  { to: '/admin/entidades', label: 'Orixás / Entidades', Icon: Users },
   { to: '/admin/giras',     label: 'Giras',      Icon: Calendar },
   { to: '/admin/rotinas',   label: 'Rotinas',    Icon: ListChecks },
   { to: '/admin/usuarios',  label: 'Usuários',   Icon: Users },

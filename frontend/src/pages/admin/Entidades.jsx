@@ -14,18 +14,17 @@ const S = {
   error:       { display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderRadius:6, backgroundColor:'#fef2f2', border:'1px solid #fecaca', fontSize:13, color:'#dc2626', marginBottom:16 },
 }
 
-const emptyForm = { nome:'', historia:'', saudacao:'', coresVelas:'', foto:'' }
+const emptyForm = { nome:'', historia:'', saudacao:'', coresVelas:'' }
 
-function EntityForm({ form, setForm, error, preview, setPreview }) {
-  const fileRef = useRef()
-  const focus   = e => e.currentTarget.style.borderColor = '#c8972b'
-  const blur    = e => e.currentTarget.style.borderColor = '#e5e0d8'
+function EntityForm({ form, setForm, error, preview, setPreview, fileRef }) {
+  const inputRef = useRef()
+  const focus    = e => e.currentTarget.style.borderColor = '#c8972b'
+  const blur     = e => e.currentTarget.style.borderColor = '#e5e0d8'
 
   const handleFile = e => {
     const file = e.target.files[0]; if (!file) return
-    const reader = new FileReader()
-    reader.onload = ev => { setPreview(ev.target.result); setForm(f=>({...f,foto:ev.target.result})) }
-    reader.readAsDataURL(file)
+    fileRef.current = file
+    setPreview(URL.createObjectURL(file))
   }
 
   return (
@@ -33,13 +32,13 @@ function EntityForm({ form, setForm, error, preview, setPreview }) {
       {error && <div style={S.error}><AlertCircle size={15}/>{error}</div>}
       <div style={{ marginBottom:16 }}>
         <div style={{ width:'100%', height:140, borderRadius:8, border:'2px dashed #e5e0d8', overflow:'hidden', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', backgroundColor:'#f8f5f0', position:'relative', transition:'border-color 0.2s' }}
-          onClick={()=>fileRef.current?.click()}
+          onClick={()=>inputRef.current?.click()}
           onMouseEnter={e=>e.currentTarget.style.borderColor='#c8972b'}
           onMouseLeave={e=>e.currentTarget.style.borderColor='#e5e0d8'}>
           {preview?<img src={preview} alt="preview" style={{ position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover' }}/>
             :<><ImageIcon size={28} color="#e5e0d8"/><span style={{ fontSize:12,color:'#9ca3af',marginTop:6 }}>Clique para selecionar foto</span></>}
         </div>
-        <input ref={fileRef} type="file" accept="image/*" style={{ display:'none' }} onChange={handleFile}/>
+        <input ref={inputRef} type="file" accept="image/*" style={{ display:'none' }} onChange={handleFile}/>
       </div>
       {[{f:'nome',l:'Nome *',p:'Nome da entidade'},{f:'saudacao',l:'Saudação',p:'Ex: Salve Ogum!'},{f:'coresVelas',l:'Cores das Velas',p:'Ex: Vermelho e branco'}].map(({f,l,p})=>(
         <div key={f} style={{ marginBottom:16 }}>
@@ -63,19 +62,19 @@ function DetailModal({ entity, onClose }) {
   useEffect(()=>{
     if (!entity) return
     setLoading(true)
-    Promise.allSettled([
-      api.get(`/entidades/${entity._id}/musicas`),
-      api.get(`/entidades/${entity._id}/ervas`),
-    ]).then(([m,e])=>{
-      setMusicas(m.status==='fulfilled'?(Array.isArray(m.value.data)?m.value.data:[]):[])
-      setErvas(e.status==='fulfilled'?(Array.isArray(e.value.data)?e.value.data:[]):[])
-    }).finally(()=>setLoading(false))
+    api.get(`/entidades/${entity.id}`)
+      .then(r => {
+        setMusicas(r.data.musicas?.map(m => m.musica) || [])
+        setErvas(r.data.ervas?.map(e => e.erva) || [])
+      })
+      .catch(()=>{})
+      .finally(()=>setLoading(false))
   },[entity])
 
   if (!entity) return null
   return (
     <Modal isOpen={!!entity} onClose={onClose} title={entity.nome}>
-      {entity.foto && <img src={entity.foto} alt={entity.nome} style={{ width:'100%', borderRadius:8, marginBottom:16, objectFit:'cover', maxHeight:200, display:'block' }}/>}
+      {entity.fotoUrl && <img src={entity.fotoUrl} alt={entity.nome} style={{ width:'100%', borderRadius:8, marginBottom:16, objectFit:'cover', maxHeight:200, display:'block' }}/>}
       {entity.saudacao && <p style={{ margin:'0 0 12px', padding:'10px 14px', borderRadius:6, backgroundColor:'rgba(200,151,43,0.08)', border:'1px solid rgba(200,151,43,0.2)', fontSize:14, fontStyle:'italic', color:'#c8972b' }}>"{entity.saudacao}"</p>}
       {entity.coresVelas && <p style={{ margin:'0 0 12px', fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Velas: </span>{entity.coresVelas}</p>}
       {entity.historia && <p style={{ margin:'0 0 16px', fontSize:14, color:'#2c2c3e', lineHeight:1.7, whiteSpace:'pre-wrap' }}>{entity.historia}</p>}
@@ -84,7 +83,7 @@ function DetailModal({ entity, onClose }) {
           <div style={{ marginBottom:12 }}>
             <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}><Music size={13} color="#6b7280"/><span style={{ fontSize:12, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.5px', color:'#6b7280' }}>Músicas</span></div>
             <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
-              {musicas.map((m,i)=><span key={i} style={{ padding:'3px 10px', borderRadius:20, fontSize:12, backgroundColor:'#f8f5f0', border:'1px solid #e5e0d8', color:'#6b7280' }}>{m.titulo||m}</span>)}
+              {musicas.map(m=><span key={m.id} style={{ padding:'3px 10px', borderRadius:20, fontSize:12, backgroundColor:'#f8f5f0', border:'1px solid #e5e0d8', color:'#6b7280' }}>{m.titulo}</span>)}
             </div>
           </div>
         )}
@@ -92,7 +91,7 @@ function DetailModal({ entity, onClose }) {
           <div>
             <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}><Leaf size={13} color="#6b7280"/><span style={{ fontSize:12, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.5px', color:'#6b7280' }}>Ervas</span></div>
             <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
-              {ervas.map((e,i)=><span key={i} style={{ padding:'3px 10px', borderRadius:20, fontSize:12, backgroundColor:'rgba(5,150,105,0.06)', border:'1px solid rgba(5,150,105,0.2)', color:'#059669' }}>{e.nome||e}</span>)}
+              {ervas.map(e=><span key={e.id} style={{ padding:'3px 10px', borderRadius:20, fontSize:12, backgroundColor:'rgba(5,150,105,0.06)', border:'1px solid rgba(5,150,105,0.2)', color:'#059669' }}>{e.nome}</span>)}
             </div>
           </div>
         )}
@@ -113,6 +112,7 @@ export default function AdminEntidades() {
   const [saving,      setSaving]      = useState(false)
   const [formError,   setFormError]   = useState('')
   const [deleteTarget,setDeleteTarget]= useState(null)
+  const fileRef = useRef(null)
 
   const load = async () => {
     setLoading(true)
@@ -121,22 +121,38 @@ export default function AdminEntidades() {
   }
   useEffect(()=>{load()},[])
 
-  const openAdd  = () => { setEditTarget(null); setForm(emptyForm); setPreview(''); setFormError(''); setModalOpen(true) }
-  const openEdit = e  => { setEditTarget(e); setForm({nome:e.nome||'',historia:e.historia||'',saudacao:e.saudacao||'',coresVelas:e.coresVelas||'',foto:e.foto||''}); setPreview(e.foto||''); setFormError(''); setModalOpen(true) }
+  const openAdd = () => {
+    setEditTarget(null); setForm(emptyForm); setPreview(''); fileRef.current=null; setFormError(''); setModalOpen(true)
+  }
+  const openEdit = e => {
+    setEditTarget(e); setForm({nome:e.nome||'',historia:e.historia||'',saudacao:e.saudacao||'',coresVelas:e.coresVelas||''})
+    setPreview(e.fotoUrl||''); fileRef.current=null; setFormError(''); setModalOpen(true)
+  }
 
   const handleSave = async () => {
     if (!form.nome.trim()) { setFormError('Nome é obrigatório.'); return }
     setSaving(true); setFormError('')
     try {
-      editTarget ? await api.put(`/entidades/${editTarget._id}`,form) : await api.post('/entidades',form)
+      const fd = new FormData()
+      fd.append('nome', form.nome.trim())
+      fd.append('historia', form.historia.trim())
+      fd.append('saudacao', form.saudacao.trim())
+      fd.append('coresVelas', form.coresVelas.trim())
+      if (fileRef.current) fd.append('foto', fileRef.current)
+
+      if (editTarget) {
+        await api.put(`/entidades/${editTarget.id}`, fd)
+      } else {
+        await api.post('/entidades', fd)
+      }
       setModalOpen(false); load()
-    } catch(err) { setFormError(err.response?.data?.message||'Erro ao salvar.') }
+    } catch(err) { setFormError(err.response?.data?.message||err.response?.data?.error||'Erro ao salvar.') }
     finally { setSaving(false) }
   }
 
   const handleDelete = async () => {
     if (!deleteTarget) return
-    try { await api.delete(`/entidades/${deleteTarget._id}`); load() } catch{}
+    try { await api.delete(`/entidades/${deleteTarget.id}`); load() } catch{}
   }
 
   const filtered = entidades.filter(e=>e.nome?.toLowerCase().includes(search.toLowerCase()))
@@ -146,7 +162,7 @@ export default function AdminEntidades() {
 
       <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:16, marginBottom:24 }}>
         <div>
-          <h1 style={{ margin:'0 0 4px', fontSize:22, fontWeight:800, color:'#2c2c3e' }}>Entidades</h1>
+          <h1 style={{ margin:'0 0 4px', fontSize:22, fontWeight:800, color:'#2c2c3e' }}>Orixás / Entidades</h1>
           <p style={{ margin:0, fontSize:13, color:'#6b7280' }}>{entidades.length} entidade(s) cadastrada(s)</p>
         </div>
         <button onClick={openAdd} style={S.btnPrimary}
@@ -173,9 +189,9 @@ export default function AdminEntidades() {
         <div className="ent-grid" style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:16 }}>
           <style>{`@media(min-width:640px){.ent-grid{grid-template-columns:repeat(3,1fr)!important;}}@media(min-width:1024px){.ent-grid{grid-template-columns:repeat(4,1fr)!important;}}`}</style>
           {filtered.map(e=>(
-            <div key={e._id} style={{ backgroundColor:'#fff', borderRadius:10, border:'1px solid #e5e0d8', overflow:'hidden', boxShadow:'0 2px 8px rgba(0,0,0,0.05)' }}>
+            <div key={e.id} style={{ backgroundColor:'#fff', borderRadius:10, border:'1px solid #e5e0d8', overflow:'hidden', boxShadow:'0 2px 8px rgba(0,0,0,0.05)' }}>
               <button style={{ width:'100%', aspectRatio:'1/1', display:'block', position:'relative', backgroundColor:'#f8f5f0', border:'none', cursor:'pointer', padding:0 }} onClick={()=>setDetailTarget(e)}>
-                {e.foto?<img src={e.foto} alt={e.nome} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}/>
+                {e.fotoUrl?<img src={e.fotoUrl} alt={e.nome} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}/>
                   :<div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center' }}><Users size={36} color="#e5e0d8"/></div>}
                 <div style={{ position:'absolute', inset:'0 0 0 0', background:'linear-gradient(transparent 50%,rgba(28,28,46,0.75))', display:'flex', alignItems:'flex-end', padding:10 }}>
                   <span style={{ fontSize:13, fontWeight:700, color:'#fff', textAlign:'left', lineHeight:1.3 }}>{e.nome}</span>
@@ -211,7 +227,7 @@ export default function AdminEntidades() {
           </button>
         </>}
       >
-        <EntityForm form={form} setForm={setForm} error={formError} preview={preview} setPreview={setPreview}/>
+        <EntityForm form={form} setForm={setForm} error={formError} preview={preview} setPreview={setPreview} fileRef={fileRef}/>
       </Modal>
 
       <DetailModal entity={detailTarget} onClose={()=>setDetailTarget(null)}/>

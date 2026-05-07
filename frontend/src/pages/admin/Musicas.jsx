@@ -66,7 +66,7 @@ export default function AdminMusicas() {
     if (!form.titulo.trim()) { setFormError('Título é obrigatório.'); return }
     setSaving(true); setFormError('')
     try {
-      editTarget ? await api.put(`/musicas/${editTarget._id}`,form) : await api.post('/musicas',form)
+      editTarget ? await api.put(`/musicas/${editTarget.id}`,form) : await api.post('/musicas',form)
       setModalOpen(false); load()
     } catch(err) { setFormError(err.response?.data?.message||'Erro ao salvar.') }
     finally { setSaving(false) }
@@ -74,7 +74,7 @@ export default function AdminMusicas() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return
-    try { await api.delete(`/musicas/${deleteTarget._id}`); load() } catch{}
+    try { await api.delete(`/musicas/${deleteTarget.id}`); load() } catch{}
   }
 
   const filtered = musicas.filter(m => m.titulo?.toLowerCase().includes(search.toLowerCase()))
@@ -116,7 +116,7 @@ export default function AdminMusicas() {
       ) : (
         <div>
           {filtered.map(m => (
-            <div key={m._id} style={S.card}>
+            <div key={m.id} style={S.card}>
               <div style={{ width:42, height:42, borderRadius:8, backgroundColor:'rgba(124,58,237,0.1)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                 <Music size={18} color="#7C3AED"/>
               </div>

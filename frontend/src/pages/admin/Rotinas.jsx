@@ -65,7 +65,7 @@ export default function AdminRotinas() {
     if (!form.titulo.trim()) { setFormError('Título é obrigatório.'); return }
     setSaving(true); setFormError('')
     try {
-      editTarget ? await api.put(`/rotinas/${editTarget._id}`,form) : await api.post('/rotinas',form)
+      editTarget ? await api.put(`/rotinas/${editTarget.id}`,form) : await api.post('/rotinas',form)
       setModalOpen(false); load()
     } catch(err) { setFormError(err.response?.data?.message||'Erro ao salvar.') }
     finally { setSaving(false) }
@@ -73,7 +73,7 @@ export default function AdminRotinas() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return
-    try { await api.delete(`/rotinas/${deleteTarget._id}`); load() } catch{}
+    try { await api.delete(`/rotinas/${deleteTarget.id}`); load() } catch{}
   }
 
   return (
@@ -99,7 +99,7 @@ export default function AdminRotinas() {
       ) : (
         <div>
           {rotinas.map(r => (
-            <div key={r._id} style={{ display:'flex', alignItems:'flex-start', gap:14, padding:'16px 18px', backgroundColor:'#fff', borderRadius:8, border:'1px solid #e5e0d8', marginBottom:8, boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }}>
+            <div key={r.id} style={{ display:'flex', alignItems:'flex-start', gap:14, padding:'16px 18px', backgroundColor:'#fff', borderRadius:8, border:'1px solid #e5e0d8', marginBottom:8, boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }}>
               <div style={{ display:'flex', alignItems:'center', gap:8, flexShrink:0, marginTop:2 }}>
                 <GripVertical size={18} color="#e5e0d8"/>
                 <div style={{ width:32, height:32, borderRadius:8, backgroundColor:'rgba(200,151,43,0.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:700, color:'#c8972b' }}>

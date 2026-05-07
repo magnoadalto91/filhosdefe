@@ -14,38 +14,41 @@ const S = {
   error:       { display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderRadius:6, backgroundColor:'#fef2f2', border:'1px solid #fecaca', fontSize:13, color:'#dc2626', marginBottom:16 },
 }
 
-const emptyForm = { nome:'', descricao:'', usos:'', noQuintal:false, foto:'' }
+const emptyForm = { nome:'', descricao:'', usos:'', noQuintal:false }
 
-function HerbForm({ form, setForm, error, preview, setPreview }) {
-  const fileRef = useRef()
-  const focus   = e => e.currentTarget.style.borderColor = '#c8972b'
-  const blur    = e => e.currentTarget.style.borderColor = '#e5e0d8'
+function HerbForm({ form, setForm, error, preview, fileRef }) {
+  const inputRef = useRef()
+  const focus    = e => e.currentTarget.style.borderColor = '#c8972b'
+  const blur     = e => e.currentTarget.style.borderColor = '#e5e0d8'
 
   const handleFile = e => {
     const file = e.target.files[0]
     if (!file) return
-    const reader = new FileReader()
-    reader.onload = ev => { setPreview(ev.target.result); setForm(f=>({...f,foto:ev.target.result})) }
-    reader.readAsDataURL(file)
+    fileRef.current = file
+    const url = URL.createObjectURL(file)
+    // store blob url so parent can display preview
+    e.target._previewUrl = url
+    // trigger parent to update preview
+    const ev = new Event('previewchange')
+    ev.url = url
+    inputRef.current.dispatchEvent(ev)
   }
 
   return (
     <div>
       {error && <div style={S.error}><AlertCircle size={15}/>{error}</div>}
 
-      {/* Photo */}
       <div style={{ marginBottom:16 }}>
         <label style={S.label}>Foto</label>
-        <div
-          style={{ width:'100%', height:140, borderRadius:8, border:'2px dashed #e5e0d8', overflow:'hidden', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', backgroundColor:'#f8f5f0', position:'relative', transition:'border-color 0.2s' }}
-          onClick={()=>fileRef.current?.click()}
+        <div style={{ width:'100%', height:140, borderRadius:8, border:'2px dashed #e5e0d8', overflow:'hidden', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', backgroundColor:'#f8f5f0', position:'relative', transition:'border-color 0.2s' }}
+          onClick={()=>inputRef.current?.click()}
           onMouseEnter={e=>e.currentTarget.style.borderColor='#c8972b'}
-          onMouseLeave={e=>e.currentTarget.style.borderColor='#e5e0d8'}
-        >
-          {preview ? <img src={preview} alt="preview" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }}/>
-            : <><ImageIcon size={28} color="#e5e0d8"/><span style={{ fontSize:12, color:'#9ca3af', marginTop:6 }}>Clique para selecionar</span></>}
+          onMouseLeave={e=>e.currentTarget.style.borderColor='#e5e0d8'}>
+          {preview
+            ? <img src={preview} alt="preview" style={{ position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover' }}/>
+            : <><ImageIcon size={28} color="#e5e0d8"/><span style={{ fontSize:12,color:'#9ca3af',marginTop:6 }}>Clique para selecionar</span></>}
         </div>
-        <input ref={fileRef} type="file" accept="image/*" style={{ display:'none' }} onChange={handleFile}/>
+        <input ref={inputRef} type="file" accept="image/*" style={{ display:'none' }} onChange={handleFile}/>
       </div>
 
       <div style={{ marginBottom:16 }}>
@@ -61,12 +64,9 @@ function HerbForm({ form, setForm, error, preview, setPreview }) {
         <textarea style={{...S.input,resize:'vertical',minHeight:80}} value={form.usos} onChange={e=>setForm(f=>({...f,usos:e.target.value}))} placeholder="Usos e propriedades..." onFocus={focus} onBlur={blur}/>
       </div>
 
-      {/* Toggle */}
       <label style={{ display:'flex', alignItems:'center', gap:12, cursor:'pointer' }}>
-        <div
-          style={{ position:'relative', width:44, height:24, borderRadius:12, backgroundColor:form.noQuintal?'#c8972b':'#e5e0d8', transition:'background 0.2s', flexShrink:0 }}
-          onClick={()=>setForm(f=>({...f,noQuintal:!f.noQuintal}))}
-        >
+        <div style={{ position:'relative', width:44, height:24, borderRadius:12, backgroundColor:form.noQuintal?'#c8972b':'#e5e0d8', transition:'background 0.2s', flexShrink:0 }}
+          onClick={()=>setForm(f=>({...f,noQuintal:!f.noQuintal}))}>
           <div style={{ position:'absolute', top:3, left:form.noQuintal?'calc(100% - 21px)':3, width:18, height:18, borderRadius:'50%', backgroundColor:'#fff', transition:'left 0.2s', boxShadow:'0 1px 3px rgba(0,0,0,0.2)' }}/>
         </div>
         <span style={{ fontSize:14, color:'#2c2c3e' }}>Temos no quintal</span>
@@ -86,6 +86,7 @@ export default function AdminErvas() {
   const [saving,      setSaving]      = useState(false)
   const [formError,   setFormError]   = useState('')
   const [deleteTarget,setDeleteTarget]= useState(null)
+  const fileRef = useRef(null)
 
   const load = async () => {
     setLoading(true)
@@ -94,23 +95,42 @@ export default function AdminErvas() {
   }
   useEffect(()=>{load()},[])
 
-  const openAdd  = () => { setEditTarget(null); setForm(emptyForm); setPreview(''); setFormError(''); setModalOpen(true) }
-  const openEdit = e  => { setEditTarget(e); setForm({nome:e.nome||'',descricao:e.descricao||'',usos:e.usos||'',noQuintal:e.noQuintal||false,foto:e.foto||''}); setPreview(e.foto||''); setFormError(''); setModalOpen(true) }
+  const openAdd = () => {
+    setEditTarget(null); setForm(emptyForm); setPreview(''); fileRef.current=null; setFormError(''); setModalOpen(true)
+  }
+  const openEdit = e => {
+    setEditTarget(e); setForm({nome:e.nome||'',descricao:e.descricao||'',usos:e.usos||'',noQuintal:e.noQuintal||false})
+    setPreview(e.fotoUrl||''); fileRef.current=null; setFormError(''); setModalOpen(true)
+  }
 
   const handleSave = async () => {
     if (!form.nome.trim()) { setFormError('Nome é obrigatório.'); return }
     setSaving(true); setFormError('')
     try {
-      editTarget ? await api.put(`/ervas/${editTarget._id}`,form) : await api.post('/ervas',form)
+      const fd = new FormData()
+      fd.append('nome', form.nome.trim())
+      fd.append('descricao', form.descricao.trim())
+      fd.append('usos', form.usos.trim())
+      fd.append('noQuintal', String(form.noQuintal))
+      if (fileRef.current) fd.append('foto', fileRef.current)
+
+      if (editTarget) {
+        await api.put(`/ervas/${editTarget.id}`, fd)
+      } else {
+        await api.post('/ervas', fd)
+      }
       setModalOpen(false); load()
-    } catch(err) { setFormError(err.response?.data?.message||'Erro ao salvar.') }
+    } catch(err) { setFormError(err.response?.data?.message||err.response?.data?.error||'Erro ao salvar.') }
     finally { setSaving(false) }
   }
 
   const handleDelete = async () => {
     if (!deleteTarget) return
-    try { await api.delete(`/ervas/${deleteTarget._id}`); load() } catch{}
+    try { await api.delete(`/ervas/${deleteTarget.id}`); load() } catch{}
   }
+
+  // Listen for preview changes from child component
+  const handlePreviewChange = url => setPreview(url)
 
   const filtered = ervas.filter(e => e.nome?.toLowerCase().includes(search.toLowerCase()))
 
@@ -146,10 +166,10 @@ export default function AdminErvas() {
         <div className="ervas-grid" style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:16 }}>
           <style>{`@media(min-width:640px){.ervas-grid{grid-template-columns:repeat(3,1fr)!important;}}@media(min-width:1024px){.ervas-grid{grid-template-columns:repeat(4,1fr)!important;}}`}</style>
           {filtered.map(e => (
-            <div key={e._id} style={{ backgroundColor:'#fff', borderRadius:10, border:'1px solid #e5e0d8', overflow:'hidden', boxShadow:'0 2px 8px rgba(0,0,0,0.05)' }}>
+            <div key={e.id} style={{ backgroundColor:'#fff', borderRadius:10, border:'1px solid #e5e0d8', overflow:'hidden', boxShadow:'0 2px 8px rgba(0,0,0,0.05)' }}>
               <div style={{ aspectRatio:'4/3', backgroundColor:'#f8f5f0', position:'relative', overflow:'hidden' }}>
-                {e.foto
-                  ? <img src={e.foto} alt={e.nome} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}/>
+                {e.fotoUrl
+                  ? <img src={e.fotoUrl} alt={e.nome} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}/>
                   : <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center' }}><Leaf size={32} color="#e5e0d8"/></div>}
                 {e.noQuintal && (
                   <span style={{ position:'absolute', top:8, right:8, padding:'3px 10px', borderRadius:20, fontSize:11, fontWeight:700, backgroundColor:'#c8972b', color:'#fff' }}>Quintal</span>
@@ -188,11 +208,64 @@ export default function AdminErvas() {
           </button>
         </>}
       >
-        <HerbForm form={form} setForm={setForm} error={formError} preview={preview} setPreview={setPreview}/>
+        <HerbFormWrapper
+          form={form} setForm={setForm} error={formError}
+          preview={preview} setPreview={setPreview} fileRef={fileRef}
+        />
       </Modal>
 
       <ConfirmModal isOpen={!!deleteTarget} onClose={()=>setDeleteTarget(null)} onConfirm={handleDelete}
         title="Excluir Erva" message={`Excluir "${deleteTarget?.nome}"? Esta ação não pode ser desfeita.`}/>
+    </div>
+  )
+}
+
+function HerbFormWrapper({ form, setForm, error, preview, setPreview, fileRef }) {
+  const inputRef = useRef()
+  const focus    = e => e.currentTarget.style.borderColor = '#c8972b'
+  const blur     = e => e.currentTarget.style.borderColor = '#e5e0d8'
+
+  const handleFile = e => {
+    const file = e.target.files[0]
+    if (!file) return
+    fileRef.current = file
+    setPreview(URL.createObjectURL(file))
+  }
+
+  return (
+    <div>
+      {error && <div style={S.error}><AlertCircle size={15}/>{error}</div>}
+      <div style={{ marginBottom:16 }}>
+        <label style={S.label}>Foto</label>
+        <div style={{ width:'100%', height:140, borderRadius:8, border:'2px dashed #e5e0d8', overflow:'hidden', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', backgroundColor:'#f8f5f0', position:'relative', transition:'border-color 0.2s' }}
+          onClick={()=>inputRef.current?.click()}
+          onMouseEnter={e=>e.currentTarget.style.borderColor='#c8972b'}
+          onMouseLeave={e=>e.currentTarget.style.borderColor='#e5e0d8'}>
+          {preview
+            ? <img src={preview} alt="preview" style={{ position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover' }}/>
+            : <><ImageIcon size={28} color="#e5e0d8"/><span style={{ fontSize:12,color:'#9ca3af',marginTop:6 }}>Clique para selecionar</span></>}
+        </div>
+        <input ref={inputRef} type="file" accept="image/*" style={{ display:'none' }} onChange={handleFile}/>
+      </div>
+      <div style={{ marginBottom:16 }}>
+        <label style={S.label}>Nome *</label>
+        <input style={S.input} value={form.nome} onChange={e=>setForm(f=>({...f,nome:e.target.value}))} placeholder="Nome da erva" onFocus={focus} onBlur={blur}/>
+      </div>
+      <div style={{ marginBottom:16 }}>
+        <label style={S.label}>Descrição</label>
+        <textarea style={{...S.input,resize:'vertical',minHeight:80}} value={form.descricao} onChange={e=>setForm(f=>({...f,descricao:e.target.value}))} placeholder="Descrição..." onFocus={focus} onBlur={blur}/>
+      </div>
+      <div style={{ marginBottom:16 }}>
+        <label style={S.label}>Usos</label>
+        <textarea style={{...S.input,resize:'vertical',minHeight:80}} value={form.usos} onChange={e=>setForm(f=>({...f,usos:e.target.value}))} placeholder="Usos e propriedades..." onFocus={focus} onBlur={blur}/>
+      </div>
+      <label style={{ display:'flex', alignItems:'center', gap:12, cursor:'pointer' }}>
+        <div style={{ position:'relative', width:44, height:24, borderRadius:12, backgroundColor:form.noQuintal?'#c8972b':'#e5e0d8', transition:'background 0.2s', flexShrink:0 }}
+          onClick={()=>setForm(f=>({...f,noQuintal:!f.noQuintal}))}>
+          <div style={{ position:'absolute', top:3, left:form.noQuintal?'calc(100% - 21px)':3, width:18, height:18, borderRadius:'50%', backgroundColor:'#fff', transition:'left 0.2s', boxShadow:'0 1px 3px rgba(0,0,0,0.2)' }}/>
+        </div>
+        <span style={{ fontSize:14, color:'#2c2c3e' }}>Temos no quintal</span>
+      </label>
     </div>
   )
 }

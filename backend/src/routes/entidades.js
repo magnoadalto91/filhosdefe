@@ -46,8 +46,8 @@ router.post('/', authenticate, requireAdmin, uploadMiddleware, async (req, res) 
   try {
     const { nome, historia, saudacao, coresVelas } = req.body;
 
-    if (!nome || !historia || !saudacao || !coresVelas) {
-      return res.status(400).json({ error: 'nome, historia, saudacao and coresVelas are required' });
+    if (!nome) {
+      return res.status(400).json({ error: 'nome is required' });
     }
 
     let fotoUrl = null;
@@ -56,7 +56,7 @@ router.post('/', authenticate, requireAdmin, uploadMiddleware, async (req, res) 
     }
 
     const entidade = await prisma.entidade.create({
-      data: { nome, historia, saudacao, coresVelas, fotoUrl },
+      data: { nome, historia: historia || '', saudacao: saudacao || '', coresVelas: coresVelas || '', fotoUrl },
     });
 
     return res.status(201).json(entidade);

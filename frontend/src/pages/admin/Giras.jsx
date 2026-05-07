@@ -45,7 +45,7 @@ function GiraForm({ form, setForm, error }) {
 function MultiSelect({ label, Icon, allItems, selectedIds, onChange, nameKey='titulo' }) {
   const [open, setOpen] = useState(false)
   const toggle = id => onChange(selectedIds.includes(id) ? selectedIds.filter(x=>x!==id) : [...selectedIds,id])
-  const names  = allItems.filter(i=>selectedIds.includes(i._id)).map(i=>i[nameKey]||i.nome)
+  const names  = allItems.filter(i=>selectedIds.includes(i.id)).map(i=>i[nameKey]||i.nome)
 
   return (
     <div style={{ marginBottom:16 }}>
@@ -62,9 +62,9 @@ function MultiSelect({ label, Icon, allItems, selectedIds, onChange, nameKey='ti
           {allItems.length===0
             ? <div style={{ padding:'12px', textAlign:'center', fontSize:13, color:'#9ca3af' }}>Nenhum item disponível</div>
             : allItems.map(item=>{
-                const sel = selectedIds.includes(item._id)
+                const sel = selectedIds.includes(item.id)
                 return (
-                  <button key={item._id} type="button" onClick={()=>toggle(item._id)}
+                  <button key={item.id} type="button" onClick={()=>toggle(item.id)}
                     style={{ width:'100%', display:'flex', alignItems:'center', gap:10, padding:'10px 14px', fontSize:14, fontFamily:"'Poppins',sans-serif", color:sel?'#c8972b':'#2c2c3e', backgroundColor:sel?'rgba(200,151,43,0.06)':'transparent', border:'none', cursor:'pointer', textAlign:'left', transition:'background 0.1s' }}
                     onMouseEnter={e=>{ if(!sel) e.currentTarget.style.backgroundColor='#f8f5f0' }}
                     onMouseLeave={e=>{ if(!sel) e.currentTarget.style.backgroundColor='transparent' }}>
@@ -83,18 +83,38 @@ function MultiSelect({ label, Icon, allItems, selectedIds, onChange, nameKey='ti
 }
 
 function AssocModal({ gira, allEntidades, allMusicas, allRotinas, onClose, onSaved }) {
-  const [entidades, setEntidades] = useState(gira?.entidades?.map(e=>e._id||e)||[])
-  const [musicas,   setMusicas]   = useState(gira?.musicas?.map(m=>m._id||m)||[])
-  const [rotinas,   setRotinas]   = useState(gira?.rotinas?.map(r=>r._id||r)||[])
-  const [saving,    setSaving]    = useState(false)
-  const [error,     setError]     = useState('')
+  const [entidades,    setEntidades]    = useState([])
+  const [musicas,      setMusicas]      = useState([])
+  const [rotinas,      setRotinas]      = useState([])
+  const [saving,       setSaving]       = useState(false)
+  const [loadingAssoc, setLoadingAssoc] = useState(false)
+  const [error,        setError]        = useState('')
+
+  useEffect(() => {
+    if (!gira) return
+    setLoadingAssoc(true)
+    api.get(`/giras/${gira.id}`)
+      .then(r => {
+        setEntidades(r.data.entidades?.map(e => e.entidadeId) || [])
+        setMusicas(r.data.musicas?.map(m => m.musicaId) || [])
+        setRotinas(r.data.rotinas?.map(rot => rot.rotinaId) || [])
+      })
+      .catch(() => {})
+      .finally(() => setLoadingAssoc(false))
+  }, [gira])
 
   const handleSave = async () => {
     setSaving(true); setError('')
-    try { await api.put(`/giras/${gira._id}`,{...gira,entidades,musicas,rotinas}); onSaved(); onClose() }
+    try { await api.put(`/giras/${gira.id}`, { entidades, musicas, rotinas }); onSaved(); onClose() }
     catch(err) { setError(err.response?.data?.message||'Erro ao salvar.') }
     finally { setSaving(false) }
   }
+
+  if (loadingAssoc) return (
+    <Modal isOpen={!!gira} onClose={onClose} title={`Associações — ${gira?.titulo}`}>
+      <LoadingSpinner/>
+    </Modal>
+  )
 
   return (
     <Modal isOpen={!!gira} onClose={onClose} title={`Associações — ${gira?.titulo}`}
@@ -166,7 +186,7 @@ export default function AdminGiras() {
   const load = async () => {
     setLoading(true)
     try {
-      const r = await api.get('/giras')
+      const r = await api.get('/giras/all')
       const list = Array.isArray(r.data)?r.data:r.data.giras||[]
       setGiras([...list].sort((a,b)=>new Date(b.data)-new Date(a.data)))
     } catch { setGiras([]) } finally { setLoading(false) }
@@ -189,7 +209,7 @@ export default function AdminGiras() {
     if (!form.data)          { setFormError('Data é obrigatória.');   return }
     setSaving(true); setFormError('')
     try {
-      editTarget ? await api.put(`/giras/${editTarget._id}`,form) : await api.post('/giras',form)
+      editTarget ? await api.put(`/giras/${editTarget.id}`,form) : await api.post('/giras',form)
       setModalOpen(false); load()
     } catch(err) { setFormError(err.response?.data?.message||'Erro ao salvar.') }
     finally { setSaving(false) }
@@ -197,7 +217,7 @@ export default function AdminGiras() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return
-    try { await api.delete(`/giras/${deleteTarget._id}`); load() } catch{}
+    try { await api.delete(`/giras/${deleteTarget.id}`); load() } catch{}
   }
 
   const now      = new Date()
@@ -229,13 +249,13 @@ export default function AdminGiras() {
           {upcoming.length>0 && (
             <section style={{ marginBottom:28 }}>
               <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'2px', color:'#c8972b', marginBottom:14 }}>Próximas Giras</div>
-              {[...upcoming].reverse().map(g=><GiraCard key={g._id} gira={g} isPast={false} onEdit={openEdit} onDelete={setDeleteTarget} onAssoc={setAssocTarget}/>)}
+              {[...upcoming].reverse().map(g=><GiraCard key={g.id} gira={g} isPast={false} onEdit={openEdit} onDelete={setDeleteTarget} onAssoc={setAssocTarget}/>)}
             </section>
           )}
           {past.length>0 && (
             <section>
               <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'2px', color:'#9ca3af', marginBottom:14 }}>Giras Passadas</div>
-              {past.map(g=><GiraCard key={g._id} gira={g} isPast={true} onEdit={openEdit} onDelete={setDeleteTarget} onAssoc={setAssocTarget}/>)}
+              {past.map(g=><GiraCard key={g.id} gira={g} isPast={true} onEdit={openEdit} onDelete={setDeleteTarget} onAssoc={setAssocTarget}/>)}
             </section>
           )}
         </>

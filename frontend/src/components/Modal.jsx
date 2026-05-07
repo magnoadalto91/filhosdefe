@@ -22,7 +22,6 @@ export default function Modal({ isOpen, onClose, title, children, footer }) {
       <div
         className="modal-wrap"
         style={{ position:'fixed', inset:0, zIndex:50, display:'flex', alignItems:'flex-end', justifyContent:'center', backgroundColor:'rgba(28,28,46,0.48)', backdropFilter:'blur(3px)', fontFamily:"'Poppins',sans-serif" }}
-        onClick={e => { if (e.target === e.currentTarget) onClose() }}
       >
         <div
           className="modal-sheet"

@@ -53,8 +53,8 @@ router.post('/', authenticate, requireAdmin, uploadMiddleware, async (req, res) 
   try {
     const { nome, descricao, usos, noQuintal } = req.body;
 
-    if (!nome || !descricao || !usos) {
-      return res.status(400).json({ error: 'nome, descricao and usos are required' });
+    if (!nome) {
+      return res.status(400).json({ error: 'nome is required' });
     }
 
     let fotoUrl = null;
@@ -65,8 +65,8 @@ router.post('/', authenticate, requireAdmin, uploadMiddleware, async (req, res) 
     const erva = await prisma.erva.create({
       data: {
         nome,
-        descricao,
-        usos,
+        descricao: descricao || '',
+        usos: usos || '',
         fotoUrl,
         noQuintal: noQuintal === 'true' || noQuintal === true,
       },
