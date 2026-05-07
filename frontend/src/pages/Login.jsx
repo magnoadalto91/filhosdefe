@@ -67,7 +67,11 @@ function TabEntrar({ onSwitchTab }) {
     try {
       const user = await login(email, password)
       const from = location.state?.from?.pathname
-      navigate(from || (user.role === 'ADMIN' ? '/admin' : '/'), { replace: true })
+      // Admin sempre vai para /admin; user volta para a página de origem ou /
+      const destination = user.role === 'ADMIN'
+        ? '/admin'
+        : (from && from !== '/login' ? from : '/')
+      navigate(destination, { replace: true })
     } catch (err) {
       setError(err.response?.data?.error || 'Email ou senha inválidos.')
     } finally {
@@ -250,7 +254,6 @@ export default function Login() {
   const TABS = [
     { id: 'entrar', label: 'Entrar' },
     { id: 'cadastrar', label: 'Cadastrar' },
-    { id: 'esqueci', label: 'Esqueci a senha' },
   ]
 
   return (
@@ -258,7 +261,7 @@ export default function Login() {
       {/* Painel decorativo — só desktop */}
       <div style={{ flex: 1, display: 'none', position: 'relative', overflow: 'hidden' }} className="login-deco">
         <style>{`@media (min-width: 768px) { .login-deco { display: block !important; } }`}</style>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(https://picsum.photos/seed/umbanda99/900/1200)`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+        <img src="https://picsum.photos/seed/umbanda99/900/1200" alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(28,28,46,0.65)' }} />
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '100%', padding: 48 }}>
           <h1 style={{ fontSize: 36, fontWeight: 800, color: '#fff', lineHeight: 1.2, marginBottom: 12 }}>Filhos de Fé</h1>

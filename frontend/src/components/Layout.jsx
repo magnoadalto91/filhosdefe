@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { Link, useLocation } from 'react-router'
-import { Menu, X, LogIn, User } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router'
+import { Menu, X, LogIn, User, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import BottomNav from './BottomNav'
 
@@ -9,6 +9,76 @@ const NAV = [
   { to: '/aprenda', label: 'Aprenda' },
   { to: '/calendario', label: 'Calendário' },
 ]
+
+function UserMenu() {
+  const { user, isAdmin, logout } = useAuth()
+  const navigate = useNavigate()
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const handleLogout = () => { logout(); navigate('/login'); setOpen(false) }
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button
+        onClick={() => setOpen(!open)}
+        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 6, border: '1px solid #e5e0d8', background: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: '#2c2c3e', fontFamily: "'Poppins', sans-serif", transition: 'border-color 0.2s' }}
+        onMouseEnter={e => e.currentTarget.style.borderColor = '#c8972b'}
+        onMouseLeave={e => { if (!open) e.currentTarget.style.borderColor = '#e5e0d8' }}
+      >
+        <User size={15} style={{ color: '#c8972b' }} />
+        <span style={{ maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {user?.email?.split('@')[0]}
+        </span>
+        <ChevronDown size={13} style={{ color: '#9ca3af', transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'rotate(0)' }} />
+      </button>
+
+      {open && (
+        <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, minWidth: 220, backgroundColor: '#fff', borderRadius: 8, boxShadow: '0 8px 32px rgba(0,0,0,0.14)', border: '1px solid #e5e0d8', zIndex: 100, overflow: 'hidden' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0ece5' }}>
+            <div style={{ fontSize: 11, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 2 }}>Conectado como</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#2c2c3e', wordBreak: 'break-all' }}>{user?.email}</div>
+          </div>
+          {isAdmin && (
+            <Link to="/admin" onClick={() => setOpen(false)}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', fontSize: 13, fontWeight: 500, color: '#c8972b', textDecoration: 'none', transition: 'background 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.background = '#f8f5f0'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              <LayoutDashboard size={15} /> Painel Admin
+            </Link>
+          )}
+          <button onClick={handleLogout}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '10px 16px', fontSize: 13, fontWeight: 500, color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'Poppins', sans-serif", transition: 'background 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.background = '#fef2f2'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            <LogOut size={15} /> Sair
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function MobileLogoutBtn({ onClose }) {
+  const { logout } = useAuth()
+  const navigate = useNavigate()
+  return (
+    <button
+      onClick={() => { logout(); navigate('/login'); onClose() }}
+      style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 0', fontSize: 14, fontWeight: 600, color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'Poppins', sans-serif", width: '100%' }}
+    >
+      <LogOut size={16} /> Sair
+    </button>
+  )
+}
 
 export default function Layout({ children }) {
   const { isAuthenticated, isAdmin } = useAuth()
@@ -57,19 +127,7 @@ export default function Layout({ children }) {
           {/* Desktop CTA */}
           <div style={{ display: 'none', alignItems: 'center', gap: 10 }} className="desktop-cta">
             <style>{`@media (min-width: 768px) { .desktop-cta { display: flex !important; } }`}</style>
-            {isAuthenticated ? (
-              <>
-                {isAdmin && (
-                  <Link to="/admin" style={{ padding: '9px 20px', borderRadius: 4, fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', backgroundColor: 'rgba(200,151,43,0.12)', color: '#c8972b', border: '1px solid rgba(200,151,43,0.3)', textDecoration: 'none', transition: 'all 0.2s' }}
-                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#c8972b'; e.currentTarget.style.color = '#fff' }}
-                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(200,151,43,0.12)'; e.currentTarget.style.color = '#c8972b' }}
-                  >Admin</Link>
-                )}
-                <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 20px', borderRadius: 4, fontSize: 13, fontWeight: 600, color: '#6b7280', border: '1px solid #e5e0d8', textDecoration: 'none' }}>
-                  <User size={15} /> Perfil
-                </Link>
-              </>
-            ) : (
+            {isAuthenticated ? <UserMenu /> : (
               <Link to="/login"
                 style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 4, fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', backgroundColor: '#c8972b', color: '#fff', textDecoration: 'none', transition: 'background 0.2s' }}
                 onMouseEnter={e => e.currentTarget.style.backgroundColor = '#a67a20'}
@@ -100,13 +158,18 @@ export default function Layout({ children }) {
                 style={{ display: 'block', padding: '10px 0', fontSize: 14, fontWeight: 600, color: location.pathname === to ? '#c8972b' : '#2c2c3e', textDecoration: 'none', borderBottom: '1px solid #f8f5f0' }}
               >{label}</Link>
             ))}
-            <div style={{ marginTop: 12 }}>
+            <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 4 }}>
               {isAuthenticated ? (
-                <Link to={isAdmin ? '/admin' : '/'} onClick={() => setMenuOpen(false)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 0', fontSize: 14, fontWeight: 600, color: '#c8972b', textDecoration: 'none' }}
-                >
-                  <User size={16} />{isAdmin ? 'Painel Admin' : 'Perfil'}
-                </Link>
+                <>
+                  {isAdmin && (
+                    <Link to="/admin" onClick={() => setMenuOpen(false)}
+                      style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 0', fontSize: 14, fontWeight: 600, color: '#c8972b', textDecoration: 'none' }}
+                    >
+                      <LayoutDashboard size={16} /> Painel Admin
+                    </Link>
+                  )}
+                  <MobileLogoutBtn onClose={() => setMenuOpen(false)} />
+                </>
               ) : (
                 <Link to="/login" onClick={() => setMenuOpen(false)}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '12px', borderRadius: 4, fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', backgroundColor: '#c8972b', color: '#fff', textDecoration: 'none', marginTop: 4 }}
