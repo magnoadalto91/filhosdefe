@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router'
-import { Menu, X, LogIn, User, Youtube, Instagram, Facebook, Phone, Clock } from 'lucide-react'
+import { Menu, X, LogIn, User, Youtube, Instagram, Facebook, Phone, Clock, ChevronDown } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import BottomNav from './BottomNav'
 import Footer from './Footer'
 
-const NAV_LINKS = [
+const NAV = [
   { to: '/', label: 'Início' },
   { to: '/aprenda', label: 'Aprenda' },
   { to: '/calendario', label: 'Calendário' },
@@ -17,78 +17,71 @@ export default function Layout({ children }) {
   const location = useLocation()
 
   return (
-    <div className="flex flex-col min-h-dvh" style={{ backgroundColor: '#0D0818' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', background: '#ffffff', fontFamily: "'Poppins', sans-serif" }}>
 
-      {/* ── Top info bar (md+) ────────────────────────────────── */}
-      <div
-        className="hidden md:flex items-center justify-between px-6 py-2 text-xs"
-        style={{ backgroundColor: '#12092B', borderBottom: '1px solid #2D1B69' }}
-      >
-        <div className="flex items-center gap-5" style={{ color: '#A78BFA' }}>
-          <span className="flex items-center gap-1.5">
-            <Phone size={12} style={{ color: '#D4AF37' }} />
-            Terreiro Filhos de Fé
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Clock size={12} style={{ color: '#D4AF37' }} />
-            Giras: Domingos 19h
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <span style={{ color: '#A78BFA' }}>Que a paz de Oxalá esteja com você</span>
-          <div className="flex items-center gap-2 ml-2">
-            <a href="#" aria-label="YouTube" className="transition-colors" style={{ color: '#A78BFA' }}
-              onMouseEnter={e => e.currentTarget.style.color = '#D4AF37'}
-              onMouseLeave={e => e.currentTarget.style.color = '#A78BFA'}>
-              <Youtube size={15} />
-            </a>
-            <a href="#" aria-label="Instagram" className="transition-colors" style={{ color: '#A78BFA' }}
-              onMouseEnter={e => e.currentTarget.style.color = '#D4AF37'}
-              onMouseLeave={e => e.currentTarget.style.color = '#A78BFA'}>
-              <Instagram size={15} />
-            </a>
-            <a href="#" aria-label="Facebook" className="transition-colors" style={{ color: '#A78BFA' }}
-              onMouseEnter={e => e.currentTarget.style.color = '#D4AF37'}
-              onMouseLeave={e => e.currentTarget.style.color = '#A78BFA'}>
-              <Facebook size={15} />
-            </a>
+      {/* ── Top info bar (desktop only) ──────────────────── */}
+      <div style={{ backgroundColor: '#f8f5f0', borderBottom: '1px solid #e5e0d8', display: 'none' }} className="md-topbar">
+        <style>{`
+          @media (min-width: 768px) { .md-topbar { display: block !important; } }
+        `}</style>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '8px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20, fontSize: 13, color: '#6b7280' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Phone size={13} style={{ color: '#c8972b' }} />
+              Terreiro Filhos de Fé
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Clock size={13} style={{ color: '#c8972b' }} />
+              Giras: Domingos às 19h
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {[
+              { Icon: Youtube, label: 'YouTube' },
+              { Icon: Instagram, label: 'Instagram' },
+              { Icon: Facebook, label: 'Facebook' },
+            ].map(({ Icon, label }) => (
+              <a key={label} href="#" aria-label={label}
+                style={{ width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7280', backgroundColor: '#fff', border: '1px solid #e5e0d8', transition: 'all 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#c8972b'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#c8972b' }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.color = '#6b7280'; e.currentTarget.style.borderColor = '#e5e0d8' }}
+              >
+                <Icon size={13} />
+              </a>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* ── Main header ──────────────────────────────────────── */}
-      <header
-        className="sticky top-0 z-40"
-        style={{ backgroundColor: '#1A1030', borderBottom: '1px solid #2D1B69', boxShadow: '0 2px 20px rgba(0,0,0,0.4)' }}
-      >
-        <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between h-16 md:h-20">
+      {/* ── Main header ──────────────────────────────────── */}
+      <header style={{ position: 'sticky', top: 0, zIndex: 40, backgroundColor: '#ffffff', borderBottom: '1px solid #e5e0d8', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', height: 72, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
 
           {/* Logo */}
-          <Link to="/" className="flex flex-col leading-tight">
-            <span className="text-xl md:text-2xl font-bold tracking-tight" style={{ color: '#D4AF37' }}>
-              Filhos de Fé
-            </span>
-            <span className="text-xs hidden md:block" style={{ color: '#A78BFA' }}>
-              Umbanda com amor e devoção
-            </span>
+          <Link to="/" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
+            <span style={{ fontSize: 22, fontWeight: 800, color: '#c8972b', letterSpacing: '-0.5px' }}>Filhos de Fé</span>
+            <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 400 }} className="logo-sub">Umbanda com amor e devoção</span>
           </Link>
+          <style>{`.logo-sub { display: none; } @media (min-width: 768px) { .logo-sub { display: block; } }`}</style>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1">
-            {NAV_LINKS.map(({ to, label }) => {
+          <nav style={{ display: 'none' }} className="desktop-nav">
+            <style>{`@media (min-width: 768px) { .desktop-nav { display: flex !important; align-items: center; gap: 4px; } }`}</style>
+            {NAV.map(({ to, label }) => {
               const active = location.pathname === to
               return (
-                <Link
-                  key={to}
-                  to={to}
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                <Link key={to} to={to}
                   style={{
-                    color: active ? '#D4AF37' : '#F8F5FF',
-                    backgroundColor: active ? 'rgba(212,175,55,0.12)' : 'transparent',
-                    borderBottom: active ? '2px solid #D4AF37' : '2px solid transparent',
+                    padding: '8px 16px',
+                    fontSize: 14,
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    color: active ? '#c8972b' : '#2c2c3e',
+                    borderBottom: active ? '2px solid #c8972b' : '2px solid transparent',
+                    transition: 'color 0.2s',
                   }}
-                  onMouseEnter={e => { if (!active) e.currentTarget.style.color = '#D4AF37' }}
-                  onMouseLeave={e => { if (!active) e.currentTarget.style.color = '#F8F5FF' }}
+                  onMouseEnter={e => { if (!active) e.currentTarget.style.color = '#c8972b' }}
+                  onMouseLeave={e => { if (!active) e.currentTarget.style.color = '#2c2c3e' }}
                 >
                   {label}
                 </Link>
@@ -96,93 +89,64 @@ export default function Layout({ children }) {
             })}
           </nav>
 
-          {/* Desktop auth button */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* Desktop CTA */}
+          <div style={{ display: 'none', alignItems: 'center', gap: 10 }} className="desktop-cta">
+            <style>{`@media (min-width: 768px) { .desktop-cta { display: flex !important; } }`}</style>
             {isAuthenticated ? (
               <>
                 {isAdmin && (
-                  <Link
-                    to="/admin"
-                    className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-                    style={{ backgroundColor: 'rgba(212,175,55,0.15)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.3)' }}
-                  >
-                    Admin
-                  </Link>
+                  <Link to="/admin" style={{ padding: '9px 20px', borderRadius: 4, fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', backgroundColor: 'rgba(200,151,43,0.12)', color: '#c8972b', border: '1px solid rgba(200,151,43,0.3)', textDecoration: 'none', transition: 'all 0.2s' }}
+                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#c8972b'; e.currentTarget.style.color = '#fff' }}
+                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(200,151,43,0.12)'; e.currentTarget.style.color = '#c8972b' }}
+                  >Admin</Link>
                 )}
-                <Link
-                  to="/"
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
-                  style={{ color: '#A78BFA', border: '1px solid #2D1B69' }}
-                >
-                  <User size={16} />
-                  Perfil
+                <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 20px', borderRadius: 4, fontSize: 13, fontWeight: 600, color: '#6b7280', border: '1px solid #e5e0d8', textDecoration: 'none' }}>
+                  <User size={15} /> Perfil
                 </Link>
               </>
             ) : (
-              <Link
-                to="/login"
-                className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all"
-                style={{ backgroundColor: '#7C3AED', color: '#fff' }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#5B21B6'}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = '#7C3AED'}
+              <Link to="/login"
+                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 4, fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', backgroundColor: '#c8972b', color: '#fff', textDecoration: 'none', transition: 'background 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#a67a20'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = '#c8972b'}
               >
-                <LogIn size={16} />
-                Entrar
+                <LogIn size={15} /> Entrar
               </Link>
             )}
           </div>
 
           {/* Mobile hamburger */}
           <button
-            className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg"
-            style={{ backgroundColor: 'rgba(124,58,237,0.1)', color: '#F8F5FF' }}
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Menu"
+            className="mobile-menu-btn"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 4, border: '1px solid #e5e0d8', background: '#fff', color: '#2c2c3e', cursor: 'pointer' }}
           >
-            {menuOpen ? <X size={22} /> : <Menu size={22} />}
+            <style>{`@media (min-width: 768px) { .mobile-menu-btn { display: none !important; } }`}</style>
+            {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
 
-        {/* Mobile dropdown menu */}
+        {/* Mobile dropdown */}
         {menuOpen && (
-          <div
-            className="md:hidden px-4 pb-4 space-y-1"
-            style={{ backgroundColor: '#1A1030', borderTop: '1px solid #2D1B69' }}
-          >
-            {NAV_LINKS.map(({ to, label }) => (
-              <Link
-                key={to}
-                to={to}
-                onClick={() => setMenuOpen(false)}
-                className="block px-4 py-3 rounded-lg text-sm font-medium"
-                style={{
-                  color: location.pathname === to ? '#D4AF37' : '#F8F5FF',
-                  backgroundColor: location.pathname === to ? 'rgba(212,175,55,0.1)' : 'transparent',
-                }}
-              >
-                {label}
-              </Link>
+          <div style={{ backgroundColor: '#ffffff', borderTop: '1px solid #e5e0d8', padding: '12px 24px 16px' }}>
+            {NAV.map(({ to, label }) => (
+              <Link key={to} to={to} onClick={() => setMenuOpen(false)}
+                style={{ display: 'block', padding: '10px 0', fontSize: 14, fontWeight: 600, color: location.pathname === to ? '#c8972b' : '#2c2c3e', textDecoration: 'none', borderBottom: '1px solid #f8f5f0' }}
+              >{label}</Link>
             ))}
-            <div className="pt-2">
+            <div style={{ marginTop: 12 }}>
               {isAuthenticated ? (
-                <Link
-                  to={isAdmin ? '/admin' : '/'}
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium w-full"
-                  style={{ color: '#A78BFA', border: '1px solid #2D1B69' }}
+                <Link to={isAdmin ? '/admin' : '/'} onClick={() => setMenuOpen(false)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 0', fontSize: 14, fontWeight: 600, color: '#c8972b', textDecoration: 'none' }}
                 >
-                  <User size={16} />
-                  {isAdmin ? 'Painel Admin' : 'Perfil'}
+                  <User size={16} />{isAdmin ? 'Painel Admin' : 'Perfil'}
                 </Link>
               ) : (
-                <Link
-                  to="/login"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold w-full justify-center"
-                  style={{ backgroundColor: '#7C3AED', color: '#fff' }}
+                <Link to="/login" onClick={() => setMenuOpen(false)}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '12px', borderRadius: 4, fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', backgroundColor: '#c8972b', color: '#fff', textDecoration: 'none', marginTop: 4 }}
                 >
-                  <LogIn size={16} />
-                  Entrar
+                  <LogIn size={15} /> Entrar
                 </Link>
               )}
             </div>
@@ -190,15 +154,17 @@ export default function Layout({ children }) {
         )}
       </header>
 
-      {/* ── Page content ─────────────────────────────────────── */}
-      <main className="flex-1 pb-20 md:pb-0">
+      {/* ── Content ──────────────────────────────────────── */}
+      <main style={{ flex: 1, paddingBottom: 0 }} className="main-content">
+        <style>{`@media (max-width: 767px) { .main-content { padding-bottom: 64px; } }`}</style>
         {children}
       </main>
 
       <Footer />
 
       {/* Bottom nav — mobile only */}
-      <div className="md:hidden">
+      <div className="mobile-nav">
+        <style>{`@media (min-width: 768px) { .mobile-nav { display: none; } }`}</style>
         <BottomNav />
       </div>
     </div>

@@ -1,48 +1,43 @@
 import { Link } from 'react-router'
-import { Youtube, Instagram, Facebook, MapPin, Mail, Phone } from 'lucide-react'
+import { Youtube, Instagram, Facebook, MapPin, Mail, Phone, ArrowRight } from 'lucide-react'
 
 export default function Footer() {
   return (
-    <footer style={{ backgroundColor: '#08041A', borderTop: '1px solid #2D1B69' }}>
-      <div className="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 md:grid-cols-4 gap-10">
+    <footer style={{ backgroundColor: '#1c1c2e', color: '#9ca3af', fontFamily: "'Poppins', sans-serif" }}>
+      {/* Main footer */}
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '64px 24px 40px', display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: 40 }} className="footer-grid">
+        <style>{`
+          @media (min-width: 640px) { .footer-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+          @media (min-width: 1024px) { .footer-grid { grid-template-columns: 2fr 1fr 1fr 1fr !important; } }
+        `}</style>
 
         {/* Brand */}
-        <div className="md:col-span-1">
-          <h2 className="text-2xl font-bold mb-2" style={{ color: '#D4AF37' }}>Filhos de Fé</h2>
-          <p className="text-sm leading-relaxed mb-5" style={{ color: '#A78BFA' }}>
-            Um espaço sagrado de aprendizado, fé e conexão com as entidades da Umbanda.
+        <div>
+          <h2 style={{ fontSize: 24, fontWeight: 800, color: '#c8972b', marginBottom: 12, letterSpacing: '-0.5px' }}>Filhos de Fé</h2>
+          <p style={{ fontSize: 14, lineHeight: 1.7, marginBottom: 20, maxWidth: 280 }}>
+            Um espaço sagrado de aprendizado, fé e conexão com as entidades da Umbanda. Que Oxalá ilumine seu caminho.
           </p>
-          <div className="flex items-center gap-3">
-            <a href="#" aria-label="YouTube"
-              className="w-9 h-9 rounded-full flex items-center justify-center transition-all"
-              style={{ backgroundColor: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.2)', color: '#A78BFA' }}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#D4AF37'; e.currentTarget.style.color = '#0D0818' }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(212,175,55,0.1)'; e.currentTarget.style.color = '#A78BFA' }}>
-              <Youtube size={16} />
-            </a>
-            <a href="#" aria-label="Instagram"
-              className="w-9 h-9 rounded-full flex items-center justify-center transition-all"
-              style={{ backgroundColor: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.2)', color: '#A78BFA' }}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#D4AF37'; e.currentTarget.style.color = '#0D0818' }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(212,175,55,0.1)'; e.currentTarget.style.color = '#A78BFA' }}>
-              <Instagram size={16} />
-            </a>
-            <a href="#" aria-label="Facebook"
-              className="w-9 h-9 rounded-full flex items-center justify-center transition-all"
-              style={{ backgroundColor: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.2)', color: '#A78BFA' }}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#D4AF37'; e.currentTarget.style.color = '#0D0818' }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(212,175,55,0.1)'; e.currentTarget.style.color = '#A78BFA' }}>
-              <Facebook size={16} />
-            </a>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {[
+              { Icon: Youtube, label: 'YouTube' },
+              { Icon: Instagram, label: 'Instagram' },
+              { Icon: Facebook, label: 'Facebook' },
+            ].map(({ Icon, label }) => (
+              <a key={label} href="#" aria-label={label}
+                style={{ width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', border: '1px solid rgba(255,255,255,0.1)', transition: 'all 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#c8972b'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#c8972b' }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#9ca3af'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)' }}
+              >
+                <Icon size={15} />
+              </a>
+            ))}
           </div>
         </div>
 
         {/* Navigation */}
         <div>
-          <h3 className="text-sm font-bold uppercase tracking-widest mb-4" style={{ color: '#D4AF37' }}>
-            Navegação
-          </h3>
-          <ul className="space-y-2">
+          <h3 style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', color: '#ffffff', marginBottom: 20 }}>Navegação</h3>
+          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
             {[
               { to: '/', label: 'Início' },
               { to: '/aprenda', label: 'Aprenda' },
@@ -50,35 +45,24 @@ export default function Footer() {
               { to: '/login', label: 'Entrar' },
             ].map(({ to, label }) => (
               <li key={to}>
-                <Link
-                  to={to}
-                  className="text-sm transition-colors"
-                  style={{ color: '#A78BFA' }}
-                  onMouseEnter={e => e.currentTarget.style.color = '#D4AF37'}
-                  onMouseLeave={e => e.currentTarget.style.color = '#A78BFA'}
+                <Link to={to} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, color: '#9ca3af', textDecoration: 'none', transition: 'color 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#c8972b'}
+                  onMouseLeave={e => e.currentTarget.style.color = '#9ca3af'}
                 >
-                  {label}
+                  <ArrowRight size={13} /> {label}
                 </Link>
               </li>
             ))}
           </ul>
         </div>
 
-        {/* Resources */}
+        {/* Content */}
         <div>
-          <h3 className="text-sm font-bold uppercase tracking-widest mb-4" style={{ color: '#D4AF37' }}>
-            Conteúdo
-          </h3>
-          <ul className="space-y-2">
-            {[
-              'Entidades',
-              'Ervas Sagradas',
-              'Pontos Cantados',
-              'Próximas Giras',
-              'Ervas do Quintal',
-            ].map(label => (
-              <li key={label}>
-                <span className="text-sm" style={{ color: '#A78BFA' }}>{label}</span>
+          <h3 style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', color: '#ffffff', marginBottom: 20 }}>Conteúdo</h3>
+          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {['Entidades', 'Ervas Sagradas', 'Pontos Cantados', 'Próximas Giras', 'Ervas do Quintal'].map(item => (
+              <li key={item} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, color: '#9ca3af' }}>
+                <ArrowRight size={13} style={{ color: '#c8972b', flexShrink: 0 }} /> {item}
               </li>
             ))}
           </ul>
@@ -86,20 +70,18 @@ export default function Footer() {
 
         {/* Contact */}
         <div>
-          <h3 className="text-sm font-bold uppercase tracking-widest mb-4" style={{ color: '#D4AF37' }}>
-            Contato
-          </h3>
-          <ul className="space-y-3">
-            <li className="flex items-start gap-2 text-sm" style={{ color: '#A78BFA' }}>
-              <MapPin size={15} className="mt-0.5 flex-shrink-0" style={{ color: '#D4AF37' }} />
+          <h3 style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', color: '#ffffff', marginBottom: 20 }}>Contato</h3>
+          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <li style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14 }}>
+              <MapPin size={15} style={{ color: '#c8972b', marginTop: 2, flexShrink: 0 }} />
               Terreiro Filhos de Fé
             </li>
-            <li className="flex items-center gap-2 text-sm" style={{ color: '#A78BFA' }}>
-              <Phone size={15} style={{ color: '#D4AF37' }} />
-              Giras: Domingos às 19h
+            <li style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14 }}>
+              <Phone size={15} style={{ color: '#c8972b', flexShrink: 0 }} />
+              Domingos às 19h
             </li>
-            <li className="flex items-center gap-2 text-sm" style={{ color: '#A78BFA' }}>
-              <Mail size={15} style={{ color: '#D4AF37' }} />
+            <li style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14 }}>
+              <Mail size={15} style={{ color: '#c8972b', flexShrink: 0 }} />
               contato@filhosdefe.com
             </li>
           </ul>
@@ -107,14 +89,11 @@ export default function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div style={{ borderTop: '1px solid #2D1B69' }}>
-        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-2">
-          <p className="text-xs" style={{ color: '#A78BFA' }}>
-            &copy; {new Date().getFullYear()} Filhos de Fé. Todos os direitos reservados.
-          </p>
-          <p className="text-xs" style={{ color: '#A78BFA' }}>
-            Salve a Umbanda
-          </p>
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '16px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, textAlign: 'center' }} className="footer-bottom">
+          <style>{`@media (min-width: 640px) { .footer-bottom { flex-direction: row !important; justify-content: space-between; text-align: left; } }`}</style>
+          <p style={{ fontSize: 13 }}>&copy; {new Date().getFullYear()} Filhos de Fé. Todos os direitos reservados.</p>
+          <p style={{ fontSize: 13, color: '#c8972b', fontWeight: 600 }}>Salve a Umbanda</p>
         </div>
       </div>
     </footer>

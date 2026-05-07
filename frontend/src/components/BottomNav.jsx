@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router'
 import { Home, BookOpen, Calendar } from 'lucide-react'
 
-const navItems = [
+const items = [
   { to: '/', label: 'Início', Icon: Home, exact: true },
   { to: '/aprenda', label: 'Aprenda', Icon: BookOpen },
   { to: '/calendario', label: 'Calendário', Icon: Calendar },
@@ -9,29 +9,27 @@ const navItems = [
 
 export default function BottomNav() {
   return (
-    <nav
-      className="fixed bottom-0 left-0 right-0 z-40 flex"
-      style={{
-        backgroundColor: '#1A1030',
-        borderTop: '1px solid #2D1B69',
-        paddingBottom: 'env(safe-area-inset-bottom)',
-      }}
-    >
-      {navItems.map(({ to, label, Icon, exact }) => (
-        <NavLink
-          key={to}
-          to={to}
-          end={exact}
-          className="flex-1 flex flex-col items-center justify-center py-3 gap-1 transition-colors"
-          style={({ isActive }) => ({
-            color: isActive ? '#7C3AED' : '#A78BFA',
-          })}
-        >
+    <nav style={{
+      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 40,
+      display: 'flex', backgroundColor: '#ffffff',
+      borderTop: '1px solid #e5e0d8',
+      boxShadow: '0 -2px 12px rgba(0,0,0,0.08)',
+      paddingBottom: 'env(safe-area-inset-bottom)',
+      fontFamily: "'Poppins', sans-serif",
+    }}>
+      {items.map(({ to, label, Icon, exact }) => (
+        <NavLink key={to} to={to} end={exact} style={{ flex: 1, textDecoration: 'none' }}>
           {({ isActive }) => (
-            <>
+            <div style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center',
+              justifyContent: 'center', padding: '10px 0', gap: 3,
+              color: isActive ? '#c8972b' : '#6b7280',
+              borderTop: isActive ? '2px solid #c8972b' : '2px solid transparent',
+              transition: 'color 0.2s',
+            }}>
               <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
-              <span className="text-xs font-medium">{label}</span>
-            </>
+              <span style={{ fontSize: 11, fontWeight: 600 }}>{label}</span>
+            </div>
           )}
         </NavLink>
       ))}

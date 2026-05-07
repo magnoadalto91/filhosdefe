@@ -4,9 +4,9 @@ import api from '../api/axios'
 import Modal from '../components/Modal'
 import LoadingSpinner from '../components/LoadingSpinner'
 
-const DAYS_OF_WEEK = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+const DAYS_OF_WEEK = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab']
 const MONTHS = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho',
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
 ]
 
@@ -32,42 +32,57 @@ function girasByDay(giras, year, month) {
   return map
 }
 
+/* ── Gira Detail Modal ───────────────────────────────────── */
 function GiraDetailModal({ gira, onClose }) {
   if (!gira) return null
   const date = new Date(gira.data)
   const dateStr = date.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 
+  const sectionLabel = (text) => (
+    <div style={{ fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#6b7280', marginBottom: '8px' }}>
+      {text}
+    </div>
+  )
+
   return (
     <Modal isOpen={!!gira} onClose={onClose} title={gira.titulo}>
-      <div className="space-y-4">
-        <div className="text-xs capitalize" style={{ color: '#F59E0B' }}>{dateStr}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', fontFamily: "'Poppins', sans-serif" }}>
+
+        {/* Date badge */}
+        <div style={{ fontSize: '13px', fontWeight: 600, color: '#c8972b', textTransform: 'capitalize' }}>{dateStr}</div>
 
         {gira.descricao && (
-          <p className="text-sm leading-relaxed" style={{ color: '#F8F5FF' }}>{gira.descricao}</p>
+          <p style={{ fontSize: '14px', lineHeight: 1.7, color: '#2c2c3e', margin: 0 }}>{gira.descricao}</p>
         )}
 
         {gira.instrucoes && (
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <FileText size={14} style={{ color: '#A78BFA' }} />
-              <span className="text-xs font-semibold uppercase" style={{ color: '#A78BFA' }}>Instrucoes</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+              <FileText size={14} style={{ color: '#c8972b' }} />
+              {sectionLabel('Instrucoes')}
             </div>
-            <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#F8F5FF' }}>{gira.instrucoes}</p>
+            <p style={{ fontSize: '14px', lineHeight: 1.7, color: '#2c2c3e', whiteSpace: 'pre-wrap', margin: 0 }}>{gira.instrucoes}</p>
           </div>
         )}
 
         {gira.entidades?.length > 0 && (
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Users size={14} style={{ color: '#A78BFA' }} />
-              <span className="text-xs font-semibold uppercase" style={{ color: '#A78BFA' }}>Entidades</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+              <Users size={14} style={{ color: '#c8972b' }} />
+              {sectionLabel('Entidades')}
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
               {gira.entidades.map((e, i) => (
                 <span
                   key={e._id || i}
-                  className="px-2 py-0.5 rounded-full text-xs"
-                  style={{ backgroundColor: 'rgba(124,58,237,0.2)', color: '#A78BFA', border: '1px solid #2D1B69' }}
+                  style={{
+                    padding: '3px 10px',
+                    borderRadius: '20px',
+                    fontSize: '12px',
+                    backgroundColor: 'rgba(200,151,43,0.10)',
+                    color: '#c8972b',
+                    border: '1px solid rgba(200,151,43,0.25)',
+                  }}
                 >
                   {e.nome || e}
                 </span>
@@ -78,16 +93,22 @@ function GiraDetailModal({ gira, onClose }) {
 
         {gira.musicas?.length > 0 && (
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Music size={14} style={{ color: '#A78BFA' }} />
-              <span className="text-xs font-semibold uppercase" style={{ color: '#A78BFA' }}>Musicas</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+              <Music size={14} style={{ color: '#c8972b' }} />
+              {sectionLabel('Musicas')}
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
               {gira.musicas.map((m, i) => (
                 <span
                   key={m._id || i}
-                  className="px-2 py-0.5 rounded-full text-xs"
-                  style={{ backgroundColor: 'rgba(124,58,237,0.2)', color: '#A78BFA', border: '1px solid #2D1B69' }}
+                  style={{
+                    padding: '3px 10px',
+                    borderRadius: '20px',
+                    fontSize: '12px',
+                    backgroundColor: 'rgba(200,151,43,0.10)',
+                    color: '#c8972b',
+                    border: '1px solid rgba(200,151,43,0.25)',
+                  }}
                 >
                   {m.titulo || m}
                 </span>
@@ -98,14 +119,14 @@ function GiraDetailModal({ gira, onClose }) {
 
         {gira.rotinas?.length > 0 && (
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <ListChecks size={14} style={{ color: '#A78BFA' }} />
-              <span className="text-xs font-semibold uppercase" style={{ color: '#A78BFA' }}>Rotinas</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+              <ListChecks size={14} style={{ color: '#c8972b' }} />
+              {sectionLabel('Rotinas')}
             </div>
-            <ol className="space-y-1">
+            <ol style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '6px' }}>
               {gira.rotinas.map((r, i) => (
-                <li key={r._id || i} className="text-sm flex items-start gap-2" style={{ color: '#F8F5FF' }}>
-                  <span className="flex-shrink-0 font-mono text-xs mt-0.5" style={{ color: '#A78BFA' }}>
+                <li key={r._id || i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '14px', color: '#2c2c3e' }}>
+                  <span style={{ flexShrink: 0, fontFamily: 'monospace', fontSize: '12px', marginTop: '2px', color: '#c8972b', minWidth: '20px' }}>
                     {String(i + 1).padStart(2, '0')}.
                   </span>
                   {r.titulo || r}
@@ -114,11 +135,60 @@ function GiraDetailModal({ gira, onClose }) {
             </ol>
           </div>
         )}
+
       </div>
     </Modal>
   )
 }
 
+/* ── Day Cell ────────────────────────────────────────────── */
+function DayCell({ day, hasGira, isToday, onClick }) {
+  const [hovered, setHovered] = useState(false)
+
+  let bg = 'transparent'
+  let color = '#2c2c3e'
+  let border = '1px solid #e5e0d8'
+
+  if (hasGira) {
+    bg = hovered ? '#a67a20' : '#c8972b'
+    color = '#ffffff'
+    border = '1px solid #c8972b'
+  } else if (isToday) {
+    bg = 'rgba(200,151,43,0.10)'
+    color = '#c8972b'
+    border = '1px solid rgba(200,151,43,0.35)'
+  }
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={!hasGira}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        width: '100%',
+        aspectRatio: '1/1',
+        borderRadius: '4px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '2px',
+        backgroundColor: bg,
+        border,
+        color,
+        cursor: hasGira ? 'pointer' : 'default',
+        transition: 'background-color 0.15s',
+        fontFamily: "'Poppins', sans-serif",
+      }}
+    >
+      <span style={{ fontSize: '13px', fontWeight: 600, lineHeight: 1 }}>{day}</span>
+      {hasGira && <Calendar size={9} style={{ color: '#ffffff' }} />}
+    </button>
+  )
+}
+
+/* ── Main Page ───────────────────────────────────────────── */
 export default function Calendario() {
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
@@ -151,40 +221,80 @@ export default function Calendario() {
   const days = buildCalendarDays(year, month)
   const giraMap = girasByDay(giras, year, month)
 
+  const navBtnBase = {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    padding: '8px',
+    borderRadius: '4px',
+    color: '#c8972b',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'background-color 0.15s',
+  }
+
   return (
-    <div className="p-4">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-5">
+    <div style={{ padding: '16px', backgroundColor: '#ffffff', minHeight: '100%', fontFamily: "'Poppins', sans-serif" }}>
+
+      {/* Page header */}
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#2c2c3e', margin: '0 0 4px' }}>Calendario</h1>
+        <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Acompanhe as giras do mes</p>
+      </div>
+
+      {/* Month navigation */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
         <button
           onClick={prevMonth}
-          className="p-2 rounded-lg transition-colors"
-          style={{ color: '#A78BFA' }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(124,58,237,0.15)'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+          style={navBtnBase}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(200,151,43,0.10)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
+          aria-label="Mes anterior"
         >
-          <ChevronLeft size={20} />
+          <ChevronLeft size={22} />
         </button>
 
-        <div className="text-center">
-          <div className="font-bold text-lg" style={{ color: '#F8F5FF' }}>{MONTHS[month]}</div>
-          <div className="text-sm" style={{ color: '#A78BFA' }}>{year}</div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '18px', fontWeight: 700, color: '#2c2c3e' }}>{MONTHS[month]}</div>
+          <div style={{ fontSize: '13px', color: '#6b7280' }}>{year}</div>
         </div>
 
         <button
           onClick={nextMonth}
-          className="p-2 rounded-lg transition-colors"
-          style={{ color: '#A78BFA' }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(124,58,237,0.15)'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+          style={navBtnBase}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(200,151,43,0.10)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
+          aria-label="Proximo mes"
         >
-          <ChevronRight size={20} />
+          <ChevronRight size={22} />
         </button>
       </div>
 
-      {/* Days of week */}
-      <div className="grid grid-cols-7 mb-2">
+      {/* Days of week header */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(7, 1fr)',
+          marginBottom: '6px',
+          backgroundColor: '#f8f5f0',
+          borderRadius: '4px',
+          padding: '4px 0',
+        }}
+      >
         {DAYS_OF_WEEK.map((d) => (
-          <div key={d} className="text-center text-xs font-semibold py-1" style={{ color: '#A78BFA' }}>
+          <div
+            key={d}
+            style={{
+              textAlign: 'center',
+              fontSize: '11px',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              padding: '4px 0',
+              color: '#6b7280',
+            }}
+          >
             {d}
           </div>
         ))}
@@ -194,40 +304,25 @@ export default function Calendario() {
       {loading ? (
         <LoadingSpinner />
       ) : (
-        <div className="grid grid-cols-7 gap-1">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
           {days.map((day, i) => {
-            const hasGira = day && giraMap[day]?.length > 0
-            const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear()
+            const hasGira = day !== null && giraMap[day]?.length > 0
+            const isToday =
+              day === today.getDate() &&
+              month === today.getMonth() &&
+              year === today.getFullYear()
 
             return (
               <div key={i}>
                 {day === null ? (
-                  <div className="aspect-square" />
+                  <div style={{ aspectRatio: '1/1' }} />
                 ) : (
-                  <button
+                  <DayCell
+                    day={day}
+                    hasGira={hasGira}
+                    isToday={isToday}
                     onClick={() => hasGira && setSelectedGira(giraMap[day][0])}
-                    disabled={!hasGira}
-                    className="w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all"
-                    style={{
-                      backgroundColor: hasGira
-                        ? 'rgba(245,158,11,0.15)'
-                        : isToday
-                          ? 'rgba(124,58,237,0.15)'
-                          : 'transparent',
-                      border: hasGira
-                        ? '1px solid rgba(245,158,11,0.4)'
-                        : isToday
-                          ? '1px solid rgba(124,58,237,0.4)'
-                          : '1px solid transparent',
-                      color: hasGira ? '#F59E0B' : isToday ? '#7C3AED' : '#F8F5FF',
-                      cursor: hasGira ? 'pointer' : 'default',
-                    }}
-                  >
-                    <span className="text-sm font-semibold leading-none">{day}</span>
-                    {hasGira && (
-                      <Calendar size={10} style={{ color: '#F59E0B' }} />
-                    )}
-                  </button>
+                  />
                 )}
               </div>
             )
@@ -236,53 +331,42 @@ export default function Calendario() {
       )}
 
       {/* Legend */}
-      <div className="flex items-center gap-4 mt-4 text-xs" style={{ color: '#A78BFA' }}>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded" style={{ backgroundColor: 'rgba(245,158,11,0.3)', border: '1px solid rgba(245,158,11,0.6)' }} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '14px', fontSize: '12px', color: '#6b7280' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ width: '12px', height: '12px', borderRadius: '2px', backgroundColor: '#c8972b' }} />
           Gira programada
         </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded" style={{ backgroundColor: 'rgba(124,58,237,0.3)', border: '1px solid rgba(124,58,237,0.6)' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ width: '12px', height: '12px', borderRadius: '2px', backgroundColor: 'rgba(200,151,43,0.15)', border: '1px solid rgba(200,151,43,0.35)' }} />
           Hoje
         </div>
       </div>
 
       {/* Upcoming giras list */}
       {giras.length > 0 && (
-        <div className="mt-6">
-          <h3 className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#A78BFA' }}>
-            Giras neste mês
+        <div style={{ marginTop: '28px' }}>
+          <h3
+            style={{
+              fontSize: '12px',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              color: '#6b7280',
+              marginBottom: '12px',
+            }}
+          >
+            Giras neste mes
           </h3>
-          <div className="space-y-2">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {giras.map((g) => {
               const d = new Date(g.data)
               return (
-                <button
+                <GiraListCard
                   key={g._id}
+                  gira={g}
+                  date={d}
                   onClick={() => setSelectedGira(g)}
-                  className="w-full text-left flex items-center gap-3 p-3 rounded-xl transition-all"
-                  style={{ backgroundColor: '#1A1030', border: '1px solid #2D1B69' }}
-                  onMouseEnter={(e) => e.currentTarget.style.borderColor = '#F59E0B'}
-                  onMouseLeave={(e) => e.currentTarget.style.borderColor = '#2D1B69'}
-                >
-                  <div
-                    className="flex-shrink-0 w-10 h-10 rounded-lg flex flex-col items-center justify-center"
-                    style={{ backgroundColor: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)' }}
-                  >
-                    <span className="text-sm font-bold leading-none" style={{ color: '#F59E0B' }}>{d.getDate()}</span>
-                    <span className="text-xs leading-none" style={{ color: '#F59E0B' }}>
-                      {d.toLocaleString('pt-BR', { month: 'short' })}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-sm truncate" style={{ color: '#F8F5FF' }}>{g.titulo}</div>
-                    {g.entidades?.length > 0 && (
-                      <div className="text-xs truncate mt-0.5" style={{ color: '#A78BFA' }}>
-                        {g.entidades.map(e => e.nome || e).join(', ')}
-                      </div>
-                    )}
-                  </div>
-                </button>
+                />
               )
             })}
           </div>
@@ -291,5 +375,62 @@ export default function Calendario() {
 
       <GiraDetailModal gira={selectedGira} onClose={() => setSelectedGira(null)} />
     </div>
+  )
+}
+
+function GiraListCard({ gira, date, onClick }) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        width: '100%',
+        textAlign: 'left',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        padding: '12px 14px',
+        borderRadius: '8px',
+        backgroundColor: '#ffffff',
+        border: '1px solid #e5e0d8',
+        boxShadow: hovered ? '0 8px 28px rgba(0,0,0,0.12)' : '0 4px 20px rgba(0,0,0,0.10)',
+        cursor: 'pointer',
+        transition: 'box-shadow 0.2s',
+        fontFamily: "'Poppins', sans-serif",
+      }}
+    >
+      {/* Date badge */}
+      <div
+        style={{
+          flexShrink: 0,
+          width: '44px',
+          height: '44px',
+          borderRadius: '4px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#c8972b',
+        }}
+      >
+        <span style={{ fontSize: '16px', fontWeight: 700, lineHeight: 1, color: '#ffffff' }}>{date.getDate()}</span>
+        <span style={{ fontSize: '10px', lineHeight: 1.2, color: 'rgba(255,255,255,0.85)', textTransform: 'uppercase' }}>
+          {date.toLocaleString('pt-BR', { month: 'short' })}
+        </span>
+      </div>
+
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: '14px', fontWeight: 600, color: '#2c2c3e', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {gira.titulo}
+        </div>
+        {gira.entidades?.length > 0 && (
+          <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {gira.entidades.map(e => e.nome || e).join(', ')}
+          </div>
+        )}
+      </div>
+    </button>
   )
 }

@@ -59,3 +59,12 @@ Site para gerenciar / controlar as obrigações no terreiro de umbanda, o nome d
 - Sem emojis/ícones padrão em UI, usar icones modernos.
 - Prisma — nunca `--force-reset` em produção
 - Sempre vá atualizando este arquivo com informações importantes do projeto.
+
+
+## LEMBRAR
+
+- Todo upload deve ser convertido para webp antes de enviar ao cloudnary
+- todo usuário deve ter um cadastro e ao acessar o site mostra primeiramente a tela de login (para cadastrar,  logar, esqueci minha senha, etc)
+- configurar o resend.com
+
+

@@ -37,9 +37,9 @@ function SidebarContent({ onClose }) {
       {/* Logo */}
       <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: '#2D1B69' }}>
         <div className="flex items-center gap-2">
-          <Star size={20} style={{ color: '#D4AF37' }} />
+          <Star size={20} style={{ color: '#c8972b' }} />
           <div>
-            <div className="font-bold text-base leading-tight" style={{ color: '#D4AF37' }}>Filhos de Fé</div>
+            <div className="font-bold text-base leading-tight" style={{ color: '#c8972b' }}>Filhos de Fé</div>
             <div className="text-xs" style={{ color: '#A78BFA' }}>Administração</div>
           </div>
         </div>
@@ -135,7 +135,7 @@ export default function AdminLayout({ children }) {
           >
             <Menu size={22} />
           </button>
-          <span className="font-bold" style={{ color: '#D4AF37' }}>Filhos de Fé</span>
+          <span className="font-bold" style={{ color: '#c8972b' }}>Filhos de Fé</span>
         </header>
 
         <main className="flex-1 p-4 lg:p-6 overflow-y-auto">

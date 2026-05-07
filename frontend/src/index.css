@@ -1,34 +1,30 @@
 @import "tailwindcss";
 
-@theme {
-  --color-background: #0D0818;
-  --color-surface: #1A1030;
-  --color-primary: #7C3AED;
-  --color-primary-dark: #5B21B6;
-  --color-accent: #F59E0B;
-  --color-text: #F8F5FF;
-  --color-text-muted: #A78BFA;
-  --color-border: #2D1B69;
-}
+/* ── Base reset ──────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
 
 body {
-  background-color: #0D0818;
-  color: #F8F5FF;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+  background: #ffffff;
+  color: #2c2c3e;
+  font-size: 15px;
+  line-height: 1.7;
   min-height: 100dvh;
 }
 
-* {
-  box-sizing: border-box;
-}
+img { max-width: 100%; display: block; }
 
-::-webkit-scrollbar {
-  width: 4px;
-}
-::-webkit-scrollbar-track {
-  background: #1A1030;
-}
-::-webkit-scrollbar-thumb {
-  background: #7C3AED;
-  border-radius: 2px;
-}
+/* ── Scrollbar ───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #f8f5f0; }
+::-webkit-scrollbar-thumb { background: #c8972b; border-radius: 3px; }
+
+/* ── Swiper ──────────────────────────────────────────────── */
+.swiper-button-next,
+.swiper-button-prev { color: #fff !important; }
+.swiper-button-next::after,
+.swiper-button-prev::after { font-size: 20px !important; font-weight: 700; }
+.swiper-pagination-bullet { background: rgba(255,255,255,0.55) !important; opacity: 1 !important; }
+.swiper-pagination-bullet-active { background: #c8972b !important; width: 24px !important; border-radius: 3px !important; }

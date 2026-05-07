@@ -5,8 +5,8 @@ export default function LoadingSpinner({ size = 40, fullScreen = false }) {
       style={{
         width: size,
         height: size,
-        border: '3px solid rgba(124,58,237,0.2)',
-        borderTopColor: '#7C3AED',
+        border: '3px solid rgba(200,151,43,0.2)',
+        borderTopColor: '#c8972b',
       }}
     />
   )
@@ -15,7 +15,7 @@ export default function LoadingSpinner({ size = 40, fullScreen = false }) {
     return (
       <div
         className="fixed inset-0 flex items-center justify-center z-50"
-        style={{ backgroundColor: '#0D0818' }}
+        style={{ backgroundColor: '#ffffff' }}
       >
         {spinner}
       </div>
