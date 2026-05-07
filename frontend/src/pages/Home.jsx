@@ -36,7 +36,7 @@ const SLIDES = [
 
 /* ─── Participate cards ──────────────────────────────────── */
 const CARDS = [
-  { img: PIC('entity33', 800, 600), title: 'Entidades', to: '/aprenda' },
+  { img: PIC('entity33', 800, 600), title: 'Orixás / Entidades', to: '/aprenda' },
   { img: PIC('herbs77', 800, 600),  title: 'Ervas Sagradas', to: '/aprenda' },
   { img: PIC('music88', 800, 600),  title: 'Pontos Cantados', to: '/aprenda' },
   { img: PIC('ritual55', 800, 600), title: 'Giras', to: '/calendario' },

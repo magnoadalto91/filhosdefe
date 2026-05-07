@@ -5,7 +5,7 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import Modal from '../components/Modal'
 
 const TABS = [
-  { id: 'entidades', label: 'Entidades', Icon: Users },
+  { id: 'entidades', label: 'Orixás / Entidades', Icon: Users },
   { id: 'ervas', label: 'Ervas', Icon: Leaf },
   { id: 'musicas', label: 'Musicas', Icon: Music },
 ]
@@ -46,15 +46,12 @@ function EntityCard({ entity, onClick }) {
         <div
           style={{
             position: 'absolute',
-            inset: '0 0 auto',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            padding: '8px 10px 6px',
-            background: 'linear-gradient(transparent, rgba(44,44,62,0.85))',
+            top: 0, left: 0, right: 0,
+            padding: '14px 12px 32px',
+            background: 'linear-gradient(rgba(28,28,46,0.85) 0%, transparent 100%)',
           }}
         >
-          <div style={{ fontSize: '13px', fontWeight: 600, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <div style={{ fontSize: '15px', fontWeight: 700, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>
             {entity.nome}
           </div>
         </div>

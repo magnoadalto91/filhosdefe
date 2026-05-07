@@ -8,7 +8,7 @@ import LoadingSpinner from '../../components/LoadingSpinner'
 const STAT_CARDS = [
   { key:'musicas',   label:'Músicas',   Icon:Music,       color:'#7C3AED', to:'/admin/musicas' },
   { key:'ervas',     label:'Ervas',     Icon:Leaf,        color:'#059669', to:'/admin/ervas' },
-  { key:'entidades', label:'Entidades', Icon:Users,       color:'#c8972b', to:'/admin/entidades' },
+  { key:'entidades', label:'Orixás / Entidades', Icon:Users, color:'#c8972b', to:'/admin/entidades' },
   { key:'giras',     label:'Giras',     Icon:Calendar,    color:'#dc2626', to:'/admin/giras' },
   { key:'rotinas',   label:'Rotinas',   Icon:ListChecks,  color:'#0284c7', to:'/admin/rotinas' },
 ]

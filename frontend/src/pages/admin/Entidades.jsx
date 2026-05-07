@@ -193,8 +193,9 @@ export default function AdminEntidades() {
               <button style={{ width:'100%', aspectRatio:'1/1', display:'block', position:'relative', backgroundColor:'#f8f5f0', border:'none', cursor:'pointer', padding:0 }} onClick={()=>setDetailTarget(e)}>
                 {e.fotoUrl?<img src={e.fotoUrl} alt={e.nome} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}/>
                   :<div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center' }}><Users size={36} color="#e5e0d8"/></div>}
-                <div style={{ position:'absolute', inset:'0 0 0 0', background:'linear-gradient(transparent 50%,rgba(28,28,46,0.75))', display:'flex', alignItems:'flex-end', padding:10 }}>
-                  <span style={{ fontSize:13, fontWeight:700, color:'#fff', textAlign:'left', lineHeight:1.3 }}>{e.nome}</span>
+                {/* Nome como cabeçalho da imagem */}
+                <div style={{ position:'absolute', top:0, left:0, right:0, padding:'14px 12px 32px', background:'linear-gradient(rgba(28,28,46,0.85) 0%, transparent 100%)' }}>
+                  <span style={{ fontSize:15, fontWeight:700, color:'#fff', display:'block', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', lineHeight:1.3 }}>{e.nome}</span>
                 </div>
               </button>
               {e.saudacao && <div style={{ padding:'8px 12px', borderBottom:'1px solid #f0ece5' }}><div style={{ fontSize:12, fontStyle:'italic', color:'#9ca3af', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>"{e.saudacao}"</div></div>}

@@ -69,7 +69,7 @@ function GiraDetailModal({ gira, onClose }) {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
               <Users size={14} style={{ color: '#c8972b' }} />
-              {sectionLabel('Entidades')}
+              {sectionLabel('Orixás / Entidades')}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
               {gira.entidades.map((e, i) => (
