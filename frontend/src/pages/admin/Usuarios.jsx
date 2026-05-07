@@ -2,27 +2,7 @@ import { useEffect, useState } from 'react'
 import { Users, Shield, User, Trash2, RefreshCw } from 'lucide-react'
 import api from '../../api/axios'
 import ConfirmModal from '../../components/ConfirmModal'
-
-const S = {
-  page: { fontFamily: "'Poppins', sans-serif" },
-  header: { marginBottom: 28 },
-  title: { fontSize: 22, fontWeight: 800, color: '#1c1c2e', marginBottom: 4 },
-  sub: { fontSize: 14, color: '#6b7280' },
-  table: { width: '100%', borderCollapse: 'collapse', backgroundColor: '#fff', borderRadius: 8, overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' },
-  th: { padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: '#6b7280', backgroundColor: '#f8f5f0', borderBottom: '1px solid #e5e0d8' },
-  td: { padding: '14px 16px', fontSize: 14, color: '#2c2c3e', borderBottom: '1px solid #f0ece5' },
-  badge: (role) => ({
-    display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20,
-    fontSize: 12, fontWeight: 700,
-    backgroundColor: role === 'ADMIN' ? 'rgba(200,151,43,0.12)' : 'rgba(107,114,128,0.10)',
-    color: role === 'ADMIN' ? '#c8972b' : '#6b7280',
-    border: `1px solid ${role === 'ADMIN' ? 'rgba(200,151,43,0.3)' : '#e5e0d8'}`,
-  }),
-  select: { padding: '6px 10px', borderRadius: 4, border: '1px solid #e5e0d8', fontSize: 13, fontFamily: "'Poppins', sans-serif", color: '#2c2c3e', backgroundColor: '#fff', cursor: 'pointer', outline: 'none' },
-  btnDel: { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: 4, border: '1px solid #fecaca', backgroundColor: '#fff', color: '#dc2626', cursor: 'pointer', transition: 'all 0.2s' },
-  error: { backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: 6, padding: '10px 14px', fontSize: 13, color: '#dc2626', marginBottom: 16 },
-  success: { backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 6, padding: '10px 14px', fontSize: 13, color: '#16a34a', marginBottom: 16 },
-}
+import LoadingSpinner from '../../components/LoadingSpinner'
 
 export default function AdminUsuarios() {
   const [users, setUsers]         = useState([])
@@ -80,67 +60,115 @@ export default function AdminUsuarios() {
   const fmt = (iso) => new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
 
   return (
-    <div style={S.page}>
-      <div style={S.header}>
-        <h1 style={S.title}>Usuários</h1>
-        <p style={S.sub}>Gerencie os membros e suas permissões de acesso.</p>
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold" style={{ color: '#F8F5FF' }}>Usuários</h1>
+          <p className="text-xs mt-0.5" style={{ color: '#A78BFA' }}>
+            {users.length} usuário{users.length !== 1 ? 's' : ''} cadastrado{users.length !== 1 ? 's' : ''}
+          </p>
+        </div>
+        <button
+          onClick={load}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold flex-shrink-0 transition-all"
+          style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid #2D1B69', color: '#A78BFA' }}
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#7C3AED'; e.currentTarget.style.color = '#F8F5FF' }}
+          onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#2D1B69'; e.currentTarget.style.color = '#A78BFA' }}
+        >
+          <RefreshCw size={15} /> Atualizar
+        </button>
       </div>
 
-      {error   && <div style={S.error}>{error}</div>}
-      {successMsg && <div style={S.success}>{successMsg}</div>}
+      {/* Alerts */}
+      {error && (
+        <div className="flex items-center gap-2 p-3 rounded-xl text-sm"
+          style={{ backgroundColor: 'rgba(220,38,38,0.12)', border: '1px solid rgba(220,38,38,0.3)', color: '#FCA5A5' }}>
+          {error}
+        </div>
+      )}
+      {successMsg && (
+        <div className="flex items-center gap-2 p-3 rounded-xl text-sm"
+          style={{ backgroundColor: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)', color: '#6EE7B7' }}>
+          {successMsg}
+        </div>
+      )}
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '48px 0', color: '#9ca3af' }}>
-          <RefreshCw size={28} style={{ margin: '0 auto 8px', animation: 'spin 1s linear infinite' }} />
-          <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
-          Carregando...
+        <LoadingSpinner />
+      ) : users.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 gap-3">
+          <Users size={40} style={{ color: '#2D1B69' }} />
+          <p className="text-sm" style={{ color: '#A78BFA' }}>Nenhum usuário encontrado.</p>
         </div>
       ) : (
         <>
           {/* Desktop table */}
-          <div style={{ overflowX: 'auto', display: 'none' }} className="dt">
-            <style>{`@media (min-width: 640px) { .dt { display: block !important; } }`}</style>
-            <table style={S.table}>
+          <div className="hidden sm:block overflow-x-auto rounded-xl"
+            style={{ border: '1px solid #2D1B69' }}>
+            <table className="w-full text-sm" style={{ borderCollapse: 'collapse' }}>
               <thead>
-                <tr>
-                  <th style={S.th}>Usuário</th>
-                  <th style={S.th}>Role</th>
-                  <th style={S.th}>Desde</th>
-                  <th style={S.th}>Alterar role</th>
-                  <th style={S.th}></th>
+                <tr style={{ backgroundColor: '#1A1030', borderBottom: '1px solid #2D1B69' }}>
+                  {['Usuário', 'Role', 'Desde', 'Alterar role', ''].map(h => (
+                    <th key={h} className="text-left px-4 py-3 text-xs font-bold uppercase tracking-widest"
+                      style={{ color: '#7C5AAA' }}>{h}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {users.map(u => (
-                  <tr key={u.id}>
-                    <td style={S.td}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#f8f5f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {users.map((u, idx) => (
+                  <tr key={u.id}
+                    style={{
+                      backgroundColor: idx % 2 === 0 ? '#0F0820' : '#120C28',
+                      borderBottom: '1px solid #1E1240',
+                    }}>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                          style={{ backgroundColor: u.role === 'ADMIN' ? 'rgba(200,151,43,0.15)' : 'rgba(124,58,237,0.15)' }}>
                           {u.role === 'ADMIN'
                             ? <Shield size={15} style={{ color: '#c8972b' }} />
-                            : <User size={15} style={{ color: '#9ca3af' }} />}
+                            : <User size={15} style={{ color: '#A78BFA' }} />}
                         </div>
-                        <span style={{ fontWeight: 500 }}>{u.email}</span>
+                        <span className="font-medium" style={{ color: '#F8F5FF' }}>{u.email}</span>
                       </div>
                     </td>
-                    <td style={S.td}><span style={S.badge(u.role)}>{u.role === 'ADMIN' ? <Shield size={11} /> : <User size={11} />}{u.role}</span></td>
-                    <td style={{ ...S.td, color: '#9ca3af' }}>{fmt(u.createdAt)}</td>
-                    <td style={S.td}>
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold"
+                        style={{
+                          backgroundColor: u.role === 'ADMIN' ? 'rgba(200,151,43,0.15)' : 'rgba(124,58,237,0.15)',
+                          color: u.role === 'ADMIN' ? '#c8972b' : '#A78BFA',
+                          border: `1px solid ${u.role === 'ADMIN' ? 'rgba(200,151,43,0.3)' : '#2D1B69'}`,
+                        }}>
+                        {u.role === 'ADMIN' ? <Shield size={10} /> : <User size={10} />}{u.role}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3" style={{ color: '#7C5AAA' }}>{fmt(u.createdAt)}</td>
+                    <td className="px-4 py-3">
                       <select
                         value={u.role}
                         disabled={updating === u.id}
                         onChange={e => handleRoleChange(u, e.target.value)}
-                        style={S.select}
+                        className="px-3 py-1.5 rounded-lg text-xs outline-none"
+                        style={{
+                          backgroundColor: '#0D0818',
+                          border: '1px solid #2D1B69',
+                          color: '#F8F5FF',
+                          cursor: updating === u.id ? 'not-allowed' : 'pointer',
+                          opacity: updating === u.id ? 0.6 : 1,
+                        }}
                       >
                         <option value="USER">USER</option>
                         <option value="ADMIN">ADMIN</option>
                       </select>
                     </td>
-                    <td style={S.td}>
-                      <button style={S.btnDel} title="Remover"
+                    <td className="px-4 py-3">
+                      <button
                         onClick={() => setDelTarget(u)}
-                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#fef2f2' }}
-                        onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff' }}
+                        className="p-1.5 rounded-lg transition-colors"
+                        style={{ color: '#A78BFA' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = '#EF4444' }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = '#A78BFA' }}
                       >
                         <Trash2 size={15} />
                       </button>
@@ -152,36 +180,60 @@ export default function AdminUsuarios() {
           </div>
 
           {/* Mobile cards */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }} className="mob">
-            <style>{`@media (min-width: 640px) { .mob { display: none !important; } }`}</style>
+          <div className="sm:hidden space-y-2">
             {users.map(u => (
-              <div key={u.id} style={{ backgroundColor: '#fff', borderRadius: 8, border: '1px solid #e5e0d8', padding: '14px 16px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: '#2c2c3e', wordBreak: 'break-all' }}>{u.email}</div>
-                    <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 2 }}>Desde {fmt(u.createdAt)}</div>
+              <div key={u.id} className="rounded-xl p-4"
+                style={{ backgroundColor: '#1A1030', border: '1px solid #2D1B69' }}>
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                      style={{ backgroundColor: u.role === 'ADMIN' ? 'rgba(200,151,43,0.15)' : 'rgba(124,58,237,0.15)' }}>
+                      {u.role === 'ADMIN'
+                        ? <Shield size={14} style={{ color: '#c8972b' }} />
+                        : <User size={14} style={{ color: '#A78BFA' }} />}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium truncate" style={{ color: '#F8F5FF' }}>{u.email}</div>
+                      <div className="text-xs mt-0.5" style={{ color: '#7C5AAA' }}>Desde {fmt(u.createdAt)}</div>
+                    </div>
                   </div>
-                  <span style={S.badge(u.role)}>{u.role}</span>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold flex-shrink-0 ml-2"
+                    style={{
+                      backgroundColor: u.role === 'ADMIN' ? 'rgba(200,151,43,0.15)' : 'rgba(124,58,237,0.15)',
+                      color: u.role === 'ADMIN' ? '#c8972b' : '#A78BFA',
+                      border: `1px solid ${u.role === 'ADMIN' ? 'rgba(200,151,43,0.3)' : '#2D1B69'}`,
+                    }}>
+                    {u.role}
+                  </span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <select value={u.role} disabled={updating === u.id}
+                <div className="flex items-center gap-2">
+                  <select
+                    value={u.role}
+                    disabled={updating === u.id}
                     onChange={e => handleRoleChange(u, e.target.value)}
-                    style={{ ...S.select, flex: 1 }}
+                    className="flex-1 px-3 py-2 rounded-lg text-xs outline-none"
+                    style={{
+                      backgroundColor: '#0D0818',
+                      border: '1px solid #2D1B69',
+                      color: '#F8F5FF',
+                    }}
                   >
                     <option value="USER">USER</option>
                     <option value="ADMIN">ADMIN</option>
                   </select>
-                  <button style={S.btnDel} onClick={() => setDelTarget(u)}>
+                  <button
+                    onClick={() => setDelTarget(u)}
+                    className="p-2 rounded-lg transition-colors flex-shrink-0"
+                    style={{ border: '1px solid #2D1B69', color: '#A78BFA' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#EF4444'; e.currentTarget.style.color = '#EF4444' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#2D1B69'; e.currentTarget.style.color = '#A78BFA' }}
+                  >
                     <Trash2 size={15} />
                   </button>
                 </div>
               </div>
             ))}
           </div>
-
-          <p style={{ fontSize: 13, color: '#9ca3af', marginTop: 16 }}>
-            {users.length} usuário{users.length !== 1 ? 's' : ''} cadastrado{users.length !== 1 ? 's' : ''}
-          </p>
         </>
       )}
 

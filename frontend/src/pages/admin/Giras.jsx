@@ -382,15 +382,17 @@ export default function AdminGiras() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold" style={{ color: '#F8F5FF' }}>Giras</h1>
           <p className="text-xs mt-0.5" style={{ color: '#A78BFA' }}>{upcoming.length} próxima(s) · {past.length} passada(s)</p>
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-          style={{ backgroundColor: '#7C3AED', color: '#fff' }}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold flex-shrink-0 transition-all"
+          style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)', color: '#fff', boxShadow: '0 4px 14px rgba(124,58,237,0.4)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(124,58,237,0.6)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 4px 14px rgba(124,58,237,0.4)' }}
         >
           <Plus size={16} /> Adicionar
         </button>
