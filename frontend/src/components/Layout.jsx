@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router'
-import { Menu, X, LogIn, User, Youtube, Instagram, Facebook, Phone, Clock, ChevronDown } from 'lucide-react'
+import { Menu, X, LogIn, User } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import BottomNav from './BottomNav'
-import Footer from './Footer'
 
 const NAV = [
   { to: '/', label: 'Início' },
@@ -18,40 +17,6 @@ export default function Layout({ children }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', background: '#ffffff', fontFamily: "'Poppins', sans-serif" }}>
-
-      {/* ── Top info bar (desktop only) ──────────────────── */}
-      <div style={{ backgroundColor: '#f8f5f0', borderBottom: '1px solid #e5e0d8', display: 'none' }} className="md-topbar">
-        <style>{`
-          @media (min-width: 768px) { .md-topbar { display: block !important; } }
-        `}</style>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '8px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 20, fontSize: 13, color: '#6b7280' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Phone size={13} style={{ color: '#c8972b' }} />
-              Terreiro Filhos de Fé
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Clock size={13} style={{ color: '#c8972b' }} />
-              Giras: Domingos às 19h
-            </span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {[
-              { Icon: Youtube, label: 'YouTube' },
-              { Icon: Instagram, label: 'Instagram' },
-              { Icon: Facebook, label: 'Facebook' },
-            ].map(({ Icon, label }) => (
-              <a key={label} href="#" aria-label={label}
-                style={{ width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7280', backgroundColor: '#fff', border: '1px solid #e5e0d8', transition: 'all 0.2s' }}
-                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#c8972b'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#c8972b' }}
-                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.color = '#6b7280'; e.currentTarget.style.borderColor = '#e5e0d8' }}
-              >
-                <Icon size={13} />
-              </a>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* ── Main header ──────────────────────────────────── */}
       <header style={{ position: 'sticky', top: 0, zIndex: 40, backgroundColor: '#ffffff', borderBottom: '1px solid #e5e0d8', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
@@ -159,8 +124,6 @@ export default function Layout({ children }) {
         <style>{`@media (max-width: 767px) { .main-content { padding-bottom: 64px; } }`}</style>
         {children}
       </main>
-
-      <Footer />
 
       {/* Bottom nav — mobile only */}
       <div className="mobile-nav">
