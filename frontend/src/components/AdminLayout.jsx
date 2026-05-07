@@ -21,6 +21,7 @@ const navItems = [
   { to: '/admin/entidades', label: 'Entidades', Icon: Users },
   { to: '/admin/giras', label: 'Giras', Icon: Calendar },
   { to: '/admin/rotinas', label: 'Rotinas', Icon: ListChecks },
+  { to: '/admin/usuarios', label: 'Usuários', Icon: Star },
 ]
 
 function SidebarContent({ onClose }) {

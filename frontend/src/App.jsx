@@ -15,11 +15,18 @@ import AdminErvas from './pages/admin/Ervas'
 import AdminEntidades from './pages/admin/Entidades'
 import AdminGiras from './pages/admin/Giras'
 import AdminRotinas from './pages/admin/Rotinas'
+import AdminUsuarios from './pages/admin/Usuarios'
 
+/* Todas as páginas públicas exigem login */
 function PublicPage({ children }) {
-  return <Layout>{children}</Layout>
+  return (
+    <PrivateRoute>
+      <Layout>{children}</Layout>
+    </PrivateRoute>
+  )
 }
 
+/* Páginas admin exigem login + role ADMIN */
 function AdminPage({ children }) {
   return (
     <PrivateRoute requireAdmin>
@@ -33,19 +40,22 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Public routes */}
+          {/* Única rota pública */}
+          <Route path="/login" element={<Login />} />
+
+          {/* Rotas do site (exigem autenticação) */}
           <Route path="/" element={<PublicPage><Home /></PublicPage>} />
           <Route path="/aprenda" element={<PublicPage><Aprenda /></PublicPage>} />
           <Route path="/calendario" element={<PublicPage><Calendario /></PublicPage>} />
-          <Route path="/login" element={<Login />} />
 
-          {/* Admin routes */}
+          {/* Rotas admin (exigem ADMIN) */}
           <Route path="/admin" element={<AdminPage><Dashboard /></AdminPage>} />
           <Route path="/admin/musicas" element={<AdminPage><AdminMusicas /></AdminPage>} />
           <Route path="/admin/ervas" element={<AdminPage><AdminErvas /></AdminPage>} />
           <Route path="/admin/entidades" element={<AdminPage><AdminEntidades /></AdminPage>} />
           <Route path="/admin/giras" element={<AdminPage><AdminGiras /></AdminPage>} />
           <Route path="/admin/rotinas" element={<AdminPage><AdminRotinas /></AdminPage>} />
+          <Route path="/admin/usuarios" element={<AdminPage><AdminUsuarios /></AdminPage>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

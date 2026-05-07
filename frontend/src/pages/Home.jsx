@@ -95,16 +95,9 @@ export default function Home() {
       >
         {SLIDES.map((sl, i) => (
           <SwiperSlide key={i}>
-            <div style={{
-              position: 'relative',
-              minHeight: 'clamp(360px, 58vh, 620px)',
-              backgroundImage: `url(${sl.img})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              display: 'flex',
-              alignItems: 'center',
-            }}>
-              {/* dark overlay */}
+            <div style={{ position: 'relative', minHeight: 'clamp(360px, 58vh, 620px)', display: 'flex', alignItems: 'center' }}>
+              {/* Imagem de fundo via <img> — funciona em iOS/Android */}
+              <img src={sl.img} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
               <div style={{ position: 'absolute', inset: 0, background: 'rgba(28,28,46,0.62)' }} />
               <div style={{ position: 'relative', zIndex: 1, maxWidth: 1200, margin: '0 auto', padding: '60px 24px', width: '100%' }}>
                 <span style={{ display: 'inline-block', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', color: '#c8972b', backgroundColor: 'rgba(200,151,43,0.18)', padding: '4px 14px', borderRadius: 20, marginBottom: 16 }}>
@@ -133,17 +126,18 @@ export default function Home() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)' }} className="participate-grid">
         <style>{`@media (min-width: 768px) { .participate-grid { grid-template-columns: repeat(4, 1fr) !important; } }`}</style>
         {CARDS.map(({ img, title, to }) => (
-          <Link key={title} to={to} style={{ position: 'relative', overflow: 'hidden', display: 'block', minHeight: 220, textDecoration: 'none' }} className="part-card">
-            <style>{`.part-card { min-height: 220px; } @media (min-width: 768px) { .part-card { min-height: 300px; } }`}</style>
-            <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center', transition: 'transform 0.4s' }}
+          <Link key={title} to={to} className="part-card" style={{ position: 'relative', overflow: 'hidden', display: 'block', textDecoration: 'none' }}>
+            <style>{`.part-card { aspect-ratio: 1/1; } @media (min-width: 768px) { .part-card { aspect-ratio: 3/4; } }`}</style>
+            {/* <img> é mais confiável que background-image no iOS */}
+            <img src={img} alt={title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.4s' }}
               onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.06)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             />
-            <div style={{ position: 'absolute', inset: 0, background: 'rgba(28,28,46,0.60)', transition: 'background 0.3s' }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(200,151,43,0.70)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'rgba(28,28,46,0.60)'}
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(28,28,46,0.55)', transition: 'background 0.3s' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(200,151,43,0.68)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'rgba(28,28,46,0.55)'}
             />
-            <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: 24, textAlign: 'center', minHeight: 'inherit' }}>
+            <div style={{ position: 'absolute', inset: 0, zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, textAlign: 'center' }}>
               <span style={{ fontSize: 20, fontWeight: 800, color: '#ffffff', lineHeight: 1.2 }}>{title}</span>
               <span style={{ marginTop: 14, display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: '#fff', border: '1px solid rgba(255,255,255,0.7)', padding: '6px 16px', borderRadius: 2 }}>
                 Ver mais <ArrowRight size={12} />

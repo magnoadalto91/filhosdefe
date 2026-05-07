@@ -2,7 +2,8 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 
-import authRoutes from './src/routes/auth.js';
+import authRoutes from './src/routes/auth.js'
+import usuariosRoutes from './src/routes/usuarios.js';
 import musicasRoutes from './src/routes/musicas.js';
 import ervasRoutes from './src/routes/ervas.js';
 import entidadesRoutes from './src/routes/entidades.js';
@@ -23,7 +24,8 @@ app.get('/', (_req, res) => {
 });
 
 // Routes
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authRoutes)
+app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/musicas', musicasRoutes);
 app.use('/api/ervas', ervasRoutes);
 app.use('/api/entidades', entidadesRoutes);
