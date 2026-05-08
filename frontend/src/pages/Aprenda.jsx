@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { useLocation } from 'react-router'
 import { Users, Leaf, Music, Play } from 'lucide-react'
 import api from '../api/axios'
 import LoadingSpinner from '../components/LoadingSpinner'
@@ -313,7 +312,6 @@ function EmptyState({ icon: Icon, message }) {
 
 /* ── Main Page ───────────────────────────────────────────── */
 export default function Aprenda() {
-  const location = useLocation()
   const [tab, setTab] = useState('entidades')
   const [data, setData] = useState({ entidades: [], ervas: [], musicas: [] })
   const [loading, setLoading] = useState({ entidades: false, ervas: false, musicas: false })
@@ -338,17 +336,6 @@ export default function Aprenda() {
   }
 
   useEffect(() => { fetchTab(tab) }, [tab])
-
-  /* Abre aba e modal ao navegar a partir de outra tela (ex: Calendário) */
-  useEffect(() => {
-    const state = location.state
-    if (!state) return
-    if (state.tab)        setTab(state.tab)
-    if (state.openEntity) setSelectedEntity(state.openEntity)
-    if (state.openMusic)  setSelectedMusic(state.openMusic)
-    // Limpa o state para não re-abrir ao voltar/atualizar
-    window.history.replaceState({}, '')
-  }, [])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%', backgroundColor: '#ffffff', fontFamily: "'Poppins', sans-serif" }}>
