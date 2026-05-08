@@ -37,7 +37,7 @@ export default function Home() {
           maxWidth: 440,
         }}>
           <img src="/logo.png" alt="Filhos de Fé" fetchPriority="high"
-            style={{ width: 'clamp(48px,10vw,76px)', height: 'auto', marginBottom: 10 }}/>
+            style={{ width: 'clamp(36px,7vw,56px)', height: 'auto', marginBottom: 8 }}/>
           <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '3px', color: '#c8972b', marginBottom: 8, display: 'block' }}>
             Bem-vindo ao Terreiro
           </span>
