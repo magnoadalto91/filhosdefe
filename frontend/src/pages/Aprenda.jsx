@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router'
-import { Users, Leaf, Music, Play, ChevronDown } from 'lucide-react'
+import { Users, Leaf, Music, Play, ChevronDown, Search, X } from 'lucide-react'
 import api from '../api/axios'
 import LoadingSpinner from '../components/LoadingSpinner'
 import Modal from '../components/Modal'
@@ -320,12 +320,13 @@ function MusicModal({ music, onClose }) {
 }
 
 /* ── Music Groups (collapse por agregador) ───────────────── */
-function MusicGroup({ label, musicas, onSelect, defaultOpen }) {
+function MusicGroup({ label, musicas, onSelect, defaultOpen, forceOpen }) {
   const [open, setOpen] = useState(defaultOpen)
+  const isOpen = forceOpen || open
   return (
     <div style={{ marginBottom: 8, borderRadius: 8, overflow: 'hidden', border: '1px solid #e5e0d8', backgroundColor: '#fff' }}>
       <button
-        onClick={() => setOpen(o => !o)}
+        onClick={() => { if (!forceOpen) setOpen(o => !o) }}
         style={{
           width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer',
@@ -337,10 +338,10 @@ function MusicGroup({ label, musicas, onSelect, defaultOpen }) {
           <span style={{ fontSize: 14, fontWeight: 700, color: '#2c2c3e' }}>{label}</span>
           <span style={{ fontSize: 12, color: '#9ca3af', fontWeight: 500 }}>({musicas.length})</span>
         </div>
-        <ChevronDown size={16} style={{ color: '#9ca3af', transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'rotate(0deg)', flexShrink: 0 }}/>
+        <ChevronDown size={16} style={{ color: '#9ca3af', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', flexShrink: 0 }}/>
       </button>
 
-      {open && (
+      {isOpen && (
         <div style={{ borderTop: '1px solid #f0ece5', padding: '8px 8px 8px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {musicas.map(m => <MusicCard key={m.id} music={m} onClick={() => onSelect(m)} />)}
@@ -351,11 +352,15 @@ function MusicGroup({ label, musicas, onSelect, defaultOpen }) {
   )
 }
 
-function MusicGroups({ musicas, onSelect }) {
+function MusicGroups({ musicas, onSelect, search }) {
+  const q = search.toLowerCase()
+  const filtered = q
+    ? musicas.filter(m => m.titulo?.toLowerCase().includes(q) || m.letra?.toLowerCase().includes(q))
+    : musicas
+
   const groups = []
   const grouped = {}
-
-  musicas.forEach(m => {
+  filtered.forEach(m => {
     const key = m.agregador ? `${m.agregador.ordem ?? 0}_${m.agregador.id}` : '__sem__'
     if (!grouped[key]) {
       grouped[key] = { label: m.agregador ? m.agregador.nome : 'Outros', musicas: [], ordem: m.agregador?.ordem ?? 9999 }
@@ -363,13 +368,17 @@ function MusicGroups({ musicas, onSelect }) {
     }
     grouped[key].musicas.push(m)
   })
-
   groups.sort((a, b) => grouped[a].ordem - grouped[b].ordem)
+
+  if (filtered.length === 0) {
+    return <EmptyState icon={Music} message="Nenhuma música encontrada." />
+  }
 
   return (
     <div>
       {groups.map((key, i) => (
-        <MusicGroup key={key} label={grouped[key].label} musicas={grouped[key].musicas} onSelect={onSelect} defaultOpen={i === 0} />
+        <MusicGroup key={key} label={grouped[key].label} musicas={grouped[key].musicas}
+          onSelect={onSelect} defaultOpen={i === 0} forceOpen={!!q} />
       ))}
     </div>
   )
@@ -396,6 +405,7 @@ export default function Aprenda() {
   const [data, setData] = useState({ entidades: [], ervas: [], musicas: [] })
   const [loading, setLoading] = useState({ entidades: false, ervas: false, musicas: false })
   const [loaded, setLoaded] = useState({ entidades: false, ervas: false, musicas: false })
+  const [search, setSearch] = useState('')
   const [selectedEntity, setSelectedEntity] = useState(null)
   const [selectedHerb,   setSelectedHerb]   = useState(null)
   const [selectedMusic,  setSelectedMusic]  = useState(null)
@@ -416,7 +426,7 @@ export default function Aprenda() {
     }
   }
 
-  useEffect(() => { fetchTab(tab) }, [tab])
+  useEffect(() => { fetchTab(tab); setSearch('') }, [tab])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%', backgroundColor: '#ffffff', fontFamily: "'Poppins', sans-serif" }}>
@@ -463,40 +473,65 @@ export default function Aprenda() {
         ))}
       </div>
 
+      {/* Search bar */}
+      <div style={{ position: 'sticky', top: 65, zIndex: 19, backgroundColor: '#ffffff', borderBottom: '1px solid #e5e0d8', padding: '10px 16px' }}>
+        <div style={{ position: 'relative' }}>
+          <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', pointerEvents: 'none' }}/>
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder={tab === 'entidades' ? 'Buscar orixá ou entidade...' : tab === 'ervas' ? 'Buscar erva...' : 'Buscar ponto cantado...'}
+            style={{ width: '100%', padding: '9px 36px', border: '1px solid #e5e0d8', borderRadius: 6, fontSize: 14, fontFamily: "'Poppins', sans-serif", color: '#2c2c3e', outline: 'none', boxSizing: 'border-box', backgroundColor: '#f8f5f0', transition: 'border-color 0.2s' }}
+            onFocus={e => e.currentTarget.style.borderColor = '#c8972b'}
+            onBlur={e => e.currentTarget.style.borderColor = '#e5e0d8'}
+          />
+          {search && (
+            <button onClick={() => setSearch('')}
+              style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex', padding: 2 }}>
+              <X size={15}/>
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Content */}
       <div style={{ flex: 1, padding: '16px', backgroundColor: '#f8f5f0' }}>
         {loading[tab] ? (
           <LoadingSpinner />
         ) : (
           <>
-            {tab === 'entidades' && (
-              data.entidades.length === 0
-                ? <EmptyState icon={Users} message="Nenhuma entidade cadastrada." />
+            {tab === 'entidades' && (() => {
+              const q = search.toLowerCase()
+              const list = q
+                ? data.entidades.filter(e => e.nome?.toLowerCase().includes(q) || e.saudacao?.toLowerCase().includes(q) || e.historia?.toLowerCase().includes(q))
+                : data.entidades
+              return list.length === 0
+                ? <EmptyState icon={Users} message={q ? 'Nenhum resultado encontrado.' : 'Nenhuma entidade cadastrada.'} />
                 : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {data.entidades.map((e) => (
-                      <EntityCard key={e.id} entity={e} onClick={() => setSelectedEntity(e)} />
-                    ))}
+                    {list.map(e => <EntityCard key={e.id} entity={e} onClick={() => setSelectedEntity(e)} />)}
                   </div>
                 )
-            )}
+            })()}
 
-            {tab === 'ervas' && (
-              data.ervas.length === 0
-                ? <EmptyState icon={Leaf} message="Nenhuma erva cadastrada." />
+            {tab === 'ervas' && (() => {
+              const q = search.toLowerCase()
+              const list = q
+                ? data.ervas.filter(e => e.nome?.toLowerCase().includes(q) || e.usos?.toLowerCase().includes(q))
+                : data.ervas
+              return list.length === 0
+                ? <EmptyState icon={Leaf} message={q ? 'Nenhum resultado encontrado.' : 'Nenhuma erva cadastrada.'} />
                 : (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-                    {data.ervas.map((e) => (
-                      <HerbCard key={e.id} herb={e} onClick={() => setSelectedHerb(e)} />
-                    ))}
+                    {list.map(e => <HerbCard key={e.id} herb={e} onClick={() => setSelectedHerb(e)} />)}
                   </div>
                 )
-            )}
+            })()}
 
             {tab === 'musicas' && (
               data.musicas.length === 0
                 ? <EmptyState icon={Music} message="Nenhuma música cadastrada." />
-                : <MusicGroups musicas={data.musicas} onSelect={setSelectedMusic} />
+                : <MusicGroups musicas={data.musicas} onSelect={setSelectedMusic} search={search} />
             )}
           </>
         )}
