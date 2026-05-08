@@ -355,7 +355,7 @@ function MusicGroup({ label, musicas, onSelect, defaultOpen, forceOpen }) {
 function MusicGroups({ musicas, onSelect, search }) {
   const q = search.toLowerCase()
   const filtered = q
-    ? musicas.filter(m => m.titulo?.toLowerCase().includes(q) || m.letra?.toLowerCase().includes(q))
+    ? musicas.filter(m => m.titulo?.toLowerCase().includes(q))
     : musicas
 
   const groups = []
@@ -503,7 +503,7 @@ export default function Aprenda() {
             {tab === 'entidades' && (() => {
               const q = search.toLowerCase()
               const list = q
-                ? data.entidades.filter(e => e.nome?.toLowerCase().includes(q) || e.saudacao?.toLowerCase().includes(q) || e.historia?.toLowerCase().includes(q))
+                ? data.entidades.filter(e => e.nome?.toLowerCase().includes(q))
                 : data.entidades
               return list.length === 0
                 ? <EmptyState icon={Users} message={q ? 'Nenhum resultado encontrado.' : 'Nenhuma entidade cadastrada.'} />
@@ -517,7 +517,7 @@ export default function Aprenda() {
             {tab === 'ervas' && (() => {
               const q = search.toLowerCase()
               const list = q
-                ? data.ervas.filter(e => e.nome?.toLowerCase().includes(q) || e.usos?.toLowerCase().includes(q))
+                ? data.ervas.filter(e => e.nome?.toLowerCase().includes(q))
                 : data.ervas
               return list.length === 0
                 ? <EmptyState icon={Leaf} message={q ? 'Nenhum resultado encontrado.' : 'Nenhuma erva cadastrada.'} />
