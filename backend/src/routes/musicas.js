@@ -39,12 +39,12 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
   try {
     const { titulo, letra, youtubeUrl } = req.body;
 
-    if (!titulo || !letra) {
-      return res.status(400).json({ error: 'titulo and letra are required' });
+    if (!titulo) {
+      return res.status(400).json({ error: 'titulo is required' });
     }
 
     const musica = await prisma.musica.create({
-      data: { titulo, letra, youtubeUrl: youtubeUrl || null },
+      data: { titulo, letra: letra || '', youtubeUrl: youtubeUrl || null },
     });
 
     return res.status(201).json(musica);

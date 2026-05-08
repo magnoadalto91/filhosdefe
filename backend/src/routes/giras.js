@@ -63,7 +63,7 @@ router.get('/:id', async (req, res) => {
 // POST /api/giras - admin only
 router.post('/', authenticate, requireAdmin, async (req, res) => {
   try {
-    const { data, titulo, descricao, instrucoes } = req.body;
+    const { data, titulo, descricao, instrucoes, entidades, musicas, rotinas } = req.body;
 
     if (!data || !titulo) {
       return res.status(400).json({ error: 'data and titulo are required' });
@@ -78,7 +78,27 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
       },
     });
 
-    return res.status(201).json(gira);
+    if (Array.isArray(entidades) && entidades.length > 0) {
+      await prisma.giraEntidade.createMany({
+        data: entidades.map(entidadeId => ({ giraId: gira.id, entidadeId: parseInt(entidadeId) })),
+        skipDuplicates: true,
+      });
+    }
+    if (Array.isArray(musicas) && musicas.length > 0) {
+      await prisma.giraMusica.createMany({
+        data: musicas.map(musicaId => ({ giraId: gira.id, musicaId: parseInt(musicaId) })),
+        skipDuplicates: true,
+      });
+    }
+    if (Array.isArray(rotinas) && rotinas.length > 0) {
+      await prisma.giraRotina.createMany({
+        data: rotinas.map(rotinaId => ({ giraId: gira.id, rotinaId: parseInt(rotinaId) })),
+        skipDuplicates: true,
+      });
+    }
+
+    const full = await prisma.gira.findUnique({ where: { id: gira.id }, include: giraFullInclude });
+    return res.status(201).json(full);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Internal server error' });

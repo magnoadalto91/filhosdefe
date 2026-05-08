@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 import { authenticate, requireAdmin } from '../middleware/auth.js'
 
 const router = Router()
@@ -14,6 +15,25 @@ router.get('/', authenticate, requireAdmin, async (req, res) => {
     })
     res.json(users)
   } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// POST / — criar usuário (admin)
+router.post('/', authenticate, requireAdmin, async (req, res) => {
+  const { email, password, role = 'USER' } = req.body
+  if (!email || !password) return res.status(400).json({ error: 'email e password são obrigatórios.' })
+  if (password.length < 6) return res.status(400).json({ error: 'Senha deve ter ao menos 6 caracteres.' })
+  if (!['ADMIN', 'USER'].includes(role)) return res.status(400).json({ error: 'Role inválida.' })
+  try {
+    const hashed = await bcrypt.hash(password, 10)
+    const user = await prisma.user.create({
+      data: { email, password: hashed, role },
+      select: { id: true, email: true, role: true, createdAt: true },
+    })
+    res.status(201).json(user)
+  } catch (err) {
+    if (err.code === 'P2002') return res.status(400).json({ error: 'E-mail já cadastrado.' })
     res.status(500).json({ error: err.message })
   }
 })

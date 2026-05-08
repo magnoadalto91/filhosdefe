@@ -1,11 +1,59 @@
 import { useEffect, useState } from 'react'
-import { Shield, User, Trash2, RefreshCw } from 'lucide-react'
+import { Shield, User, Trash2, RefreshCw, Plus, Eye, EyeOff, AlertCircle } from 'lucide-react'
 import api from '../../api/axios'
+import Modal from '../../components/Modal'
 import ConfirmModal from '../../components/ConfirmModal'
 import LoadingSpinner from '../../components/LoadingSpinner'
 
 const S = {
-  page: { fontFamily:"'Poppins',sans-serif" },
+  page:        { fontFamily:"'Poppins',sans-serif" },
+  label:       { display:'block', fontSize:12, fontWeight:600, color:'#2c2c3e', marginBottom:6, textTransform:'uppercase', letterSpacing:'0.5px' },
+  input:       { width:'100%', padding:'11px 14px', border:'1px solid #e5e0d8', borderRadius:6, fontSize:14, fontFamily:"'Poppins',sans-serif", color:'#2c2c3e', outline:'none', boxSizing:'border-box', transition:'border-color 0.2s', backgroundColor:'#fff' },
+  btnPrimary:  { padding:'10px 22px', borderRadius:6, fontSize:13, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.5px', backgroundColor:'#c8972b', color:'#fff', border:'none', cursor:'pointer', fontFamily:"'Poppins',sans-serif", transition:'background 0.15s' },
+  btnSecondary:{ padding:'10px 22px', borderRadius:6, fontSize:13, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.5px', backgroundColor:'transparent', color:'#6b7280', border:'1px solid #e5e0d8', cursor:'pointer', fontFamily:"'Poppins',sans-serif", transition:'all 0.15s' },
+  error:       { display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderRadius:6, backgroundColor:'#fef2f2', border:'1px solid #fecaca', fontSize:13, color:'#dc2626', marginBottom:16 },
+}
+
+const focus = e => e.currentTarget.style.borderColor = '#c8972b'
+const blur  = e => e.currentTarget.style.borderColor = '#e5e0d8'
+
+const emptyForm = { email:'', password:'', role:'USER' }
+
+function CreateForm({ form, setForm, error }) {
+  const [showPass, setShowPass] = useState(false)
+  return (
+    <div>
+      {error && <div style={S.error}><AlertCircle size={15}/>{error}</div>}
+      <div style={{ marginBottom:16 }}>
+        <label style={S.label}>E-mail *</label>
+        <input type="email" style={S.input} value={form.email}
+          onChange={e=>setForm(f=>({...f,email:e.target.value}))}
+          placeholder="email@exemplo.com" onFocus={focus} onBlur={blur}/>
+      </div>
+      <div style={{ marginBottom:16 }}>
+        <label style={S.label}>Senha *</label>
+        <div style={{ position:'relative' }}>
+          <input type={showPass?'text':'password'} style={{...S.input,paddingRight:44}}
+            value={form.password}
+            onChange={e=>setForm(f=>({...f,password:e.target.value}))}
+            placeholder="Mínimo 6 caracteres" onFocus={focus} onBlur={blur}/>
+          <button type="button" onClick={()=>setShowPass(v=>!v)}
+            style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', color:'#9ca3af', display:'flex', padding:2 }}>
+            {showPass?<EyeOff size={17}/>:<Eye size={17}/>}
+          </button>
+        </div>
+      </div>
+      <div>
+        <label style={S.label}>Perfil</label>
+        <select style={{...S.input,cursor:'pointer'}} value={form.role}
+          onChange={e=>setForm(f=>({...f,role:e.target.value}))}
+          onFocus={focus} onBlur={blur}>
+          <option value="USER">Usuário (USER)</option>
+          <option value="ADMIN">Administrador (ADMIN)</option>
+        </select>
+      </div>
+    </div>
+  )
 }
 
 export default function AdminUsuarios() {
@@ -15,6 +63,10 @@ export default function AdminUsuarios() {
   const [successMsg, setSuccess]    = useState('')
   const [delTarget,  setDelTarget]  = useState(null)
   const [updating,   setUpdating]   = useState(null)
+  const [modalOpen,  setModalOpen]  = useState(false)
+  const [form,       setForm]       = useState(emptyForm)
+  const [saving,     setSaving]     = useState(false)
+  const [formError,  setFormError]  = useState('')
 
   const load = async () => {
     setLoading(true)
@@ -27,6 +79,21 @@ export default function AdminUsuarios() {
   const flash = (msg, isError=false) => {
     if (isError) { setError(msg); setTimeout(()=>setError(''),4000) }
     else { setSuccess(msg); setTimeout(()=>setSuccess(''),4000) }
+  }
+
+  const openCreate = () => { setForm(emptyForm); setFormError(''); setModalOpen(true) }
+
+  const handleCreate = async () => {
+    if (!form.email.trim()) { setFormError('E-mail é obrigatório.'); return }
+    if (form.password.length < 6) { setFormError('Senha deve ter ao menos 6 caracteres.'); return }
+    setSaving(true); setFormError('')
+    try {
+      const r = await api.post('/usuarios', form)
+      setUsers(prev => [...prev, r.data])
+      setModalOpen(false)
+      flash(`Usuário ${r.data.email} criado com sucesso.`)
+    } catch(err) { setFormError(err.response?.data?.error||'Erro ao criar usuário.') }
+    finally { setSaving(false) }
   }
 
   const handleRoleChange = async (user, newRole) => {
@@ -62,18 +129,24 @@ export default function AdminUsuarios() {
   return (
     <div style={S.page}>
 
-      {/* Header */}
       <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:16, marginBottom:24 }}>
         <div>
           <h1 style={{ margin:'0 0 4px', fontSize:22, fontWeight:800, color:'#2c2c3e' }}>Usuários</h1>
           <p style={{ margin:0, fontSize:13, color:'#6b7280' }}>{users.length} usuário(s) cadastrado(s)</p>
         </div>
-        <button onClick={load}
-          style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 18px', borderRadius:6, border:'1px solid #e5e0d8', fontSize:13, fontWeight:600, color:'#6b7280', background:'#fff', cursor:'pointer', fontFamily:"'Poppins',sans-serif", transition:'all 0.15s' }}
-          onMouseEnter={e=>{e.currentTarget.style.borderColor='#c8972b';e.currentTarget.style.color='#c8972b'}}
-          onMouseLeave={e=>{e.currentTarget.style.borderColor='#e5e0d8';e.currentTarget.style.color='#6b7280'}}>
-          <RefreshCw size={15}/> Atualizar
-        </button>
+        <div style={{ display:'flex', gap:8 }}>
+          <button onClick={load}
+            style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 16px', borderRadius:6, border:'1px solid #e5e0d8', fontSize:13, fontWeight:600, color:'#6b7280', background:'#fff', cursor:'pointer', fontFamily:"'Poppins',sans-serif", transition:'all 0.15s' }}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor='#c8972b';e.currentTarget.style.color='#c8972b'}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor='#e5e0d8';e.currentTarget.style.color='#6b7280'}}>
+            <RefreshCw size={15}/>
+          </button>
+          <button onClick={openCreate} style={S.btnPrimary}
+            onMouseEnter={e=>e.currentTarget.style.backgroundColor='#a67a20'}
+            onMouseLeave={e=>e.currentTarget.style.backgroundColor='#c8972b'}>
+            <span style={{ display:'flex', alignItems:'center', gap:6 }}><Plus size={15}/> Novo Usuário</span>
+          </button>
+        </div>
       </div>
 
       {error      && <div style={{ padding:'10px 14px', borderRadius:6, backgroundColor:'#fef2f2', border:'1px solid #fecaca', fontSize:13, color:'#dc2626', marginBottom:16 }}>{error}</div>}
@@ -161,6 +234,22 @@ export default function AdminUsuarios() {
           </div>
         </>
       )}
+
+      {/* Modal criar usuário */}
+      <Modal isOpen={modalOpen} onClose={()=>setModalOpen(false)} title="Novo Usuário"
+        footer={<>
+          <button style={S.btnSecondary} onClick={()=>setModalOpen(false)}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor='#2c2c3e';e.currentTarget.style.color='#2c2c3e'}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor='#e5e0d8';e.currentTarget.style.color='#6b7280'}}>Cancelar</button>
+          <button style={{...S.btnPrimary,opacity:saving?.7:1}} onClick={handleCreate} disabled={saving}
+            onMouseEnter={e=>{if(!saving)e.currentTarget.style.backgroundColor='#a67a20'}}
+            onMouseLeave={e=>e.currentTarget.style.backgroundColor='#c8972b'}>
+            {saving?'Criando...':'Criar Usuário'}
+          </button>
+        </>}
+      >
+        <CreateForm form={form} setForm={setForm} error={formError}/>
+      </Modal>
 
       <ConfirmModal isOpen={!!delTarget} onClose={()=>setDelTarget(null)} onConfirm={handleDelete}
         title="Remover usuário" message={`Remover "${delTarget?.email}"? Esta ação não pode ser desfeita.`}/>

@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 // GET /api/rotinas
 router.get('/', async (_req, res) => {
   try {
-    const rotinas = await prisma.rotina.findMany({ orderBy: { ordem: 'asc' } });
+    const rotinas = await prisma.rotina.findMany({ orderBy: { createdAt: 'asc' } });
     return res.json(rotinas);
   } catch (err) {
     console.error(err);
@@ -37,16 +37,12 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
   try {
     const { titulo, descricao, ordem } = req.body;
 
-    if (!titulo || !descricao) {
-      return res.status(400).json({ error: 'titulo and descricao are required' });
+    if (!titulo) {
+      return res.status(400).json({ error: 'titulo is required' });
     }
 
     const rotina = await prisma.rotina.create({
-      data: {
-        titulo,
-        descricao,
-        ordem: ordem !== undefined ? parseInt(ordem) : 0,
-      },
+      data: { titulo, descricao: descricao || '', ordem: 0 },
     });
 
     return res.status(201).json(rotina);

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ListChecks, Plus, Pencil, Trash2, AlertCircle, GripVertical } from 'lucide-react'
+import { ListChecks, Plus, Pencil, Trash2, AlertCircle } from 'lucide-react'
 import api from '../../api/axios'
 import Modal from '../../components/Modal'
 import ConfirmModal from '../../components/ConfirmModal'
@@ -14,7 +14,7 @@ const S = {
   error:       { display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderRadius:6, backgroundColor:'#fef2f2', border:'1px solid #fecaca', fontSize:13, color:'#dc2626', marginBottom:16 },
 }
 
-const emptyForm = { titulo:'', descricao:'', ordem:1 }
+const emptyForm = { titulo:'', descricao:'' }
 
 function RotinaForm({ form, setForm, error }) {
   const focus = e => e.currentTarget.style.borderColor = '#c8972b'
@@ -26,13 +26,9 @@ function RotinaForm({ form, setForm, error }) {
         <label style={S.label}>Título *</label>
         <input style={S.input} value={form.titulo} onChange={e=>setForm(f=>({...f,titulo:e.target.value}))} placeholder="Título da rotina" onFocus={focus} onBlur={blur}/>
       </div>
-      <div style={{ marginBottom:16 }}>
+      <div>
         <label style={S.label}>Descrição</label>
         <textarea style={{...S.input,resize:'vertical',minHeight:100}} value={form.descricao} onChange={e=>setForm(f=>({...f,descricao:e.target.value}))} placeholder="Descrição da rotina..." onFocus={focus} onBlur={blur}/>
-      </div>
-      <div>
-        <label style={S.label}>Ordem</label>
-        <input type="number" min="1" style={{...S.input,width:100}} value={form.ordem} onChange={e=>setForm(f=>({...f,ordem:parseInt(e.target.value)||1}))} onFocus={focus} onBlur={blur}/>
       </div>
     </div>
   )
@@ -52,14 +48,13 @@ export default function AdminRotinas() {
     setLoading(true)
     try {
       const r = await api.get('/rotinas')
-      const list = Array.isArray(r.data) ? r.data : r.data.rotinas||[]
-      setRotinas([...list].sort((a,b)=>(a.ordem||0)-(b.ordem||0)))
+      setRotinas(Array.isArray(r.data) ? r.data : r.data.rotinas||[])
     } catch { setRotinas([]) } finally { setLoading(false) }
   }
   useEffect(()=>{load()},[])
 
-  const openAdd  = () => { setEditTarget(null); const next = rotinas.length ? Math.max(...rotinas.map(r=>r.ordem||0))+1 : 1; setForm({...emptyForm,ordem:next}); setFormError(''); setModalOpen(true) }
-  const openEdit = r  => { setEditTarget(r); setForm({titulo:r.titulo||'',descricao:r.descricao||'',ordem:r.ordem||1}); setFormError(''); setModalOpen(true) }
+  const openAdd  = () => { setEditTarget(null); setForm(emptyForm); setFormError(''); setModalOpen(true) }
+  const openEdit = r  => { setEditTarget(r); setForm({titulo:r.titulo||'',descricao:r.descricao||''}); setFormError(''); setModalOpen(true) }
 
   const handleSave = async () => {
     if (!form.titulo.trim()) { setFormError('Título é obrigatório.'); return }
@@ -67,7 +62,7 @@ export default function AdminRotinas() {
     try {
       editTarget ? await api.put(`/rotinas/${editTarget.id}`,form) : await api.post('/rotinas',form)
       setModalOpen(false); load()
-    } catch(err) { setFormError(err.response?.data?.message||'Erro ao salvar.') }
+    } catch(err) { setFormError(err.response?.data?.message||err.response?.data?.error||'Erro ao salvar.') }
     finally { setSaving(false) }
   }
 
@@ -98,17 +93,14 @@ export default function AdminRotinas() {
         </div>
       ) : (
         <div>
-          {rotinas.map(r => (
+          {rotinas.map((r, idx) => (
             <div key={r.id} style={{ display:'flex', alignItems:'flex-start', gap:14, padding:'16px 18px', backgroundColor:'#fff', borderRadius:8, border:'1px solid #e5e0d8', marginBottom:8, boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }}>
-              <div style={{ display:'flex', alignItems:'center', gap:8, flexShrink:0, marginTop:2 }}>
-                <GripVertical size={18} color="#e5e0d8"/>
-                <div style={{ width:32, height:32, borderRadius:8, backgroundColor:'rgba(200,151,43,0.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:700, color:'#c8972b' }}>
-                  {r.ordem}
-                </div>
+              <div style={{ width:28, height:28, borderRadius:8, backgroundColor:'rgba(200,151,43,0.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:700, color:'#c8972b', flexShrink:0, marginTop:2 }}>
+                {idx + 1}
               </div>
               <div style={{ flex:1, minWidth:0 }}>
                 <div style={{ fontSize:15, fontWeight:600, color:'#2c2c3e' }}>{r.titulo}</div>
-                {r.descricao && <div style={{ fontSize:13, color:'#6b7280', marginTop:4, lineHeight:1.5, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{r.descricao}</div>}
+                {r.descricao && <div style={{ fontSize:13, color:'#6b7280', marginTop:4, lineHeight:1.5 }}>{r.descricao}</div>}
               </div>
               <div style={{ display:'flex', gap:2, flexShrink:0 }}>
                 <button onClick={()=>openEdit(r)} style={{ display:'flex', padding:8, borderRadius:6, background:'none', border:'none', cursor:'pointer', color:'#9ca3af', transition:'color 0.15s' }}
