@@ -51,11 +51,11 @@ export default function Home() {
       </div>
 
       {/* ───────────────── CARDS ─────────────────────────── */}
-      <div className="participate-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)' }}>
+      <div className="participate-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', flex: 1, gridAutoRows: '1fr' }}>
         <style>{`@media (min-width: 768px) { .participate-grid { grid-template-columns: repeat(4, 1fr) !important; } }`}</style>
         {CARDS.map(({ title, to, bg }) => (
           <Link key={title} to={to}
-            style={{ position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', aspectRatio: '1/1', textDecoration: 'none', backgroundColor: bg, transition: 'filter 0.2s' }}
+            style={{ position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', backgroundColor: bg, transition: 'filter 0.2s', minHeight: 140 }}
             onMouseEnter={e => e.currentTarget.style.filter = 'brightness(1.15)'}
             onMouseLeave={e => e.currentTarget.style.filter = 'brightness(1)'}
           >
