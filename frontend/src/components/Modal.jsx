@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { X } from 'lucide-react'
 
-export default function Modal({ isOpen, onClose, title, children, footer }) {
+export default function Modal({ isOpen, onClose, title, children, footer, zIndex = 50 }) {
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
@@ -21,7 +21,7 @@ export default function Modal({ isOpen, onClose, title, children, footer }) {
       `}</style>
       <div
         className="modal-wrap"
-        style={{ position:'fixed', inset:0, zIndex:50, display:'flex', alignItems:'flex-end', justifyContent:'center', backgroundColor:'rgba(28,28,46,0.48)', backdropFilter:'blur(3px)', fontFamily:"'Poppins',sans-serif" }}
+        style={{ position:'fixed', inset:0, zIndex, display:'flex', alignItems:'flex-end', justifyContent:'center', backgroundColor:'rgba(28,28,46,0.48)', backdropFilter:'blur(3px)', fontFamily:"'Poppins',sans-serif" }}
       >
         <div
           className="modal-sheet"

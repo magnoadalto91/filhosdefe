@@ -57,7 +57,7 @@ const BtnVoltar = ({ onClick }) => (
 /* ── Modal de Entidade ───────────────────────────────────── */
 function EntityDetailModal({ entity, onClose }) {
   return (
-    <Modal isOpen={!!entity} onClose={onClose} title={entity?.nome || ''}
+    <Modal isOpen={!!entity} onClose={onClose} title={entity?.nome || ''} zIndex={60}
       footer={<BtnVoltar onClick={onClose}/>}
     >
       {entity && (
@@ -103,7 +103,7 @@ function EntityDetailModal({ entity, onClose }) {
 /* ── Modal de Música ─────────────────────────────────────── */
 function MusicDetailModal({ music, onClose }) {
   return (
-    <Modal isOpen={!!music} onClose={onClose} title={music?.titulo || ''}
+    <Modal isOpen={!!music} onClose={onClose} title={music?.titulo || ''} zIndex={60}
       footer={<BtnVoltar onClick={onClose}/>}
     >
       {music && (
@@ -172,7 +172,7 @@ function GiraDetailModal({ giraId, onClose, onEntityClick, onMusicClick }) {
               <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
                 {entidades.map(e => (
                   <button key={e.id}
-                    onClick={() => { onClose(); onEntityClick(e) }}
+                    onClick={() => onEntityClick(e)}
                     style={{ padding:'6px 14px', borderRadius:20, fontSize:13, fontWeight:600, backgroundColor:'rgba(200,151,43,0.1)', color:'#c8972b', border:'1px solid rgba(200,151,43,0.3)', cursor:'pointer', fontFamily:"'Poppins',sans-serif", transition:'all 0.15s' }}
                     onMouseEnter={ev=>{ev.currentTarget.style.backgroundColor='#c8972b';ev.currentTarget.style.color='#fff'}}
                     onMouseLeave={ev=>{ev.currentTarget.style.backgroundColor='rgba(200,151,43,0.1)';ev.currentTarget.style.color='#c8972b'}}>
@@ -190,7 +190,7 @@ function GiraDetailModal({ giraId, onClose, onEntityClick, onMusicClick }) {
               <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
                 {musicas.map((m, i) => (
                   <button key={m.id}
-                    onClick={() => { onClose(); onMusicClick(m) }}
+                    onClick={() => onMusicClick(m)}
                     style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 14px', borderRadius:6, backgroundColor:'#f8f5f0', border:'1px solid #e5e0d8', cursor:'pointer', width:'100%', textAlign:'left', fontFamily:"'Poppins',sans-serif", transition:'all 0.15s' }}
                     onMouseEnter={ev=>{ev.currentTarget.style.borderColor='#c8972b';ev.currentTarget.style.backgroundColor='rgba(200,151,43,0.06)'}}
                     onMouseLeave={ev=>{ev.currentTarget.style.borderColor='#e5e0d8';ev.currentTarget.style.backgroundColor='#f8f5f0'}}>
