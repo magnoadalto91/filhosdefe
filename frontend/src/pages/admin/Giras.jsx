@@ -176,7 +176,11 @@ export default function AdminGiras() {
   useEffect(()=>{ load(); loadRelated() },[])
 
   const openAdd = () => {
-    setEditTarget(null); setForm(emptyForm); setAssoc({entidades:[],musicas:[],rotinas:[]}); setFormError(''); setModalOpen(true)
+    setEditTarget(null)
+    setForm(emptyForm)
+    setAssoc({ entidades: [], musicas: [], rotinas: allRotinas.map(r => r.id) })
+    setFormError('')
+    setModalOpen(true)
   }
 
   const openEdit = async (g) => {
