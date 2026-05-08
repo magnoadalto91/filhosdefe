@@ -66,68 +66,86 @@ function EntityCard({ entity, onClick }) {
 }
 
 /* ── Herb Card ───────────────────────────────────────────── */
-function HerbCard({ herb }) {
+function HerbCard({ herb, onClick }) {
+  const [hovered, setHovered] = useState(false)
   return (
-    <div
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
+        width: '100%',
+        textAlign: 'left',
         borderRadius: '8px',
         overflow: 'hidden',
         backgroundColor: '#ffffff',
         border: '1px solid #e5e0d8',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
+        boxShadow: hovered ? '0 8px 28px rgba(0,0,0,0.14)' : '0 2px 12px rgba(0,0,0,0.07)',
+        cursor: 'pointer',
+        transition: 'box-shadow 0.2s, transform 0.2s',
+        transform: hovered ? 'translateY(-2px)' : 'translateY(0)',
         fontFamily: "'Poppins', sans-serif",
       }}
     >
-      <div style={{ position: 'relative', aspectRatio: '16/9', backgroundColor: '#f8f5f0' }}>
+      <div style={{ position: 'relative', aspectRatio: '4/3', backgroundColor: '#f8f5f0' }}>
         {herb.fotoUrl ? (
-          <img
-            src={herb.fotoUrl}
-            alt={herb.nome}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-          />
+          <img src={herb.fotoUrl} alt={herb.nome}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}/>
         ) : (
           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Leaf size={32} style={{ color: '#e5e0d8' }} />
           </div>
         )}
         {herb.noQuintal && (
-          <div
-            style={{
-              position: 'absolute',
-              top: '8px',
-              right: '8px',
-              padding: '2px 8px',
-              borderRadius: '20px',
-              fontSize: '11px',
-              fontWeight: 600,
-              backgroundColor: '#c8972b',
-              color: '#ffffff',
-            }}
-          >
+          <span style={{ position: 'absolute', top: 8, right: 8, padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 700, backgroundColor: '#c8972b', color: '#fff' }}>
             No quintal
+          </span>
+        )}
+      </div>
+      <div style={{ padding: '12px 14px' }}>
+        <div style={{ fontSize: '14px', fontWeight: 700, color: '#2c2c3e' }}>{herb.nome}</div>
+        {herb.usos && (
+          <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+            {herb.usos}
           </div>
         )}
       </div>
-      <div style={{ padding: '12px' }}>
-        <div style={{ fontSize: '14px', fontWeight: 600, color: '#2c2c3e' }}>{herb.nome}</div>
-        {herb.descricao && (
-          <div
-            style={{
-              fontSize: '13px',
-              color: '#6b7280',
-              marginTop: '4px',
-              lineHeight: 1.6,
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}
-          >
-            {herb.descricao}
-          </div>
-        )}
+    </button>
+  )
+}
+
+/* ── Herb Detail Modal ───────────────────────────────────── */
+function HerbModal({ herb, onClose }) {
+  if (!herb) return null
+  const secLabel = txt => (
+    <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#c8972b', marginBottom: 6 }}>{txt}</div>
+  )
+  return (
+    <Modal isOpen={!!herb} onClose={onClose} title={herb.nome}>
+      {herb.fotoUrl && (
+        <img src={herb.fotoUrl} alt={herb.nome}
+          style={{ width: '100%', height: 'auto', borderRadius: 6, marginBottom: 20, display: 'block' }}/>
+      )}
+
+      <div style={{ marginBottom: 16 }}>
+        {secLabel('Nome')}
+        <div style={{ fontSize: 20, fontWeight: 800, color: '#2c2c3e', display: 'flex', alignItems: 'center', gap: 10 }}>
+          {herb.nome}
+          {herb.noQuintal && (
+            <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 10px', borderRadius: 20, backgroundColor: '#c8972b', color: '#fff' }}>
+              No quintal
+            </span>
+          )}
+        </div>
       </div>
-    </div>
+
+      {herb.usos && (
+        <div>
+          {secLabel('Usos e propriedades')}
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{herb.usos}</p>
+        </div>
+      )}
+    </Modal>
   )
 }
 
@@ -317,7 +335,8 @@ export default function Aprenda() {
   const [loading, setLoading] = useState({ entidades: false, ervas: false, musicas: false })
   const [loaded, setLoaded] = useState({ entidades: false, ervas: false, musicas: false })
   const [selectedEntity, setSelectedEntity] = useState(null)
-  const [selectedMusic, setSelectedMusic] = useState(null)
+  const [selectedHerb,   setSelectedHerb]   = useState(null)
+  const [selectedMusic,  setSelectedMusic]  = useState(null)
 
   const fetchTab = async (tabId) => {
     if (loaded[tabId]) return
@@ -406,7 +425,7 @@ export default function Aprenda() {
                 : (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
                     {data.ervas.map((e) => (
-                      <HerbCard key={e.id} herb={e} />
+                      <HerbCard key={e.id} herb={e} onClick={() => setSelectedHerb(e)} />
                     ))}
                   </div>
                 )
@@ -428,7 +447,8 @@ export default function Aprenda() {
       </div>
 
       <EntityModal entity={selectedEntity} onClose={() => setSelectedEntity(null)} />
-      <MusicModal music={selectedMusic} onClose={() => setSelectedMusic(null)} />
+      <HerbModal   herb={selectedHerb}     onClose={() => setSelectedHerb(null)} />
+      <MusicModal  music={selectedMusic}   onClose={() => setSelectedMusic(null)} />
     </div>
   )
 }

@@ -14,7 +14,7 @@ const S = {
   error:       { display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderRadius:6, backgroundColor:'#fef2f2', border:'1px solid #fecaca', fontSize:13, color:'#dc2626', marginBottom:16 },
 }
 
-const emptyForm = { nome:'', descricao:'', usos:'', noQuintal:false }
+const emptyForm = { nome:'', usos:'', noQuintal:false }
 
 function HerbForm({ form, setForm, error, preview, fileRef }) {
   const inputRef = useRef()
@@ -99,7 +99,7 @@ export default function AdminErvas() {
     setEditTarget(null); setForm(emptyForm); setPreview(''); fileRef.current=null; setFormError(''); setModalOpen(true)
   }
   const openEdit = e => {
-    setEditTarget(e); setForm({nome:e.nome||'',descricao:e.descricao||'',usos:e.usos||'',noQuintal:e.noQuintal||false})
+    setEditTarget(e); setForm({nome:e.nome||'',usos:e.usos||'',noQuintal:e.noQuintal||false})
     setPreview(e.fotoUrl||''); fileRef.current=null; setFormError(''); setModalOpen(true)
   }
 
@@ -109,7 +109,6 @@ export default function AdminErvas() {
     try {
       const fd = new FormData()
       fd.append('nome', form.nome.trim())
-      fd.append('descricao', form.descricao.trim())
       fd.append('usos', form.usos.trim())
       fd.append('noQuintal', String(form.noQuintal))
       if (fileRef.current) fd.append('foto', fileRef.current)
@@ -252,12 +251,8 @@ function HerbFormWrapper({ form, setForm, error, preview, setPreview, fileRef })
         <input style={S.input} value={form.nome} onChange={e=>setForm(f=>({...f,nome:e.target.value}))} placeholder="Nome da erva" onFocus={focus} onBlur={blur}/>
       </div>
       <div style={{ marginBottom:16 }}>
-        <label style={S.label}>Descrição</label>
-        <textarea style={{...S.input,resize:'vertical',minHeight:80}} value={form.descricao} onChange={e=>setForm(f=>({...f,descricao:e.target.value}))} placeholder="Descrição..." onFocus={focus} onBlur={blur}/>
-      </div>
-      <div style={{ marginBottom:16 }}>
-        <label style={S.label}>Usos</label>
-        <textarea style={{...S.input,resize:'vertical',minHeight:80}} value={form.usos} onChange={e=>setForm(f=>({...f,usos:e.target.value}))} placeholder="Usos e propriedades..." onFocus={focus} onBlur={blur}/>
+        <label style={S.label}>Usos e propriedades</label>
+        <textarea style={{...S.input,resize:'vertical',minHeight:120}} value={form.usos} onChange={e=>setForm(f=>({...f,usos:e.target.value}))} placeholder="Usos, propriedades e indicações..." onFocus={focus} onBlur={blur}/>
       </div>
       <label style={{ display:'flex', alignItems:'center', gap:12, cursor:'pointer' }}>
         <div style={{ position:'relative', width:44, height:24, borderRadius:12, backgroundColor:form.noQuintal?'#c8972b':'#e5e0d8', transition:'background 0.2s', flexShrink:0 }}
