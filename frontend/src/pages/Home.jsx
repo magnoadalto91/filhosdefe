@@ -36,13 +36,6 @@ export default function Home() {
             <p style={{ fontSize: 'clamp(14px,1.8vw,16px)', color: '#6b7280', lineHeight: 1.75, maxWidth: 420, margin: '0 0 28px' }}>
               Umbanda com amor e devoção. Conecte-se às entidades, aprenda sobre ervas sagradas e acompanhe nossas giras espirituais.
             </p>
-            <Link to="/aprenda"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '13px 32px', borderRadius: 4, fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', backgroundColor: '#c8972b', color: '#fff', textDecoration: 'none', transition: 'background 0.2s' }}
-              onMouseEnter={e => e.currentTarget.style.backgroundColor = '#a67a20'}
-              onMouseLeave={e => e.currentTarget.style.backgroundColor = '#c8972b'}
-            >
-              Comece aqui <ArrowRight size={16} />
-            </Link>
           </div>
         </div>
       </div>
