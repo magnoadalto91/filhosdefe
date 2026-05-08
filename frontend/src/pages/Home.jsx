@@ -16,36 +16,34 @@ export default function Home() {
     <div style={{ fontFamily: "'Poppins', sans-serif" }}>
 
       {/* ───────────────── HERO ──────────────────────────── */}
-      <div style={{
-        position: 'relative',
-        minHeight: 'clamp(340px, 55vh, 580px)',
-        display: 'flex',
-        alignItems: 'center',
-        background: 'linear-gradient(135deg, #1c1c2e 0%, #2c2230 50%, #1c2c2e 100%)',
-        overflow: 'hidden',
-      }}>
-        {/* Decoração geométrica */}
-        <div style={{ position: 'absolute', top: '-20%', right: '-5%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(200,151,43,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '-30%', left: '10%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(200,151,43,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(200,151,43,0.06) 1px, transparent 0)', backgroundSize: '32px 32px', pointerEvents: 'none' }} />
+      <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e5e0d8' }}>
+        <div className="hero-inner" style={{ maxWidth: 1200, margin: '0 auto', padding: 'clamp(40px,7vw,72px) 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 48 }}>
+          <style>{`@media(min-width:768px){.hero-inner{justify-content:space-between!important;}}.hero-logo{width:clamp(160px,28vw,260px);flex-shrink:0;}`}</style>
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 1200, margin: '0 auto', padding: 'clamp(48px, 8vw, 80px) 24px', width: '100%' }}>
-          <span style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '3px', color: '#c8972b', backgroundColor: 'rgba(200,151,43,0.15)', padding: '5px 16px', borderRadius: 20, marginBottom: 20 }}>
-            Bem-vindo ao Terreiro
-          </span>
-          <h1 style={{ fontSize: 'clamp(28px, 5vw, 52px)', fontWeight: 800, color: '#ffffff', lineHeight: 1.15, maxWidth: 600, marginBottom: 18, margin: '0 0 18px' }}>
-            A Umbanda: uma<br/>religião de amor e paz
-          </h1>
-          <p style={{ fontSize: 'clamp(14px, 2vw, 16px)', color: 'rgba(255,255,255,0.75)', maxWidth: 480, lineHeight: 1.75, marginBottom: 32 }}>
-            Conecte-se às entidades, aprenda sobre ervas sagradas e acompanhe nossas giras espirituais.
-          </p>
-          <Link to="/aprenda"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '13px 32px', borderRadius: 4, fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', backgroundColor: '#c8972b', color: '#fff', textDecoration: 'none', transition: 'background 0.2s' }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#a67a20'}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#c8972b'}
-          >
-            Comece aqui <ArrowRight size={16} />
-          </Link>
+          {/* Logo */}
+          <img src="/logo.png" alt="Filhos de Fé" className="hero-logo"
+            style={{ display: 'block' }}/>
+
+          {/* Texto */}
+          <div style={{ textAlign: 'center' }} className="hero-text">
+            <style>{`@media(min-width:768px){.hero-text{text-align:left!important;}}`}</style>
+            <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '3px', color: '#c8972b', display: 'block', marginBottom: 14 }}>
+              Bem-vindo ao Terreiro
+            </span>
+            <h1 style={{ fontSize: 'clamp(26px,4vw,46px)', fontWeight: 800, color: '#2c2c3e', lineHeight: 1.2, margin: '0 0 16px' }}>
+              Filhos de Fé
+            </h1>
+            <p style={{ fontSize: 'clamp(14px,1.8vw,16px)', color: '#6b7280', lineHeight: 1.75, maxWidth: 420, margin: '0 0 28px' }}>
+              Umbanda com amor e devoção. Conecte-se às entidades, aprenda sobre ervas sagradas e acompanhe nossas giras espirituais.
+            </p>
+            <Link to="/aprenda"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '13px 32px', borderRadius: 4, fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', backgroundColor: '#c8972b', color: '#fff', textDecoration: 'none', transition: 'background 0.2s' }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = '#a67a20'}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = '#c8972b'}
+            >
+              Comece aqui <ArrowRight size={16} />
+            </Link>
+          </div>
         </div>
       </div>
 
