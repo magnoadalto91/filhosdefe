@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router'
-import { Users, Leaf, Music, Play } from 'lucide-react'
+import { Users, Leaf, Music, Play, ChevronDown } from 'lucide-react'
 import api from '../api/axios'
 import LoadingSpinner from '../components/LoadingSpinner'
 import Modal from '../components/Modal'
@@ -319,6 +319,62 @@ function MusicModal({ music, onClose }) {
   )
 }
 
+/* ── Music Groups (collapse por agregador) ───────────────── */
+function MusicGroup({ label, musicas, onSelect, defaultOpen }) {
+  const [open, setOpen] = useState(defaultOpen)
+  return (
+    <div style={{ marginBottom: 8, borderRadius: 8, overflow: 'hidden', border: '1px solid #e5e0d8', backgroundColor: '#fff' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer',
+          fontFamily: "'Poppins', sans-serif",
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#c8972b', flexShrink: 0 }}/>
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#2c2c3e' }}>{label}</span>
+          <span style={{ fontSize: 12, color: '#9ca3af', fontWeight: 500 }}>({musicas.length})</span>
+        </div>
+        <ChevronDown size={16} style={{ color: '#9ca3af', transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'rotate(0deg)', flexShrink: 0 }}/>
+      </button>
+
+      {open && (
+        <div style={{ borderTop: '1px solid #f0ece5', padding: '8px 8px 8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {musicas.map(m => <MusicCard key={m.id} music={m} onClick={() => onSelect(m)} />)}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function MusicGroups({ musicas, onSelect }) {
+  const groups = []
+  const grouped = {}
+
+  musicas.forEach(m => {
+    const key = m.agregador ? `${m.agregador.ordem ?? 0}_${m.agregador.id}` : '__sem__'
+    if (!grouped[key]) {
+      grouped[key] = { label: m.agregador ? m.agregador.nome : 'Outros', musicas: [], ordem: m.agregador?.ordem ?? 9999 }
+      groups.push(key)
+    }
+    grouped[key].musicas.push(m)
+  })
+
+  groups.sort((a, b) => grouped[a].ordem - grouped[b].ordem)
+
+  return (
+    <div>
+      {groups.map((key, i) => (
+        <MusicGroup key={key} label={grouped[key].label} musicas={grouped[key].musicas} onSelect={onSelect} defaultOpen={i === 0} />
+      ))}
+    </div>
+  )
+}
+
 /* ── Empty State ─────────────────────────────────────────── */
 function EmptyState({ icon: Icon, message }) {
   return (
@@ -439,14 +495,8 @@ export default function Aprenda() {
 
             {tab === 'musicas' && (
               data.musicas.length === 0
-                ? <EmptyState icon={Music} message="Nenhuma musica cadastrada." />
-                : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {data.musicas.map((m) => (
-                      <MusicCard key={m.id} music={m} onClick={() => setSelectedMusic(m)} />
-                    ))}
-                  </div>
-                )
+                ? <EmptyState icon={Music} message="Nenhuma música cadastrada." />
+                : <MusicGroups musicas={data.musicas} onSelect={setSelectedMusic} />
             )}
           </>
         )}

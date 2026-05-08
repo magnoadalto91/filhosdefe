@@ -2,13 +2,14 @@ import { useState } from 'react'
 import { NavLink, useNavigate, Link } from 'react-router'
 import {
   LayoutDashboard, Music, Leaf, Users, Calendar,
-  ListChecks, LogOut, Menu, X, Star, Globe,
+  ListChecks, LogOut, Menu, X, Star, Globe, Layers,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
 const NAV = [
   { to: '/admin',           label: 'Dashboard',  Icon: LayoutDashboard, exact: true },
-  { to: '/admin/musicas',   label: 'Músicas',    Icon: Music },
+  { to: '/admin/musicas',     label: 'Músicas',    Icon: Music },
+  { to: '/admin/agregadores', label: 'Agregadores', Icon: Layers },
   { to: '/admin/ervas',     label: 'Ervas',      Icon: Leaf },
   { to: '/admin/entidades', label: 'Orixás / Entidades', Icon: Users },
   { to: '/admin/giras',     label: 'Giras',      Icon: Calendar },

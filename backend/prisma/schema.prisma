@@ -22,15 +22,26 @@ model User {
   createdAt DateTime @default(now())
 }
 
+model Agregador {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  ordem     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  musicas   Musica[]
+}
+
 model Musica {
-  id         Int              @id @default(autoincrement())
-  titulo     String
-  letra      String
-  youtubeUrl String?
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
-  entidades  EntidadeMusica[]
-  giras      GiraMusica[]
+  id          Int              @id @default(autoincrement())
+  titulo      String
+  letra       String
+  youtubeUrl  String?
+  agregadorId Int?
+  agregador   Agregador?       @relation(fields: [agregadorId], references: [id], onDelete: SetNull)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  entidades   EntidadeMusica[]
+  giras       GiraMusica[]
 }
 
 model Erva {
