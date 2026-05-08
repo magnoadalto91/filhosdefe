@@ -16,27 +16,37 @@ export default function Home() {
     <div style={{ fontFamily: "'Poppins', sans-serif" }}>
 
       {/* ───────────────── HERO ──────────────────────────── */}
-      <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e5e0d8' }}>
-        <div className="hero-inner" style={{ maxWidth: 1200, margin: '0 auto', padding: 'clamp(40px,7vw,72px) 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 48 }}>
-          <style>{`@media(min-width:768px){.hero-inner{justify-content:space-between!important;}}.hero-logo{width:clamp(160px,28vw,260px);flex-shrink:0;}`}</style>
+      <div style={{ position: 'relative', minHeight: 'clamp(280px, 42vh, 440px)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+        {/* Imagem de fundo */}
+        <img src="/fundo.png" alt="" aria-hidden="true"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}/>
+        {/* Overlay branco translúcido */}
+        <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.50)' }}/>
 
-          {/* Logo */}
-          <img src="/logo.png" alt="Filhos de Fé" className="hero-logo"
-            style={{ display: 'block' }}/>
-
-          {/* Texto */}
-          <div style={{ textAlign: 'center' }} className="hero-text">
-            <style>{`@media(min-width:768px){.hero-text{text-align:left!important;}}`}</style>
-            <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '3px', color: '#c8972b', display: 'block', marginBottom: 14 }}>
-              Bem-vindo ao Terreiro
-            </span>
-            <h1 style={{ fontSize: 'clamp(26px,4vw,46px)', fontWeight: 800, color: '#2c2c3e', lineHeight: 1.2, margin: '0 0 16px' }}>
-              Filhos de Fé
-            </h1>
-            <p style={{ fontSize: 'clamp(14px,1.8vw,16px)', color: '#6b7280', lineHeight: 1.75, maxWidth: 420, margin: '0 0 28px' }}>
-              Umbanda com amor e devoção. Conecte-se às entidades, aprenda sobre ervas sagradas e acompanhe nossas giras espirituais.
-            </p>
-          </div>
+        {/* Caixa de texto com borda dourada arredondada */}
+        <div style={{
+          position: 'relative', zIndex: 1,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
+          padding: 'clamp(20px,4vw,36px) clamp(24px,6vw,52px)',
+          margin: '20px 24px',
+          border: '2px solid #c8972b',
+          borderRadius: 24,
+          backgroundColor: 'rgba(255,255,255,0.78)',
+          backdropFilter: 'blur(6px)',
+          boxShadow: '0 0 0 5px rgba(200,151,43,0.14), 0 8px 32px rgba(0,0,0,0.1)',
+          maxWidth: 440,
+        }}>
+          <img src="/logo.png" alt="Filhos de Fé"
+            style={{ width: 'clamp(64px,14vw,96px)', height: 'auto', marginBottom: 14 }}/>
+          <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '3px', color: '#c8972b', marginBottom: 8, display: 'block' }}>
+            Bem-vindo ao Terreiro
+          </span>
+          <h1 style={{ fontSize: 'clamp(22px,4vw,34px)', fontWeight: 800, color: '#2c2c3e', lineHeight: 1.2, margin: '0 0 8px' }}>
+            Filhos de Fé
+          </h1>
+          <p style={{ fontSize: 'clamp(12px,1.8vw,14px)', color: '#6b7280', lineHeight: 1.7, margin: 0 }}>
+            Umbanda com amor e devoção
+          </p>
         </div>
       </div>
 
