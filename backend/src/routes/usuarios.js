@@ -10,7 +10,7 @@ const prisma = new PrismaClient()
 router.get('/', authenticate, requireAdmin, async (req, res) => {
   try {
     const users = await prisma.user.findMany({
-      select: { id: true, email: true, role: true, createdAt: true },
+      select: { id: true, email: true, nome: true, role: true, createdAt: true },
       orderBy: { createdAt: 'asc' },
     })
     res.json(users)
@@ -21,15 +21,15 @@ router.get('/', authenticate, requireAdmin, async (req, res) => {
 
 // POST / — criar usuário (admin)
 router.post('/', authenticate, requireAdmin, async (req, res) => {
-  const { email, password, role = 'USER' } = req.body
+  const { email, password, nome, role = 'USER' } = req.body
   if (!email || !password) return res.status(400).json({ error: 'email e password são obrigatórios.' })
   if (password.length < 6) return res.status(400).json({ error: 'Senha deve ter ao menos 6 caracteres.' })
   if (!['ADMIN', 'USER'].includes(role)) return res.status(400).json({ error: 'Role inválida.' })
   try {
     const hashed = await bcrypt.hash(password, 10)
     const user = await prisma.user.create({
-      data: { email, password: hashed, role },
-      select: { id: true, email: true, role: true, createdAt: true },
+      data: { email, password: hashed, nome: nome?.trim() || null, role },
+      select: { id: true, email: true, nome: true, role: true, createdAt: true },
     })
     res.status(201).json(user)
   } catch (err) {

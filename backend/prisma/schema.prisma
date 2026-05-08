@@ -16,6 +16,7 @@ enum Role {
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
+  nome      String?
   password  String
   role      Role     @default(USER)
   createdAt DateTime @default(now())

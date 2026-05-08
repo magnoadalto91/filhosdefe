@@ -27,7 +27,7 @@ function UserMenu() {
       >
         <User size={15} style={{ color: '#c8972b' }} />
         <span style={{ maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {user?.email?.split('@')[0]}
+          {user?.nome || user?.email?.split('@')[0]}
         </span>
         <ChevronDown size={13} style={{ color: '#9ca3af', transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'rotate(0)' }} />
       </button>

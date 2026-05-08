@@ -17,13 +17,19 @@ const S = {
 const focus = e => e.currentTarget.style.borderColor = '#c8972b'
 const blur  = e => e.currentTarget.style.borderColor = '#e5e0d8'
 
-const emptyForm = { email:'', password:'', role:'USER' }
+const emptyForm = { nome:'', email:'', password:'', role:'USER' }
 
 function CreateForm({ form, setForm, error }) {
   const [showPass, setShowPass] = useState(false)
   return (
     <div>
       {error && <div style={S.error}><AlertCircle size={15}/>{error}</div>}
+      <div style={{ marginBottom:16 }}>
+        <label style={S.label}>Nome *</label>
+        <input type="text" style={S.input} value={form.nome}
+          onChange={e=>setForm(f=>({...f,nome:e.target.value}))}
+          placeholder="Nome completo" onFocus={focus} onBlur={blur}/>
+      </div>
       <div style={{ marginBottom:16 }}>
         <label style={S.label}>E-mail *</label>
         <input type="email" style={S.input} value={form.email}
@@ -84,6 +90,7 @@ export default function AdminUsuarios() {
   const openCreate = () => { setForm(emptyForm); setFormError(''); setModalOpen(true) }
 
   const handleCreate = async () => {
+    if (!form.nome.trim()) { setFormError('Nome é obrigatório.'); return }
     if (!form.email.trim()) { setFormError('E-mail é obrigatório.'); return }
     if (form.password.length < 6) { setFormError('Senha deve ter ao menos 6 caracteres.'); return }
     setSaving(true); setFormError('')
@@ -178,7 +185,10 @@ export default function AdminUsuarios() {
                         <div style={{ width:34, height:34, borderRadius:'50%', backgroundColor:'#f8f5f0', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                           {u.role==='ADMIN'?<Shield size={15} color="#c8972b"/>:<User size={15} color="#9ca3af"/>}
                         </div>
-                        <span style={{ fontSize:14, fontWeight:500, color:'#2c2c3e' }}>{u.email}</span>
+                        <div>
+                          {u.nome && <div style={{ fontSize:14, fontWeight:600, color:'#2c2c3e' }}>{u.nome}</div>}
+                          <div style={{ fontSize:12, color:'#9ca3af' }}>{u.email}</div>
+                        </div>
                       </div>
                     </td>
                     <td style={{ padding:'14px 16px' }}><span style={badge(u.role)}>{u.role==='ADMIN'?<Shield size={10}/>:<User size={10}/>}{u.role}</span></td>
@@ -211,7 +221,8 @@ export default function AdminUsuarios() {
               <div key={u.id} style={{ backgroundColor:'#fff', borderRadius:10, border:'1px solid #e5e0d8', padding:'16px', boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }}>
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12 }}>
                   <div style={{ minWidth:0 }}>
-                    <div style={{ fontSize:14, fontWeight:600, color:'#2c2c3e', wordBreak:'break-all' }}>{u.email}</div>
+                    {u.nome && <div style={{ fontSize:14, fontWeight:600, color:'#2c2c3e' }}>{u.nome}</div>}
+                    <div style={{ fontSize:13, color: u.nome ? '#6b7280' : '#2c2c3e', wordBreak:'break-all' }}>{u.email}</div>
                     <div style={{ fontSize:12, color:'#9ca3af', marginTop:2 }}>Desde {fmt(u.createdAt)}</div>
                   </div>
                   <span style={{...badge(u.role), marginLeft:8, flexShrink:0}}>{u.role}</span>

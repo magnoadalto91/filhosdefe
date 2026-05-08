@@ -112,22 +112,25 @@ function TabEntrar({ onSwitchTab }) {
 
 /* ── Tab Cadastrar ───────────────────────────────────────── */
 function TabCadastrar({ onSwitchTab }) {
+  const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [focusNome, setFocusNome] = useState(false)
   const [focusEmail, setFocusEmail] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    if (!nome.trim()) return setError('Nome é obrigatório.')
     if (password !== confirm) return setError('As senhas não coincidem.')
     if (password.length < 6) return setError('A senha deve ter pelo menos 6 caracteres.')
     setLoading(true)
     try {
-      await api.post('/auth/register', { email, password })
+      await api.post('/auth/register', { nome: nome.trim(), email, password })
       setSuccess(true)
     } catch (err) {
       setError(err.response?.data?.error || 'Erro ao criar conta. Tente novamente.')
@@ -157,6 +160,14 @@ function TabCadastrar({ onSwitchTab }) {
   return (
     <form onSubmit={handleSubmit}>
       {error && <div style={S.error}>{error}</div>}
+      <div style={S.inputWrap}>
+        <label style={S.label}>Nome *</label>
+        <input type="text" value={nome} onChange={e => setNome(e.target.value)}
+          placeholder="Seu nome completo" required autoComplete="name"
+          onFocus={() => setFocusNome(true)} onBlur={() => setFocusNome(false)}
+          style={S.input(focusNome)}
+        />
+      </div>
       <div style={S.inputWrap}>
         <label style={S.label}>E-mail</label>
         <input type="email" value={email} onChange={e => setEmail(e.target.value)}

@@ -8,7 +8,7 @@ export default function PrivateRoute({ children, requireAdmin = false }) {
 
   if (loading) return <LoadingSpinner fullScreen />
   if (!isAuthenticated) return <Navigate to="/login" state={{ from: location }} replace />
-  if (requireAdmin && !isAdmin) return <Navigate to="/" replace />
+  if (requireAdmin && !isAdmin) return <Navigate to="/login" replace />
 
   return children
 }
