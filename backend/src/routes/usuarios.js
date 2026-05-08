@@ -38,6 +38,37 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
   }
 })
 
+// PUT /:id — editar usuário (admin)
+router.put('/:id', authenticate, requireAdmin, async (req, res) => {
+  const { id } = req.params
+  const { nome, email, password, role } = req.body
+
+  if (role && !['ADMIN', 'USER'].includes(role)) {
+    return res.status(400).json({ error: 'Role inválida.' })
+  }
+  if (password && password.length < 6) {
+    return res.status(400).json({ error: 'Senha deve ter ao menos 6 caracteres.' })
+  }
+
+  try {
+    const data = {}
+    if (nome  !== undefined) data.nome  = nome?.trim() || null
+    if (email !== undefined) data.email = email
+    if (role  !== undefined) data.role  = role
+    if (password)            data.password = await bcrypt.hash(password, 10)
+
+    const user = await prisma.user.update({
+      where: { id: Number(id) },
+      data,
+      select: { id: true, email: true, nome: true, role: true, createdAt: true },
+    })
+    res.json(user)
+  } catch (err) {
+    if (err.code === 'P2002') return res.status(400).json({ error: 'E-mail já cadastrado.' })
+    res.status(404).json({ error: 'Usuário não encontrado.' })
+  }
+})
+
 // PATCH /:id/role — alterar role (admin)
 router.patch('/:id/role', authenticate, requireAdmin, async (req, res) => {
   const { id } = req.params
