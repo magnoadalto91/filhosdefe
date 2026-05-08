@@ -210,7 +210,7 @@ function EntityModal({ entity, onClose }) {
 
       {entity.fotoUrl && (
         <img src={entity.fotoUrl} alt={entity.nome}
-          style={{ width: '100%', borderRadius: 6, marginBottom: 20, objectFit: 'cover', maxHeight: 220, display: 'block' }}/>
+          style={{ width: '100%', height: 'auto', borderRadius: 6, marginBottom: 20, display: 'block' }}/>
       )}
 
       {/* Nome */}
