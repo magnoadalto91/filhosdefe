@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router'
 import { Users, Leaf, Music, Play } from 'lucide-react'
 import api from '../api/axios'
 import LoadingSpinner from '../components/LoadingSpinner'
@@ -330,7 +331,12 @@ function EmptyState({ icon: Icon, message }) {
 
 /* ── Main Page ───────────────────────────────────────────── */
 export default function Aprenda() {
-  const [tab, setTab] = useState('entidades')
+  const location = useLocation()
+  const [tab, setTab] = useState(() => {
+    const p = new URLSearchParams(location.search)
+    const t = p.get('tab')
+    return ['entidades','ervas','musicas'].includes(t) ? t : 'entidades'
+  })
   const [data, setData] = useState({ entidades: [], ervas: [], musicas: [] })
   const [loading, setLoading] = useState({ entidades: false, ervas: false, musicas: false })
   const [loaded, setLoaded] = useState({ entidades: false, ervas: false, musicas: false })

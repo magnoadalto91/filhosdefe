@@ -3,17 +3,17 @@ import { ArrowRight } from 'lucide-react'
 
 /* ─── Participate cards ──────────────────────────────────── */
 const CARDS = [
-  { title: 'Orixás / Entidades', to: '/aprenda', bg: '#2c2c3e' },
-  { title: 'Ervas Sagradas',     to: '/aprenda', bg: '#1a3a2a' },
-  { title: 'Pontos Cantados',    to: '/aprenda', bg: '#3a2a1a' },
-  { title: 'Giras',              to: '/calendario', bg: '#1a1a3a' },
+  { title: 'Orixás / Entidades', to: '/aprenda?tab=entidades', bg: '#2c2c3e' },
+  { title: 'Ervas Sagradas',     to: '/aprenda?tab=ervas',     bg: '#1a3a2a' },
+  { title: 'Pontos Cantados',    to: '/aprenda?tab=musicas',   bg: '#3a2a1a' },
+  { title: 'Giras',              to: '/calendario',             bg: '#1a1a3a' },
 ]
 
 /* ─── Main ───────────────────────────────────────────────── */
 export default function Home() {
 
   return (
-    <div style={{ fontFamily: "'Poppins', sans-serif" }}>
+    <div style={{ fontFamily: "'Poppins', sans-serif", minHeight: '100dvh', display: 'flex', flexDirection: 'column', backgroundColor: '#1a1a3a' }}>
 
       {/* ───────────────── HERO ──────────────────────────── */}
       <div style={{ position: 'relative', minHeight: 'clamp(280px, 42vh, 440px)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
