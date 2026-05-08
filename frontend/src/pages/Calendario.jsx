@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router'
 import { ChevronLeft, ChevronRight, Calendar, Users, Music, ListChecks, FileText } from 'lucide-react'
 import api from '../api/axios'
 import Modal from '../components/Modal'
@@ -42,6 +43,7 @@ const SecLabel = ({ Icon, text }) => (
 
 /* ── Gira Detail Modal ───────────────────────────────────── */
 function GiraDetailModal({ giraId, onClose }) {
+  const navigate  = useNavigate()
   const [gira,    setGira]    = useState(null)
   const [loading, setLoading] = useState(false)
 
@@ -61,6 +63,21 @@ function GiraDetailModal({ giraId, onClose }) {
   const dateStr = gira
     ? new Date(gira.data).toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
     : ''
+
+  const goTo = (tab, stateKey, obj) => {
+    onClose()
+    navigate('/aprenda', { state: { tab, [stateKey]: obj } })
+  }
+
+  const itemBtn = (onClick) => ({
+    display:'flex', alignItems:'center', gap:10,
+    padding:'8px 12px', borderRadius:6,
+    backgroundColor:'#f8f5f0', border:'1px solid #e5e0d8',
+    cursor: onClick ? 'pointer' : 'default',
+    width:'100%', textAlign:'left',
+    transition: onClick ? 'border-color 0.15s, background-color 0.15s' : 'none',
+    background:'none',
+  })
 
   return (
     <Modal isOpen={!!giraId} onClose={onClose} title={gira?.titulo || '...'}>
@@ -85,36 +102,48 @@ function GiraDetailModal({ giraId, onClose }) {
             </div>
           )}
 
-          {/* Orixás / Entidades */}
+          {/* Orixás / Entidades — clicável */}
           {entidades.length > 0 && (
             <div>
-              <SecLabel Icon={Users} text="Orixás / Entidades"/>
+              <SecLabel Icon={Users} text="Orixás / Entidades — toque para saber mais"/>
               <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
                 {entidades.map(e => (
-                  <span key={e.id} style={{ padding:'4px 12px', borderRadius:20, fontSize:13, backgroundColor:'rgba(200,151,43,0.1)', color:'#c8972b', border:'1px solid rgba(200,151,43,0.25)', fontWeight:500 }}>
+                  <button
+                    key={e.id}
+                    onClick={() => goTo('entidades', 'openEntity', e)}
+                    style={{ padding:'6px 14px', borderRadius:20, fontSize:13, backgroundColor:'rgba(200,151,43,0.1)', color:'#c8972b', border:'1px solid rgba(200,151,43,0.3)', fontWeight:600, cursor:'pointer', fontFamily:"'Poppins',sans-serif", transition:'all 0.15s' }}
+                    onMouseEnter={ev => { ev.currentTarget.style.backgroundColor='#c8972b'; ev.currentTarget.style.color='#fff' }}
+                    onMouseLeave={ev => { ev.currentTarget.style.backgroundColor='rgba(200,151,43,0.1)'; ev.currentTarget.style.color='#c8972b' }}
+                  >
                     {e.nome}
-                  </span>
+                  </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Músicas */}
+          {/* Músicas — clicável */}
           {musicas.length > 0 && (
             <div>
-              <SecLabel Icon={Music} text="Pontos Cantados"/>
+              <SecLabel Icon={Music} text="Pontos Cantados — toque para ver a letra"/>
               <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
                 {musicas.map((m, i) => (
-                  <div key={m.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 12px', borderRadius:6, backgroundColor:'#f8f5f0', border:'1px solid #e5e0d8' }}>
+                  <button
+                    key={m.id}
+                    onClick={() => goTo('musicas', 'openMusic', m)}
+                    style={{ ...itemBtn(true), border:'1px solid #e5e0d8' }}
+                    onMouseEnter={ev => { ev.currentTarget.style.borderColor='#c8972b'; ev.currentTarget.style.backgroundColor='rgba(200,151,43,0.06)' }}
+                    onMouseLeave={ev => { ev.currentTarget.style.borderColor='#e5e0d8'; ev.currentTarget.style.backgroundColor='#f8f5f0' }}
+                  >
                     <span style={{ fontSize:11, fontWeight:700, color:'#c8972b', minWidth:20, fontFamily:'monospace' }}>{String(i+1).padStart(2,'0')}.</span>
                     <span style={{ fontSize:14, color:'#2c2c3e', fontWeight:500 }}>{m.titulo}</span>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Rotinas */}
+          {/* Rotinas — apenas informativo */}
           {rotinas.length > 0 && (
             <div>
               <SecLabel Icon={ListChecks} text="Rotinas"/>
