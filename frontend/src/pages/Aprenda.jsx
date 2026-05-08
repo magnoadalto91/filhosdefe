@@ -355,7 +355,7 @@ function MusicGroup({ label, musicas, onSelect, defaultOpen, forceOpen }) {
 function MusicGroups({ musicas, onSelect, search }) {
   const q = search.toLowerCase()
   const filtered = q
-    ? musicas.filter(m => m.titulo?.toLowerCase().includes(q))
+    ? musicas.filter(m => m.titulo?.toLowerCase().includes(q) || m.agregador?.nome?.toLowerCase().includes(q))
     : musicas
 
   const groups = []
