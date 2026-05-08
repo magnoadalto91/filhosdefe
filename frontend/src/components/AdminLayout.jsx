@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { NavLink, useNavigate } from 'react-router'
+import { NavLink, useNavigate, Link } from 'react-router'
 import {
   LayoutDashboard, Music, Leaf, Users, Calendar,
-  ListChecks, LogOut, Menu, X, Star,
+  ListChecks, LogOut, Menu, X, Star, Globe,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -74,8 +74,19 @@ function Sidebar({ onClose }) {
         </ul>
       </nav>
 
+      {/* Ver site público */}
+      <div style={{ padding: '8px 12px 0' }}>
+        <Link to="/"
+          style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 18px', borderRadius: 8, fontSize: 15, fontWeight: 600, textDecoration: 'none', color: '#6b7280', transition: 'all 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(200,151,43,0.08)'; e.currentTarget.style.color = '#c8972b' }}
+          onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#6b7280' }}
+        >
+          <Globe size={22} /> Ver site público
+        </Link>
+      </div>
+
       {/* Logout */}
-      <div style={{ padding: '16px 12px', borderTop: '1px solid #e5e0d8' }}>
+      <div style={{ padding: '8px 12px 16px', borderTop: '1px solid #e5e0d8', marginTop: 8 }}>
         <button
           onClick={doLogout}
           style={{ display: 'flex', alignItems: 'center', gap: 14, width: '100%', padding: '14px 18px', borderRadius: 8, border: '1px solid #fecaca', fontSize: 15, fontWeight: 600, color: '#dc2626', background: 'transparent', cursor: 'pointer', fontFamily: "'Poppins', sans-serif", transition: 'all 0.15s' }}

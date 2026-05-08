@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { LogIn, User, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react'
+import { LogIn, User, LogOut, LayoutDashboard, ChevronDown, Shield } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
 function UserMenu() {
@@ -61,7 +61,7 @@ function UserMenu() {
 }
 
 export default function Layout({ children }) {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isAdmin } = useAuth()
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', background: '#ffffff', fontFamily: "'Poppins', sans-serif" }}>
@@ -76,6 +76,16 @@ export default function Layout({ children }) {
           </Link>
 
           {/* Ação */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {isAdmin && (
+            <Link to="/admin"
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 4, fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#c8972b', border: '1px solid rgba(200,151,43,0.4)', textDecoration: 'none', transition: 'all 0.2s', backgroundColor: 'rgba(200,151,43,0.06)' }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#c8972b'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#c8972b' }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(200,151,43,0.06)'; e.currentTarget.style.color = '#c8972b'; e.currentTarget.style.borderColor = 'rgba(200,151,43,0.4)' }}
+            >
+              <Shield size={13} /> Admin
+            </Link>
+          )}
           {isAuthenticated ? <UserMenu /> : (
             <Link to="/login"
               style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 20px', borderRadius: 4, fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', backgroundColor: '#c8972b', color: '#fff', textDecoration: 'none', transition: 'background 0.2s' }}
@@ -85,6 +95,7 @@ export default function Layout({ children }) {
               <LogIn size={15} /> Entrar
             </Link>
           )}
+          </div>
         </div>
       </header>
 
