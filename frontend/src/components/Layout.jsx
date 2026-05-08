@@ -71,12 +71,8 @@ export default function Layout({ children }) {
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
 
           {/* Logo */}
-          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <img src="/logo.png" alt="Filhos de Fé" style={{ width: 36, height: 36, objectFit: 'contain' }}/>
-            <div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: '#c8972b', letterSpacing: '-0.5px', lineHeight: 1.1 }}>Filhos de Fé</div>
-              <div style={{ fontSize: 10, color: '#9ca3af', lineHeight: 1 }}>Umbanda com amor e devoção</div>
-            </div>
+          <Link to="/" style={{ textDecoration: 'none' }}>
+            <span style={{ fontSize: 18, fontWeight: 800, color: '#c8972b', letterSpacing: '1px', textTransform: 'uppercase' }}>Filhos de Fé</span>
           </Link>
 
           {/* Ação */}
