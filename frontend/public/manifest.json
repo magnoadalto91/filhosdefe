@@ -1,14 +1,14 @@
 {
   "name": "Filhos de Fé",
-  "short_name": "FilhosFé",
+  "short_name": "Filhos de Fé",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f8f5f0",
   "theme_color": "#c8972b",
   "icons": [
     {
-      "src": "/logo.png",
-      "sizes": "any",
+      "src": "/icon.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
