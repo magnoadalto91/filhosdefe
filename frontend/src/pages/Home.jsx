@@ -18,7 +18,7 @@ export default function Home() {
       {/* ───────────────── HERO ──────────────────────────── */}
       <div style={{ position: 'relative', minHeight: 'clamp(280px, 42vh, 440px)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
         {/* Imagem de fundo */}
-        <img src="/fundo.png" alt="" aria-hidden="true"
+        <img src="/fundo.webp" alt="" aria-hidden="true" fetchPriority="high"
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}/>
         {/* Overlay branco translúcido */}
         <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.50)' }}/>
@@ -36,7 +36,7 @@ export default function Home() {
           boxShadow: '0 0 0 5px rgba(200,151,43,0.14), 0 8px 32px rgba(0,0,0,0.1)',
           maxWidth: 440,
         }}>
-          <img src="/logo.png" alt="Filhos de Fé"
+          <img src="/logo.png" alt="Filhos de Fé" fetchPriority="high"
             style={{ width: 'clamp(64px,14vw,96px)', height: 'auto', marginBottom: 14 }}/>
           <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '3px', color: '#c8972b', marginBottom: 8, display: 'block' }}>
             Bem-vindo ao Terreiro
