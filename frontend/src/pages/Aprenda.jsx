@@ -208,15 +208,7 @@ function MusicCard({ music, onClick }) {
             {music.letra.slice(0, 100)}...
           </div>
         )}
-        {music.youtubeUrl && (
-          <div style={{ fontSize: '12px', color: '#c8972b', marginTop: '4px', fontWeight: 600 }}>
-            Ver no YouTube
-          </div>
-        )}
       </div>
-      {music.youtubeUrl && (
-        <Play size={16} style={{ color: '#c8972b', flexShrink: 0, marginTop: '2px' }} />
-      )}
     </button>
   )
 }
@@ -293,41 +285,6 @@ function MusicModal({ music, onClose }) {
   if (!music) return null
   return (
     <Modal isOpen={!!music} onClose={onClose} title={music.titulo}>
-      {music.youtubeUrl && (
-        <a
-          href={music.youtubeUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '10px 18px',
-            borderRadius: '4px',
-            marginBottom: '16px',
-            fontSize: '13px',
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-            textDecoration: 'none',
-            color: '#c8972b',
-            border: '2px solid #c8972b',
-            transition: 'background-color 0.15s, color 0.15s',
-            fontFamily: "'Poppins', sans-serif",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#c8972b'
-            e.currentTarget.style.color = '#ffffff'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.color = '#c8972b'
-          }}
-        >
-          <Play size={15} />
-          Ouvir no YouTube
-        </a>
-      )}
       {music.letra ? (
         <pre style={{ fontSize: '14px', lineHeight: 1.7, color: '#2c2c3e', whiteSpace: 'pre-wrap', fontFamily: "'Poppins', sans-serif", margin: 0 }}>
           {music.letra}

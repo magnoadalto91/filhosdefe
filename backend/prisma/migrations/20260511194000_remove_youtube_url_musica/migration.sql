@@ -1,0 +1,1 @@
+ALTER TABLE "Musica" DROP COLUMN IF EXISTS "youtubeUrl";

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Music, Plus, Search, Pencil, Trash2, ExternalLink, AlertCircle, Youtube, Save } from 'lucide-react'
+import { Music, Search, Pencil, Trash2, AlertCircle, Youtube, Save } from 'lucide-react'
 import api from '../../api/axios'
 import Modal from '../../components/Modal'
 import ConfirmModal from '../../components/ConfirmModal'
@@ -15,7 +15,7 @@ const S = {
   error:        { display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderRadius:6, backgroundColor:'#fef2f2', border:'1px solid #fecaca', fontSize:13, color:'#dc2626', marginBottom:16 },
 }
 
-const emptyForm = { titulo:'', letra:'', youtubeUrl:'', agregadorId:'' }
+const emptyForm = { titulo:'', letra:'', agregadorId:'' }
 
 function MusicForm({ form, setForm, error, agregadores }) {
   const focus = e => e.currentTarget.style.borderColor = '#c8972b'
@@ -50,12 +50,6 @@ function MusicForm({ form, setForm, error, agregadores }) {
           placeholder="Letra da música..." onFocus={focus} onBlur={blur}/>
       </div>
 
-      <div>
-        <label style={S.label}>URL do YouTube</label>
-        <input style={S.input} value={form.youtubeUrl}
-          onChange={e=>setForm(f=>({...f,youtubeUrl:e.target.value}))}
-          placeholder="https://youtube.com/..." onFocus={focus} onBlur={blur}/>
-      </div>
     </div>
   )
 }
@@ -100,7 +94,7 @@ export default function AdminMusicas() {
   const openAdd  = () => { setEditTarget(null); setForm(emptyForm); setFormError(''); setModalOpen(true) }
   const openEdit = m  => {
     setEditTarget(m)
-    setForm({ titulo: m.titulo||'', letra: m.letra||'', youtubeUrl: m.youtubeUrl||'', agregadorId: m.agregadorId ? String(m.agregadorId) : '' })
+    setForm({ titulo: m.titulo||'', letra: m.letra||'', agregadorId: m.agregadorId ? String(m.agregadorId) : '' })
     setFormError('')
     setModalOpen(true)
   }
@@ -109,7 +103,7 @@ export default function AdminMusicas() {
     if (!form.titulo.trim()) { setFormError('Título é obrigatório.'); return }
     setSaving(true); setFormError('')
     try {
-      const payload = { titulo: form.titulo, letra: form.letra, youtubeUrl: form.youtubeUrl, agregadorId: form.agregadorId || null }
+      const payload = { titulo: form.titulo, letra: form.letra, agregadorId: form.agregadorId || null }
       editTarget ? await api.put(`/musicas/${editTarget.id}`, payload) : await api.post('/musicas', payload)
       setModalOpen(false); load()
     } catch (err) { setFormError(err.response?.data?.error || 'Erro ao salvar.') }
@@ -199,14 +193,6 @@ export default function AdminMusicas() {
                 </div>
               </div>
               <div style={{ display:'flex', alignItems:'center', gap:4, flexShrink:0 }}>
-                {m.youtubeUrl && (
-                  <a href={m.youtubeUrl} target="_blank" rel="noopener noreferrer"
-                    style={{ display:'flex', padding:8, borderRadius:6, color:'#9ca3af', transition:'color 0.15s' }}
-                    onMouseEnter={e=>e.currentTarget.style.color='#dc2626'}
-                    onMouseLeave={e=>e.currentTarget.style.color='#9ca3af'}>
-                    <ExternalLink size={16}/>
-                  </a>
-                )}
                 <button onClick={() => openEdit(m)}
                   style={{ display:'flex', padding:8, borderRadius:6, background:'none', border:'none', cursor:'pointer', color:'#9ca3af', transition:'color 0.15s' }}
                   onMouseEnter={e=>e.currentTarget.style.color='#2c2c3e'}
