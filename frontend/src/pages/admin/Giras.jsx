@@ -103,7 +103,10 @@ function GiraForm({ form, setForm, error, assoc, setAssoc, allEntidades, allMusi
 function GiraCard({ gira, onEdit, onDelete, onStatusChange }) {
   const meta    = STATUS_META[gira.status] || STATUS_META.AGUARDANDO
   const concluida = gira.status === 'CONCLUIDA'
-  const dateStr = new Date(gira.data).toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'})
+  // parseDate sem fuso: evita que meia-noite UTC vire dia anterior no Brasil
+  const d = new Date(gira.data)
+  const dateLocal = new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+  const dateStr = dateLocal.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'})
 
   return (
     <div style={{ backgroundColor:'#fff', borderRadius:10, border:'1px solid #e5e0d8', padding:'18px 20px', marginBottom:10, boxShadow:'0 2px 8px rgba(0,0,0,0.05)', opacity: concluida ? 0.8 : 1 }}>
@@ -223,7 +226,7 @@ export default function AdminGiras() {
 
   const openEdit = async (g, readOnly=false) => {
     setEditTarget(g); setViewOnly(readOnly)
-    setForm({ titulo:g.titulo||'', data:g.data?new Date(g.data).toISOString().split('T')[0]:'', descricao:g.descricao||'', instrucoes:g.instrucoes||'' })
+    setForm({ titulo:g.titulo||'', data:g.data?g.data.split('T')[0]:'', descricao:g.descricao||'', instrucoes:g.instrucoes||'' })
     setAssoc({ entidades:[], musicas:[], rotinas:[] })
     setFormError(''); setModalOpen(true)
     try {

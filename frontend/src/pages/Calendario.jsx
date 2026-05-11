@@ -4,6 +4,13 @@ import api from '../api/axios'
 import Modal from '../components/Modal'
 import LoadingSpinner from '../components/LoadingSpinner'
 
+// Converte ISO datetime para Date local sem aplicar offset de fuso horário
+// (evita que 2026-06-04T00:00:00Z vire 03/06 no Brasil UTC-3)
+function parseUTC(iso) {
+  const d = new Date(iso)
+  return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+}
+
 const DAYS_OF_WEEK = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 const MONTHS = [
   'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
@@ -22,7 +29,7 @@ function buildCalendarDays(year, month) {
 function girasByDay(giras, year, month) {
   const map = {}
   giras.forEach(g => {
-    const d = new Date(g.data)
+    const d = parseUTC(g.data)
     if (d.getFullYear() === year && d.getMonth() === month) {
       const day = d.getDate()
       if (!map[day]) map[day] = []
@@ -144,7 +151,7 @@ function GiraDetailModal({ giraId, onClose, onEntityClick, onMusicClick }) {
   const rotinas   = gira?.rotinas?.map(r => r.rotina).filter(Boolean)     || []
 
   const dateStr = gira
-    ? new Date(gira.data).toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
+    ? parseUTC(gira.data).toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
     : ''
 
   return (
@@ -249,7 +256,7 @@ function DayCell({ day, hasGira, isToday, onClick }) {
 /* ── Gira List Card ──────────────────────────────────────── */
 function GiraListCard({ gira, onClick }) {
   const [hovered, setHovered] = useState(false)
-  const date = new Date(gira.data)
+  const date = parseUTC(gira.data)
   return (
     <button onClick={onClick}
       onMouseEnter={()=>setHovered(true)} onMouseLeave={()=>setHovered(false)}
