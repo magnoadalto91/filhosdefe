@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { LogIn, User, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import PWAGuard from './PWAGuard'
 
 function UserMenu() {
   const { user, logout } = useAuth()
@@ -89,7 +90,9 @@ export default function Layout({ children }) {
       </header>
 
       <main style={{ flex: 1 }}>
-        {children}
+        <PWAGuard>
+          {children}
+        </PWAGuard>
       </main>
 
     </div>
