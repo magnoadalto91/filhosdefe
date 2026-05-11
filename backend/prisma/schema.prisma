@@ -13,6 +13,12 @@ enum Role {
   USER
 }
 
+enum StatusGira {
+  AGUARDANDO
+  EM_ANDAMENTO
+  CONCLUIDA
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
@@ -86,6 +92,7 @@ model Gira {
   titulo     String
   descricao  String?
   instrucoes String?
+  status     StatusGira     @default(AGUARDANDO)
   createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
   entidades  GiraEntidade[]

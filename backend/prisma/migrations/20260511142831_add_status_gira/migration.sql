@@ -1,0 +1,5 @@
+-- CreateEnum
+CREATE TYPE "StatusGira" AS ENUM ('AGUARDANDO', 'EM_ANDAMENTO', 'CONCLUIDA');
+
+-- AlterTable
+ALTER TABLE "Gira" ADD COLUMN     "status" "StatusGira" NOT NULL DEFAULT 'AGUARDANDO';

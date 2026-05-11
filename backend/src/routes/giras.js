@@ -105,6 +105,24 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
   }
 });
 
+// PATCH /api/giras/:id/status - admin only
+router.patch('/:id/status', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
+
+    const { status } = req.body;
+    if (!['AGUARDANDO', 'EM_ANDAMENTO', 'CONCLUIDA'].includes(status)) {
+      return res.status(400).json({ error: 'Status inválido.' });
+    }
+
+    const gira = await prisma.gira.update({ where: { id }, data: { status } });
+    return res.json(gira);
+  } catch {
+    return res.status(404).json({ error: 'Gira not found' });
+  }
+});
+
 // PUT /api/giras/:id - admin only
 router.put('/:id', authenticate, requireAdmin, async (req, res) => {
   try {
@@ -113,6 +131,10 @@ router.put('/:id', authenticate, requireAdmin, async (req, res) => {
 
     const existing = await prisma.gira.findUnique({ where: { id } });
     if (!existing) return res.status(404).json({ error: 'Gira not found' });
+
+    if (existing.status === 'CONCLUIDA') {
+      return res.status(400).json({ error: 'Giras concluídas não podem ser editadas.' });
+    }
 
     const { data, titulo, descricao, instrucoes, entidades, musicas, rotinas } = req.body;
     const updateData = {};
