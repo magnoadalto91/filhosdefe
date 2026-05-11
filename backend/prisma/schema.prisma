@@ -39,6 +39,27 @@ model PushSubscription {
   createdAt DateTime @default(now())
 }
 
+model Publicacao {
+  id        Int      @id @default(autoincrement())
+  titulo    String
+  conteudo  String
+  capaUrl   String?
+  publicado Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Documento {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  descricao String?
+  fileUrl   String
+  fileType  String
+  tamanho   Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model NotificacaoConfig {
   id           Int      @id @default(1)
   novaEntidade Boolean  @default(true)

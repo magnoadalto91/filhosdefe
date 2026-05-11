@@ -12,6 +12,8 @@ import rotinasRoutes from './src/routes/rotinas.js';
 import girasRoutes from './src/routes/giras.js';
 import pushRoutes from './src/routes/push.js';
 import notificacoesRoutes from './src/routes/notificacoes.js';
+import publicacoesRoutes from './src/routes/publicacoes.js';
+import documentosRoutes from './src/routes/documentos.js';
 import { startGirasReminderJob } from './src/jobs/girasReminder.js';
 
 const app = express();
@@ -38,6 +40,8 @@ app.use('/api/rotinas', rotinasRoutes);
 app.use('/api/giras', girasRoutes);
 app.use('/api/push', pushRoutes);
 app.use('/api/notificacoes', notificacoesRoutes);
+app.use('/api/publicacoes', publicacoesRoutes);
+app.use('/api/documentos', documentosRoutes);
 
 // 404 handler
 app.use((_req, res) => {

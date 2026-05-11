@@ -51,7 +51,7 @@ export default function Home() {
       </div>
 
       {/* ───────────────── CARDS ─────────────────────────── */}
-      <div className="participate-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', flex: 1, gridAutoRows: '1fr' }}>
+      <div className="participate-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gridAutoRows: '1fr' }}>
         <style>{`@media (min-width: 768px) { .participate-grid { grid-template-columns: repeat(4, 1fr) !important; } }`}</style>
         {CARDS.map(({ title, to, bg }) => (
           <Link key={title} to={to}
@@ -69,6 +69,21 @@ export default function Home() {
           </Link>
         ))}
       </div>
+
+      {/* ───────────────── ESTUDOS (largura total) ────────── */}
+      <Link to="/estudos"
+        style={{ position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', backgroundColor: '#1e2a1e', transition: 'filter 0.2s', minHeight: 100 }}
+        onMouseEnter={e => e.currentTarget.style.filter = 'brightness(1.15)'}
+        onMouseLeave={e => e.currentTarget.style.filter = 'brightness(1)'}
+      >
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(200,151,43,0.1) 0%, transparent 60%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: 24 }}>
+          <span style={{ fontSize: 18, fontWeight: 800, color: '#ffffff', lineHeight: 1.3, display: 'block', marginBottom: 12 }}>Estudos</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.4)', padding: '5px 14px', borderRadius: 2 }}>
+            Publicações e documentos <ArrowRight size={11} />
+          </span>
+        </div>
+      </Link>
 
 
     </div>

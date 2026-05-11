@@ -21,3 +21,16 @@ export async function uploadToCloudinary(buffer, folder = 'filhosdefe') {
     stream.end(webpBuffer);
   });
 }
+
+export async function uploadDocToCloudinary(buffer, originalname, folder = 'filhosdefe/documentos') {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder, resource_type: 'raw', use_filename: true, unique_filename: true, original_filename: originalname },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result.secure_url);
+      }
+    );
+    stream.end(buffer);
+  });
+}

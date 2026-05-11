@@ -7,6 +7,7 @@ import PrivateRoute from './components/PrivateRoute'
 import Home from './pages/Home'
 import Aprenda from './pages/Aprenda'
 import Calendario from './pages/Calendario'
+import Estudos from './pages/Estudos'
 import Login from './pages/Login'
 
 import Dashboard from './pages/admin/Dashboard'
@@ -18,6 +19,7 @@ import AdminRotinas from './pages/admin/Rotinas'
 import AdminUsuarios from './pages/admin/Usuarios'
 import AdminAgregadores from './pages/admin/Agregadores'
 import AdminNotificacoes from './pages/admin/Notificacoes'
+import AdminEstudos from './pages/admin/Estudos'
 
 /* Todas as páginas públicas exigem login */
 function PublicPage({ children }) {
@@ -49,6 +51,7 @@ export default function App() {
           <Route path="/" element={<PublicPage><Home /></PublicPage>} />
           <Route path="/aprenda" element={<PublicPage><Aprenda /></PublicPage>} />
           <Route path="/calendario" element={<PublicPage><Calendario /></PublicPage>} />
+          <Route path="/estudos" element={<PublicPage><Estudos /></PublicPage>} />
 
           {/* Rotas admin (exigem ADMIN) */}
           <Route path="/admin" element={<AdminPage><Dashboard /></AdminPage>} />
@@ -59,6 +62,7 @@ export default function App() {
           <Route path="/admin/rotinas" element={<AdminPage><AdminRotinas /></AdminPage>} />
           <Route path="/admin/usuarios"    element={<AdminPage><AdminUsuarios /></AdminPage>} />
           <Route path="/admin/agregadores"   element={<AdminPage><AdminAgregadores /></AdminPage>} />
+          <Route path="/admin/estudos"      element={<AdminPage><AdminEstudos /></AdminPage>} />
           <Route path="/admin/notificacoes" element={<AdminPage><AdminNotificacoes /></AdminPage>} />
         </Routes>
       </BrowserRouter>
