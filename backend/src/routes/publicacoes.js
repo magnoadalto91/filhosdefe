@@ -65,13 +65,14 @@ router.put('/:id', authenticate, requireAdmin, uploadMiddleware, async (req, res
     const existing = await prisma.publicacao.findUnique({ where: { id } })
     if (!existing) return res.status(404).json({ error: 'Publicação não encontrada.' })
 
-    const { titulo, conteudo, publicado } = req.body
+    const { titulo, conteudo, publicado, removeCapa } = req.body
     const data = {}
     if (titulo    !== undefined) data.titulo    = titulo.trim()
     if (conteudo  !== undefined) data.conteudo  = conteudo
     if (publicado !== undefined) data.publicado = publicado !== 'false' && publicado !== false
 
     if (req.file) data.capaUrl = await uploadToCloudinary(req.file.buffer, 'filhosdefe/publicacoes')
+    else if (removeCapa === 'true') data.capaUrl = null
 
     const item = await prisma.publicacao.update({ where: { id }, data })
     return res.json(item)

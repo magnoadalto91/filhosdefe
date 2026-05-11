@@ -2,12 +2,11 @@ import { useEffect, useState, useRef } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
-import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import {
-  BookOpen, FileText, Plus, Trash2, AlertCircle, ImageIcon,
-  Bold, Italic, List, ListOrdered, Link2, Image as ImageIcon2,
-  Eye, EyeOff, Heading2, Heading3, FileUp, Download, Pencil,
+  BookOpen, FileText, Trash2, AlertCircle, ImageIcon,
+  Bold, Italic, List, ListOrdered, Heading2, Heading3,
+  FileUp, Download, Pencil, X,
 } from 'lucide-react'
 import api from '../../api/axios'
 import Modal from '../../components/Modal'
@@ -39,7 +38,7 @@ function Toolbar({ editor, onImageUpload }) {
     </button>
   )
   return (
-    <div style={{ display:'flex', flexWrap:'wrap', gap:2, padding:'8px 10px', borderBottom:'1px solid #e5e0d8', backgroundColor:'#f8f5f0', borderRadius:'8px 8px 0 0' }}>
+    <div style={{ display:'flex', flexWrap:'wrap', gap:2, padding:'8px 10px', borderBottom:'1px solid #e5e0d8', backgroundColor:'#f8f5f0', borderRadius:'8px 8px 0 0', alignItems:'center' }}>
       {btn(editor.isActive('bold'),       ()=>editor.chain().focus().toggleBold().run(),          'Negrito',       Bold)}
       {btn(editor.isActive('italic'),     ()=>editor.chain().focus().toggleItalic().run(),        'Itálico',       Italic)}
       <div style={{ width:1, height:24, backgroundColor:'#e5e0d8', margin:'0 4px', alignSelf:'center' }}/>
@@ -49,17 +48,18 @@ function Toolbar({ editor, onImageUpload }) {
       {btn(editor.isActive('bulletList'),  ()=>editor.chain().focus().toggleBulletList().run(),  'Lista',         List)}
       {btn(editor.isActive('orderedList'), ()=>editor.chain().focus().toggleOrderedList().run(), 'Lista Numerada',ListOrdered)}
       <div style={{ width:1, height:24, backgroundColor:'#e5e0d8', margin:'0 4px', alignSelf:'center' }}/>
-      {btn(false, () => {
-        const url = window.prompt('URL do link:')
-        if (url) editor.chain().focus().setLink({ href: url }).run()
-      }, 'Link', Link2)}
-      {btn(false, onImageUpload, 'Inserir imagem', ImageIcon2)}
+      <button type="button" onClick={onImageUpload}
+        style={{ display:'flex', alignItems:'center', gap:5, padding:'5px 10px', borderRadius:4, border:'1px solid #e5e0d8', cursor:'pointer', backgroundColor:'transparent', color:'#6b7280', fontSize:12, fontWeight:600, fontFamily:"'Poppins',sans-serif", transition:'all 0.15s' }}
+        onMouseEnter={e=>{e.currentTarget.style.backgroundColor='rgba(200,151,43,0.1)';e.currentTarget.style.color='#c8972b';e.currentTarget.style.borderColor='#c8972b'}}
+        onMouseLeave={e=>{e.currentTarget.style.backgroundColor='transparent';e.currentTarget.style.color='#6b7280';e.currentTarget.style.borderColor='#e5e0d8'}}>
+        Upload de imagens
+      </button>
     </div>
   )
 }
 
 /* ── Publicação Form ────────────────────────────────────────── */
-function PubForm({ form, setForm, error, preview, setPreview, fileRef, editor, uploading, onImageClick }) {
+function PubForm({ form, setForm, error, preview, setPreview, fileRef, editor, uploading, onImageClick, onRemoveCover }) {
   const inputRef = useRef()
   return (
     <div>
@@ -68,13 +68,26 @@ function PubForm({ form, setForm, error, preview, setPreview, fileRef, editor, u
       {/* Capa */}
       <div style={{ marginBottom:16 }}>
         <label style={S.label}>Imagem de capa</label>
-        <div style={{ width:'100%', height:120, borderRadius:8, border:'2px dashed #e5e0d8', overflow:'hidden', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backgroundColor:'#f8f5f0', position:'relative', transition:'border-color 0.2s' }}
-          onClick={()=>inputRef.current?.click()}
-          onMouseEnter={e=>e.currentTarget.style.borderColor='#c8972b'}
-          onMouseLeave={e=>e.currentTarget.style.borderColor='#e5e0d8'}>
-          {preview
-            ? <img src={preview} alt="" style={{ position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover' }}/>
-            : <><ImageIcon size={24} color="#e5e0d8"/><span style={{ fontSize:12,color:'#9ca3af',marginTop:6,marginLeft:8 }}>Clique para selecionar capa</span></>}
+        <div style={{ position:'relative' }}>
+          <div style={{ width:'100%', height:120, borderRadius:8, border:'2px dashed #e5e0d8', overflow:'hidden', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backgroundColor:'#f8f5f0', position:'relative', transition:'border-color 0.2s' }}
+            onClick={()=>inputRef.current?.click()}
+            onMouseEnter={e=>e.currentTarget.style.borderColor='#c8972b'}
+            onMouseLeave={e=>e.currentTarget.style.borderColor='#e5e0d8'}>
+            {preview
+              ? <img src={preview} alt="" style={{ position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover' }}/>
+              : <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
+                  <BookOpen size={28} color="#e5e0d8"/>
+                  <span style={{ fontSize:12, color:'#9ca3af' }}>Clique para selecionar capa</span>
+                </div>}
+          </div>
+          {preview && (
+            <button type="button" onClick={e => { e.stopPropagation(); onRemoveCover() }}
+              style={{ position:'absolute', top:6, right:6, width:24, height:24, borderRadius:'50%', border:'none', cursor:'pointer', backgroundColor:'rgba(0,0,0,0.55)', color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', zIndex:2, transition:'background 0.15s' }}
+              onMouseEnter={e=>e.currentTarget.style.backgroundColor='rgba(220,38,38,0.85)'}
+              onMouseLeave={e=>e.currentTarget.style.backgroundColor='rgba(0,0,0,0.55)'}>
+              <X size={13}/>
+            </button>
+          )}
         </div>
         <input ref={inputRef} type="file" accept="image/*" style={{ display:'none' }} onChange={e => {
           const f = e.target.files[0]; if(!f) return
@@ -87,12 +100,6 @@ function PubForm({ form, setForm, error, preview, setPreview, fileRef, editor, u
       <div style={{ marginBottom:16 }}>
         <label style={S.label}>Título *</label>
         <input style={S.input} value={form.titulo} onChange={e=>setForm(f=>({...f,titulo:e.target.value}))} placeholder="Título da publicação" onFocus={focus} onBlur={blur}/>
-      </div>
-
-      {/* Publicado */}
-      <div style={{ marginBottom:16, display:'flex', alignItems:'center', gap:10 }}>
-        <input type="checkbox" id="pub_check" checked={form.publicado} onChange={e=>setForm(f=>({...f,publicado:e.target.checked}))} style={{ width:16, height:16, cursor:'pointer' }}/>
-        <label htmlFor="pub_check" style={{ fontSize:13, fontWeight:600, color:'#2c2c3e', cursor:'pointer' }}>Publicar imediatamente</label>
       </div>
 
       {/* Editor */}
@@ -114,8 +121,9 @@ function PublicacoesTab() {
   const [loading,     setLoading]     = useState(true)
   const [modalOpen,   setModalOpen]   = useState(false)
   const [editTarget,  setEditTarget]  = useState(null)
-  const [form,        setForm]        = useState({ titulo:'', publicado:true })
+  const [form,        setForm]        = useState({ titulo:'' })
   const [preview,     setPreview]     = useState('')
+  const [removeCapa,  setRemoveCapa]  = useState(false)
   const [saving,      setSaving]      = useState(false)
   const [formError,   setFormError]   = useState('')
   const [deleteTarget,setDeleteTarget]= useState(null)
@@ -127,7 +135,6 @@ function PublicacoesTab() {
     extensions: [
       StarterKit,
       Image,
-      Link.configure({ openOnClick: false }),
       Placeholder.configure({ placeholder: 'Escreva o conteúdo da publicação aqui...' }),
     ],
     content: '',
@@ -141,11 +148,11 @@ function PublicacoesTab() {
   useEffect(() => { load() }, [])
 
   const openAdd = () => {
-    setEditTarget(null); setForm({ titulo:'', publicado:true }); setPreview(''); fileRef.current=null
+    setEditTarget(null); setForm({ titulo:'' }); setPreview(''); fileRef.current=null; setRemoveCapa(false)
     editor?.commands.setContent(''); setFormError(''); setModalOpen(true)
   }
   const openEdit = async (item) => {
-    setEditTarget(item); setForm({ titulo:item.titulo, publicado:item.publicado }); setPreview(item.capaUrl||''); fileRef.current=null; setFormError(''); setModalOpen(true)
+    setEditTarget(item); setForm({ titulo:item.titulo }); setPreview(item.capaUrl||''); fileRef.current=null; setRemoveCapa(false); setFormError(''); setModalOpen(true)
     try { const r = await api.get(`/publicacoes/${item.id}`); editor?.commands.setContent(r.data.conteudo||'') } catch {}
   }
 
@@ -166,8 +173,9 @@ function PublicacoesTab() {
       const fd = new FormData()
       fd.append('titulo', form.titulo.trim())
       fd.append('conteudo', editor?.getHTML() || '')
-      fd.append('publicado', String(form.publicado))
+      fd.append('publicado', 'true')
       if (fileRef.current) fd.append('foto', fileRef.current)
+      else if (removeCapa) fd.append('removeCapa', 'true')
       editTarget ? await api.put(`/publicacoes/${editTarget.id}`, fd) : await api.post('/publicacoes', fd)
       setModalOpen(false); load()
     } catch (err) { setFormError(err.response?.data?.error || 'Erro ao salvar.') }
@@ -206,9 +214,6 @@ function PublicacoesTab() {
               <div style={{ fontSize:15, fontWeight:600, color:'#2c2c3e', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{item.titulo}</div>
               <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:4 }}>
                 <span style={{ fontSize:12, color:'#9ca3af' }}>{fmt(item.createdAt)}</span>
-                <span style={{ fontSize:11, fontWeight:700, padding:'1px 8px', borderRadius:20, backgroundColor: item.publicado ? 'rgba(22,163,74,0.08)' : 'rgba(107,114,128,0.08)', color: item.publicado ? '#16a34a' : '#6b7280', border: `1px solid ${item.publicado ? 'rgba(22,163,74,0.2)' : '#e5e0d8'}` }}>
-                  {item.publicado ? 'Publicado' : 'Rascunho'}
-                </span>
               </div>
             </div>
             <div style={{ display:'flex', gap:4, flexShrink:0 }}>
@@ -237,7 +242,8 @@ function PublicacoesTab() {
         </>}
       >
         <PubForm form={form} setForm={setForm} error={formError} preview={preview} setPreview={setPreview}
-          fileRef={fileRef} editor={editor} uploading={uploading} onImageClick={()=>imgInput.current?.click()}/>
+          fileRef={fileRef} editor={editor} uploading={uploading} onImageClick={()=>imgInput.current?.click()}
+          onRemoveCover={() => { setPreview(''); fileRef.current = null; setRemoveCapa(true) }}/>
       </Modal>
 
       <ConfirmModal isOpen={!!deleteTarget} onClose={()=>setDeleteTarget(null)} onConfirm={handleDelete}
@@ -405,7 +411,6 @@ export default function AdminEstudos() {
         .ProseMirror li { margin-bottom: 4px; }
         .ProseMirror strong { font-weight: 700; }
         .ProseMirror em { font-style: italic; }
-        .ProseMirror a { color: #c8972b; text-decoration: underline; }
         .ProseMirror img { max-width: 100%; height: auto; border-radius: 6px; margin: 8px 0; }
         .ProseMirror p.is-editor-empty:first-child::before { content: attr(data-placeholder); color: #9ca3af; pointer-events: none; float: left; height: 0; }
       `}</style>
