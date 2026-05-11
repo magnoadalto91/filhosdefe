@@ -252,6 +252,14 @@ function EntityModal({ entity, onClose }) {
         </div>
       )}
 
+      {/* Dia da Semana */}
+      {entity.diaSemana && (
+        <div style={{ marginBottom: 16 }}>
+          {secLabel('Dia da Semana')}
+          <div style={{ fontSize: 14, color: '#2c2c3e' }}>{entity.diaSemana}</div>
+        </div>
+      )}
+
       {/* Cores das Velas */}
       {entity.coresVelas && (
         <div style={{ marginBottom: 16 }}>
@@ -262,9 +270,17 @@ function EntityModal({ entity, onClose }) {
 
       {/* História */}
       {entity.historia && (
-        <div>
+        <div style={{ marginBottom: 16 }}>
           {secLabel('História')}
           <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{entity.historia}</p>
+        </div>
+      )}
+
+      {/* Oferendas */}
+      {entity.oferendas && (
+        <div>
+          {secLabel('Oferendas')}
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{entity.oferendas}</p>
         </div>
       )}
 

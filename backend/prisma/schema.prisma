@@ -92,6 +92,8 @@ model Entidade {
   historia   String
   saudacao   String
   coresVelas String
+  diaSemana  String?
+  oferendas  String?
   fotoUrl    String?
   createdAt  DateTime         @default(now())
   updatedAt  DateTime         @updatedAt
