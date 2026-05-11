@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { NavLink, useNavigate, Link } from 'react-router'
 import {
   LayoutDashboard, Music, Leaf, Users, Calendar,
-  ListChecks, LogOut, Menu, X, Star, Globe, Layers,
+  ListChecks, LogOut, Menu, X, Star, Globe, Layers, Bell,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -14,7 +14,8 @@ const NAV = [
   { to: '/admin/entidades', label: 'Orixás / Entidades', Icon: Users },
   { to: '/admin/giras',     label: 'Giras',      Icon: Calendar },
   { to: '/admin/rotinas',   label: 'Rotinas',    Icon: ListChecks },
-  { to: '/admin/usuarios',  label: 'Usuários',   Icon: Users },
+  { to: '/admin/usuarios',      label: 'Usuários',      Icon: Users },
+  { to: '/admin/notificacoes', label: 'Notificações',  Icon: Bell },
 ]
 
 function Sidebar({ onClose }) {

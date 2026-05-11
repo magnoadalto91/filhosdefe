@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { PrismaClient } from '@prisma/client'
 import { authenticate, requireAdmin } from '../middleware/auth.js'
+import { sendPushToAll, isEnabled } from '../lib/sendPush.js'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -47,6 +48,9 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
       },
       include,
     })
+    if (await isEnabled('novaMusica')) {
+      sendPushToAll('🎵 Novo Ponto Cantado', `"${musica.titulo}" foi adicionado. Confira!`, { url: '/aprenda?tab=musicas' }).catch(() => {})
+    }
     return res.status(201).json(musica)
   } catch (err) {
     return res.status(500).json({ error: err.message })

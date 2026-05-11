@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { authenticate, requireAdmin } from '../middleware/auth.js';
 import uploadMiddleware from '../middleware/upload.js';
 import { uploadToCloudinary } from '../lib/uploadToCloudinary.js';
+import { sendPushToAll, isEnabled } from '../lib/sendPush.js';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -59,6 +60,9 @@ router.post('/', authenticate, requireAdmin, uploadMiddleware, async (req, res) 
       data: { nome, historia: historia || '', saudacao: saudacao || '', coresVelas: coresVelas || '', fotoUrl },
     });
 
+    if (await isEnabled('novaEntidade')) {
+      sendPushToAll('✨ Novo Orixá / Entidade', `"${entidade.nome}" foi adicionado(a). Confira!`, { url: '/aprenda?tab=entidades' }).catch(() => {})
+    }
     return res.status(201).json(entidade);
   } catch (err) {
     console.error(err);

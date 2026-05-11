@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { authenticate, requireAdmin } from '../middleware/auth.js';
 import uploadMiddleware from '../middleware/upload.js';
 import { uploadToCloudinary } from '../lib/uploadToCloudinary.js';
+import { sendPushToAll, isEnabled } from '../lib/sendPush.js';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -72,6 +73,9 @@ router.post('/', authenticate, requireAdmin, uploadMiddleware, async (req, res) 
       },
     });
 
+    if (await isEnabled('novaErva')) {
+      sendPushToAll('🌿 Nova Erva Sagrada', `"${erva.nome}" foi adicionada. Confira!`, { url: '/aprenda?tab=ervas' }).catch(() => {})
+    }
     return res.status(201).json(erva);
   } catch (err) {
     console.error(err);

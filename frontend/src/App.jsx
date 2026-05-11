@@ -17,6 +17,7 @@ import AdminGiras from './pages/admin/Giras'
 import AdminRotinas from './pages/admin/Rotinas'
 import AdminUsuarios from './pages/admin/Usuarios'
 import AdminAgregadores from './pages/admin/Agregadores'
+import AdminNotificacoes from './pages/admin/Notificacoes'
 
 /* Todas as páginas públicas exigem login */
 function PublicPage({ children }) {
@@ -57,7 +58,8 @@ export default function App() {
           <Route path="/admin/giras" element={<AdminPage><AdminGiras /></AdminPage>} />
           <Route path="/admin/rotinas" element={<AdminPage><AdminRotinas /></AdminPage>} />
           <Route path="/admin/usuarios"    element={<AdminPage><AdminUsuarios /></AdminPage>} />
-          <Route path="/admin/agregadores" element={<AdminPage><AdminAgregadores /></AdminPage>} />
+          <Route path="/admin/agregadores"   element={<AdminPage><AdminAgregadores /></AdminPage>} />
+          <Route path="/admin/notificacoes" element={<AdminPage><AdminNotificacoes /></AdminPage>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authenticate, requireAdmin } from '../middleware/auth.js';
+import { sendPushToAll, isEnabled } from '../lib/sendPush.js';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -98,6 +99,12 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
     }
 
     const full = await prisma.gira.findUnique({ where: { id: gira.id }, include: giraFullInclude });
+
+    if (await isEnabled('novaGira')) {
+      const dataFmt = new Date(gira.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      sendPushToAll('📅 Nova Gira cadastrada!', `"${gira.titulo}" — ${dataFmt}. Salve na agenda!`, { url: '/calendario' }).catch(() => {})
+    }
+
     return res.status(201).json(full);
   } catch (err) {
     console.error(err);

@@ -10,6 +10,9 @@ import ervasRoutes from './src/routes/ervas.js';
 import entidadesRoutes from './src/routes/entidades.js';
 import rotinasRoutes from './src/routes/rotinas.js';
 import girasRoutes from './src/routes/giras.js';
+import pushRoutes from './src/routes/push.js';
+import notificacoesRoutes from './src/routes/notificacoes.js';
+import { startGirasReminderJob } from './src/jobs/girasReminder.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -33,6 +36,8 @@ app.use('/api/ervas', ervasRoutes);
 app.use('/api/entidades', entidadesRoutes);
 app.use('/api/rotinas', rotinasRoutes);
 app.use('/api/giras', girasRoutes);
+app.use('/api/push', pushRoutes);
+app.use('/api/notificacoes', notificacoesRoutes);
 
 // 404 handler
 app.use((_req, res) => {
@@ -49,4 +54,5 @@ app.use((err, _req, res, _next) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  startGirasReminderJob();
 });

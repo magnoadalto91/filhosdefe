@@ -20,12 +20,36 @@ enum StatusGira {
 }
 
 model User {
+  id                Int                @id @default(autoincrement())
+  email             String             @unique
+  nome              String?
+  password          String
+  role              Role               @default(USER)
+  createdAt         DateTime           @default(now())
+  pushSubscriptions PushSubscription[]
+}
+
+model PushSubscription {
   id        Int      @id @default(autoincrement())
-  email     String   @unique
-  nome      String?
-  password  String
-  role      Role     @default(USER)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
   createdAt DateTime @default(now())
+}
+
+model NotificacaoConfig {
+  id           Int      @id @default(1)
+  novaEntidade Boolean  @default(true)
+  novaErva     Boolean  @default(true)
+  novaMusica   Boolean  @default(true)
+  novaGira     Boolean  @default(true)
+  gira1Semana  Boolean  @default(true)
+  gira1Dia     Boolean  @default(true)
+  giraNoDia    Boolean  @default(true)
+  horaEnvio    String   @default("08:00")
+  updatedAt    DateTime @updatedAt
 }
 
 model Agregador {

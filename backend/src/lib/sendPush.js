@@ -1,0 +1,43 @@
+import { PrismaClient } from '@prisma/client'
+import webpush from './webpush.js'
+
+const prisma = new PrismaClient()
+
+/**
+ * Envia push para todos os subscribers cadastrados.
+ * @param {string} title
+ * @param {string} body
+ * @param {object} [data]  dados extras para o SW (ex.: url)
+ */
+export async function sendPushToAll(title, body, data = {}) {
+  const subs = await prisma.pushSubscription.findMany()
+  const payload = JSON.stringify({ title, body, ...data })
+
+  const results = await Promise.allSettled(
+    subs.map(s =>
+      webpush.sendNotification(
+        { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
+        payload,
+      ).catch(async err => {
+        // Subscription expirada ou inválida → remove do banco
+        if (err.statusCode === 404 || err.statusCode === 410) {
+          await prisma.pushSubscription.delete({ where: { id: s.id } }).catch(() => {})
+        }
+        throw err
+      })
+    )
+  )
+
+  const sent   = results.filter(r => r.status === 'fulfilled').length
+  const failed = results.filter(r => r.status === 'rejected').length
+  if (subs.length) console.log(`[push] ${title} → ${sent} ok, ${failed} falha(s)`)
+}
+
+/**
+ * Verifica se um tipo de notificação está habilitado.
+ */
+export async function isEnabled(field) {
+  const cfg = await prisma.notificacaoConfig.findUnique({ where: { id: 1 } })
+  if (!cfg) return true            // sem config → habilitado por padrão
+  return cfg[field] === true
+}
