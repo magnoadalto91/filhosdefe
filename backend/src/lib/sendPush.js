@@ -10,6 +10,8 @@ const prisma = new PrismaClient()
  * @param {object} [data]  dados extras para o SW (ex.: url)
  */
 export async function sendPushToAll(title, body, data = {}) {
+  if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) return
+
   const subs = await prisma.pushSubscription.findMany()
   const payload = JSON.stringify({ title, body, ...data })
 
