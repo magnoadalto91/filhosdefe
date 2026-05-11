@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Music, Plus, Search, Pencil, Trash2, ExternalLink, AlertCircle } from 'lucide-react'
+import { Music, Plus, Search, Pencil, Trash2, ExternalLink, AlertCircle, Youtube, Save } from 'lucide-react'
 import api from '../../api/axios'
 import Modal from '../../components/Modal'
 import ConfirmModal from '../../components/ConfirmModal'
@@ -61,9 +61,12 @@ function MusicForm({ form, setForm, error, agregadores }) {
 }
 
 export default function AdminMusicas() {
-  const [musicas,     setMusicas]     = useState([])
-  const [agregadores, setAgregadores] = useState([])
-  const [loading,     setLoading]     = useState(true)
+  const [musicas,      setMusicas]      = useState([])
+  const [agregadores,  setAgregadores]  = useState([])
+  const [loading,      setLoading]      = useState(true)
+  const [playlistUrl,  setPlaylistUrl]  = useState('')
+  const [savingUrl,    setSavingUrl]    = useState(false)
+  const [urlSaved,     setUrlSaved]     = useState(false)
   const [search,      setSearch]      = useState('')
   const [modalOpen,   setModalOpen]   = useState(false)
   const [editTarget,  setEditTarget]  = useState(null)
@@ -75,13 +78,24 @@ export default function AdminMusicas() {
   const load = async () => {
     setLoading(true)
     try {
-      const [mr, ar] = await Promise.all([api.get('/musicas'), api.get('/agregadores')])
+      const [mr, ar, pr] = await Promise.all([api.get('/musicas'), api.get('/agregadores'), api.get('/notificacoes/playlist')])
       setMusicas(Array.isArray(mr.data) ? mr.data : [])
       setAgregadores(Array.isArray(ar.data) ? ar.data : [])
+      setPlaylistUrl(pr.data?.playlistUrl || '')
     } catch { setMusicas([]) }
     finally { setLoading(false) }
   }
   useEffect(() => { load() }, [])
+
+  const savePlaylist = async () => {
+    setSavingUrl(true); setUrlSaved(false)
+    try {
+      await api.put('/notificacoes/config', { playlistUrl: playlistUrl.trim() || null })
+      setUrlSaved(true)
+      setTimeout(() => setUrlSaved(false), 3000)
+    } catch {}
+    finally { setSavingUrl(false) }
+  }
 
   const openAdd  = () => { setEditTarget(null); setForm(emptyForm); setFormError(''); setModalOpen(true) }
   const openEdit = m  => {
@@ -111,6 +125,32 @@ export default function AdminMusicas() {
 
   return (
     <div style={S.page}>
+
+      {/* Playlist do terreiro */}
+      <div style={{ backgroundColor:'#fff', borderRadius:10, border:'1px solid #e5e0d8', padding:'18px 20px', marginBottom:24, boxShadow:'0 2px 8px rgba(0,0,0,0.04)' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10 }}>
+          <Youtube size={16} color="#dc2626"/>
+          <span style={{ fontSize:13, fontWeight:700, color:'#2c2c3e' }}>Playlist do Terreiro</span>
+          <span style={{ fontSize:12, color:'#9ca3af' }}>— link exibido no topo das músicas para os usuários</span>
+        </div>
+        <div style={{ display:'flex', gap:8 }}>
+          <input
+            value={playlistUrl}
+            onChange={e => setPlaylistUrl(e.target.value)}
+            placeholder="https://www.youtube.com/playlist?list=..."
+            style={{...S.input, flex:1}}
+            onFocus={e=>e.currentTarget.style.borderColor='#c8972b'}
+            onBlur={e=>e.currentTarget.style.borderColor='#e5e0d8'}
+          />
+          <button onClick={savePlaylist} disabled={savingUrl}
+            style={{ display:'flex', alignItems:'center', gap:6, padding:'10px 18px', borderRadius:6, fontSize:13, fontWeight:600, backgroundColor: savingUrl ? '#e5e0d8' : '#c8972b', color:'#fff', border:'none', cursor: savingUrl ? 'not-allowed' : 'pointer', fontFamily:"'Poppins',sans-serif", flexShrink:0, transition:'background 0.15s' }}
+            onMouseEnter={e=>{ if(!savingUrl) e.currentTarget.style.backgroundColor='#a67a20' }}
+            onMouseLeave={e=>e.currentTarget.style.backgroundColor= savingUrl ? '#e5e0d8' : '#c8972b'}>
+            <Save size={14}/>{savingUrl ? 'Salvando...' : 'Salvar'}
+          </button>
+        </div>
+        {urlSaved && <p style={{ margin:'6px 0 0', fontSize:12, color:'#16a34a', fontWeight:600 }}>Link salvo com sucesso!</p>}
+      </div>
 
       {/* Header */}
       <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:16, marginBottom:24 }}>

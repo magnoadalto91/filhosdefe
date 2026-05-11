@@ -49,6 +49,7 @@ model NotificacaoConfig {
   gira1Dia     Boolean  @default(true)
   giraNoDia    Boolean  @default(true)
   horaEnvio    String   @default("08:00")
+  playlistUrl  String?
   updatedAt    DateTime @updatedAt
 }
 

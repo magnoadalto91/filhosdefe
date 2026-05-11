@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router'
-import { Users, Leaf, Music, Play, ChevronDown, Search, X } from 'lucide-react'
+import { Users, Leaf, Music, Play, ChevronDown, Search, X, Youtube } from 'lucide-react'
 import api from '../api/axios'
 import LoadingSpinner from '../components/LoadingSpinner'
 import Modal from '../components/Modal'
@@ -425,7 +425,8 @@ export default function Aprenda() {
   const [data, setData] = useState({ entidades: [], ervas: [], musicas: [] })
   const [loading, setLoading] = useState({ entidades: false, ervas: false, musicas: false })
   const [loaded, setLoaded] = useState({ entidades: false, ervas: false, musicas: false })
-  const [search, setSearch] = useState('')
+  const [search,      setSearch]      = useState('')
+  const [playlistUrl, setPlaylistUrl] = useState(null)
   const [selectedEntity, setSelectedEntity] = useState(null)
   const [selectedHerb,   setSelectedHerb]   = useState(null)
   const [selectedMusic,  setSelectedMusic]  = useState(null)
@@ -447,6 +448,12 @@ export default function Aprenda() {
   }
 
   useEffect(() => { fetchTab(tab); setSearch('') }, [tab])
+
+  useEffect(() => {
+    api.get('/notificacoes/playlist')
+      .then(r => setPlaylistUrl(r.data?.playlistUrl || null))
+      .catch(() => {})
+  }, [])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%', backgroundColor: '#ffffff', fontFamily: "'Poppins', sans-serif" }}>
@@ -551,7 +558,24 @@ export default function Aprenda() {
             {tab === 'musicas' && (
               data.musicas.length === 0
                 ? <EmptyState icon={Music} message="Nenhuma música cadastrada." />
-                : <MusicGroups musicas={data.musicas} onSelect={setSelectedMusic} search={search} />
+                : <>
+                    {playlistUrl && (
+                      <a href={playlistUrl} target="_blank" rel="noopener noreferrer"
+                        style={{ display:'flex', alignItems:'center', gap:10, padding:'13px 16px', marginBottom:14, borderRadius:8, backgroundColor:'#fff', border:'1px solid #fecaca', textDecoration:'none', boxShadow:'0 2px 8px rgba(0,0,0,0.06)', transition:'box-shadow 0.2s' }}
+                        onMouseEnter={e=>e.currentTarget.style.boxShadow='0 4px 16px rgba(220,38,38,0.15)'}
+                        onMouseLeave={e=>e.currentTarget.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)'}>
+                        <div style={{ width:38, height:38, borderRadius:8, backgroundColor:'#fef2f2', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                          <Youtube size={20} color="#dc2626"/>
+                        </div>
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <div style={{ fontSize:13, fontWeight:700, color:'#2c2c3e' }}>Playlist completa do Terreiro</div>
+                          <div style={{ fontSize:12, color:'#9ca3af', marginTop:1 }}>Ouça todos os pontos cantados no YouTube</div>
+                        </div>
+                        <Play size={14} color="#dc2626" style={{ flexShrink:0 }}/>
+                      </a>
+                    )}
+                    <MusicGroups musicas={data.musicas} onSelect={setSelectedMusic} search={search} />
+                  </>
             )}
           </>
         )}

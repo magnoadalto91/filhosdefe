@@ -16,6 +16,16 @@ const DEFAULT_CONFIG = {
   horaEnvio:    '08:00',
 }
 
+// GET /api/notificacoes/playlist  (público — retorna só a URL da playlist)
+router.get('/playlist', async (_req, res) => {
+  try {
+    const cfg = await prisma.notificacaoConfig.findUnique({ where: { id: 1 } })
+    return res.json({ playlistUrl: cfg?.playlistUrl || null })
+  } catch (err) {
+    return res.status(500).json({ error: err.message })
+  }
+})
+
 // GET /api/notificacoes/config
 router.get('/config', authenticate, requireAdmin, async (_req, res) => {
   try {
@@ -31,7 +41,7 @@ router.get('/config', authenticate, requireAdmin, async (_req, res) => {
 
 // PUT /api/notificacoes/config
 router.put('/config', authenticate, requireAdmin, async (req, res) => {
-  const fields = ['novaEntidade','novaErva','novaMusica','novaGira','gira1Semana','gira1Dia','giraNoDia','horaEnvio']
+  const fields = ['novaEntidade','novaErva','novaMusica','novaGira','gira1Semana','gira1Dia','giraNoDia','horaEnvio','playlistUrl']
   const data = {}
   fields.forEach(f => { if (req.body[f] !== undefined) data[f] = req.body[f] })
 
