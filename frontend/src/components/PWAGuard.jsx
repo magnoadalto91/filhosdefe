@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Share2, Plus, MoreVertical, Smartphone, CheckCircle, Download } from 'lucide-react'
+import { Share2, MoreVertical, Smartphone, Download, Home } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { getInstallPrompt, clearInstallPrompt, isPWA } from '../lib/pwaInstall'
 
@@ -26,12 +26,24 @@ function Step({ n, children }) {
   )
 }
 
-/* ── Instrução de destaque ────────────────── */
+/* ── Texto em destaque ────────────────────── */
 function Tag({ children }) {
   return (
-    <strong style={{ backgroundColor: '#f8f5f0', borderRadius: 4, padding: '1px 6px', fontWeight: 700, color: '#2c2c3e' }}>
+    <strong style={{ backgroundColor: '#f0ece5', borderRadius: 4, padding: '1px 6px', fontWeight: 700, color: '#2c2c3e' }}>
       {children}
     </strong>
+  )
+}
+
+/* ── Aviso fixo: procure o ícone ──────────── */
+function HomeHint() {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, backgroundColor: 'rgba(200,151,43,0.08)', border: '1px solid rgba(200,151,43,0.25)', borderRadius: 8, padding: '11px 14px', marginBottom: 18 }}>
+      <Home size={15} color="#c8972b" style={{ flexShrink: 0 }}/>
+      <span style={{ fontSize: 12, color: '#6b7280', lineHeight: 1.5 }}>
+        Após instalar, <strong style={{ color: '#2c2c3e' }}>procure o ícone do app na tela inicial</strong> do seu celular e abra por lá.
+      </span>
+    </div>
   )
 }
 
@@ -100,7 +112,7 @@ function AndroidSteps({ onInstall, prompted }) {
 function DesktopMessage() {
   return (
     <div style={{ backgroundColor: '#f8f5f0', borderRadius: 10, padding: '20px', marginBottom: 16, textAlign: 'center' }}>
-      <Smartphone size={32} color="#e5e0d8" style={{ marginBottom: 12 }}/>
+      <Smartphone size={32} color="#e5e0d8" style={{ marginBottom: 12, display: 'block', margin: '0 auto 12px' }}/>
       <p style={{ margin: 0, fontSize: 13, color: '#6b7280', lineHeight: 1.6 }}>
         Este aplicativo é projetado para <strong>dispositivos móveis</strong>.<br/>
         Acesse pelo <strong>Chrome</strong> (Android) ou <strong>Safari</strong> (iPhone) e instale na tela inicial.
@@ -112,10 +124,8 @@ function DesktopMessage() {
 /* ── Guard principal ──────────────────────── */
 export default function PWAGuard({ children }) {
   const { user, isAdmin } = useAuth()
-  const [prompted,       setPrompted]       = useState(false)
-  const [showAfterMsg,   setShowAfterMsg]   = useState(false)
+  const [prompted, setPrompted] = useState(false)
 
-  // Dev, admin ou já rodando como PWA → libera direto
   if (import.meta.env.DEV || !user || isAdmin || isPWA()) return children
 
   const handleInstall = async () => {
@@ -124,15 +134,13 @@ export default function PWAGuard({ children }) {
     prompt.prompt()
     const { outcome } = await prompt.userChoice
     clearInstallPrompt()
-    if (outcome === 'accepted') setShowAfterMsg(true)
+    if (outcome === 'accepted') window.close()
     else setPrompted(true)
   }
 
-  const handleAlreadyInstalled = () => setShowAfterMsg(true)
-
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, backgroundColor: 'rgba(15,15,38,0.97)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 20px', fontFamily: "'Poppins',sans-serif" }}>
-      <div style={{ backgroundColor: '#fff', borderRadius: 20, maxWidth: 420, width: '100%', overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.5)' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, backgroundColor: 'rgba(15,15,38,0.97)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 20px', fontFamily: "'Poppins',sans-serif", overflowY: 'auto' }}>
+      <div style={{ backgroundColor: '#fff', borderRadius: 20, maxWidth: 420, width: '100%', overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.5)', margin: 'auto' }}>
 
         {/* Cabeçalho */}
         <div style={{ backgroundColor: '#1a1a3a', padding: '28px 28px 22px', textAlign: 'center' }}>
@@ -141,48 +149,28 @@ export default function PWAGuard({ children }) {
             Filhos de Fé
           </div>
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#fff', lineHeight: 1.3 }}>
-            {showAfterMsg ? 'Quase lá!' : 'Instale o aplicativo'}
+            Instale o aplicativo
           </h2>
         </div>
 
         {/* Corpo */}
-        <div style={{ padding: '24px 24px 28px' }}>
-          {showAfterMsg ? (
-            /* Mensagem pós-instalação */
-            <div style={{ textAlign: 'center' }}>
-              <CheckCircle size={52} color="#c8972b" style={{ marginBottom: 14 }}/>
-              <p style={{ margin: '0 0 10px', fontSize: 15, fontWeight: 700, color: '#2c2c3e' }}>
-                App instalado!
-              </p>
-              <p style={{ margin: '0 0 20px', fontSize: 13, color: '#6b7280', lineHeight: 1.7 }}>
-                Feche este navegador e abra o <strong>Filhos de Fé</strong> pelo ícone na sua tela inicial para continuar.
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, backgroundColor: '#f8f5f0', borderRadius: 8, padding: '12px 16px' }}>
-                <Plus size={16} color="#c8972b" style={{ flexShrink: 0 }}/>
-                <span style={{ fontSize: 12, color: '#6b7280', textAlign: 'left' }}>
-                  Procure o ícone do app na tela inicial do seu celular
-                </span>
-              </div>
-            </div>
-          ) : (
-            /* Instruções de instalação */
-            <>
-              <p style={{ margin: '0 0 18px', fontSize: 13, color: '#6b7280', lineHeight: 1.7, textAlign: 'center' }}>
-                Para receber notificações e usar todas as funcionalidades, é necessário instalar o app no seu celular.
-              </p>
+        <div style={{ padding: '22px 24px 26px' }}>
+          <p style={{ margin: '0 0 16px', fontSize: 13, color: '#6b7280', lineHeight: 1.7, textAlign: 'center' }}>
+            Para receber notificações e usar todas as funcionalidades, instale o app no seu celular.
+          </p>
 
-              {IS_IOS     && <IOSSteps/>}
-              {IS_ANDROID && <AndroidSteps onInstall={handleInstall} prompted={prompted}/>}
-              {!IS_IOS && !IS_ANDROID && <DesktopMessage/>}
+          <HomeHint/>
 
-              <button onClick={handleAlreadyInstalled}
-                style={{ width: '100%', padding: '11px', borderRadius: 8, border: '1px solid #e5e0d8', background: 'transparent', fontSize: 13, fontWeight: 600, color: '#9ca3af', cursor: 'pointer', fontFamily: "'Poppins',sans-serif", transition: 'all 0.15s' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = '#2c2c3e'; e.currentTarget.style.color = '#2c2c3e' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e0d8'; e.currentTarget.style.color = '#9ca3af' }}>
-                Já instalei — abrir pelo ícone
-              </button>
-            </>
-          )}
+          {IS_IOS     && <IOSSteps/>}
+          {IS_ANDROID && <AndroidSteps onInstall={handleInstall} prompted={prompted}/>}
+          {!IS_IOS && !IS_ANDROID && <DesktopMessage/>}
+
+          <button onClick={() => window.close()}
+            style={{ width: '100%', padding: '11px', borderRadius: 8, border: '1px solid #e5e0d8', background: 'transparent', fontSize: 13, fontWeight: 600, color: '#9ca3af', cursor: 'pointer', fontFamily: "'Poppins',sans-serif", transition: 'all 0.15s' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = '#2c2c3e'; e.currentTarget.style.color = '#2c2c3e' }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e0d8'; e.currentTarget.style.color = '#9ca3af' }}>
+            Já instalei, fechar aba
+          </button>
         </div>
       </div>
     </div>
