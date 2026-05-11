@@ -76,6 +76,9 @@ function HerbCard({ herb, onClick }) {
       onMouseLeave={() => setHovered(false)}
       style={{
         width: '100%',
+        height: '100%',          /* estica para preencher a célula da grid */
+        display: 'flex',
+        flexDirection: 'column',
         textAlign: 'left',
         borderRadius: '8px',
         overflow: 'hidden',
@@ -88,12 +91,13 @@ function HerbCard({ herb, onClick }) {
         fontFamily: "'Poppins', sans-serif",
       }}
     >
-      <div style={{ position: 'relative', aspectRatio: '4/3', backgroundColor: '#f8f5f0' }}>
+      {/* Imagem com position absolute para preencher o container sem faixa branca */}
+      <div style={{ position: 'relative', aspectRatio: '4/3', backgroundColor: '#f8f5f0', overflow: 'hidden', flexShrink: 0 }}>
         {herb.fotoUrl ? (
           <img src={herb.fotoUrl} alt={herb.nome}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}/>
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}/>
         ) : (
-          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Leaf size={32} style={{ color: '#e5e0d8' }} />
           </div>
         )}
@@ -103,7 +107,7 @@ function HerbCard({ herb, onClick }) {
           </span>
         )}
       </div>
-      <div style={{ padding: '12px 14px' }}>
+      <div style={{ padding: '12px 14px', flex: 1 }}>
         <div style={{ fontSize: '14px', fontWeight: 700, color: '#2c2c3e' }}>{herb.nome}</div>
         {herb.usos && (
           <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
