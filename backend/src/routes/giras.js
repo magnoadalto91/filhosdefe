@@ -182,6 +182,12 @@ router.put('/:id', authenticate, requireAdmin, async (req, res) => {
     }
 
     const gira = await prisma.gira.findUnique({ where: { id }, include: giraFullInclude });
+
+    if (await isEnabled('novaGira')) {
+      const dataFmt = new Date(gira.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      sendPushToAll('✏️ Gira atualizada', `"${gira.titulo}" — ${dataFmt} foi atualizada. Confira os detalhes!`, { url: '/calendario' }).catch(() => {})
+    }
+
     return res.json(gira);
   } catch (err) {
     console.error(err);
@@ -202,7 +208,11 @@ router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
       return res.status(400).json({ error: 'Giras concluídas não podem ser excluídas.' });
     }
 
+    const dataFmt = new Date(existing.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
     await prisma.gira.delete({ where: { id } });
+
+    sendPushToAll('🗑️ Gira cancelada', `"${existing.titulo}" — ${dataFmt} foi removida.`, { url: '/calendario' }).catch(() => {})
+
     return res.json({ message: 'Gira deleted successfully' });
   } catch (err) {
     console.error(err);
