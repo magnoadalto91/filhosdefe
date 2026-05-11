@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { BookOpen, FileText, Download, ArrowLeft, Calendar } from 'lucide-react'
 import api from '../api/axios'
+
+const apiBase = () => api.defaults.baseURL || '/api'
 import LoadingSpinner from '../components/LoadingSpinner'
 import Modal from '../components/Modal'
 
@@ -118,7 +120,7 @@ function DocumentosTab() {
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
       {list.map(doc => (
-        <a key={doc.id} href={doc.fileUrl} target="_blank" rel="noopener noreferrer"
+        <a key={doc.id} href={`${apiBase()}/documentos/${doc.id}/download`} target="_blank" rel="noopener noreferrer"
           style={{ display:'flex', alignItems:'center', gap:14, backgroundColor:'#fff', borderRadius:10, border:'1px solid #e5e0d8', padding:'14px 16px', textDecoration:'none', boxShadow:'0 2px 8px rgba(0,0,0,0.04)', transition:'box-shadow 0.2s', cursor:'pointer' }}
           onMouseEnter={e=>e.currentTarget.style.boxShadow='0 6px 20px rgba(0,0,0,0.1)'}
           onMouseLeave={e=>e.currentTarget.style.boxShadow='0 2px 8px rgba(0,0,0,0.04)'}>

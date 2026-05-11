@@ -73,7 +73,7 @@ export default function Home() {
 
         {/* ─── ESTUDOS (largura total) ─── */}
         <Link to="/estudos"
-          style={{ position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', backgroundColor: '#0d2137', transition: 'filter 0.2s', minHeight: 130 }}
+          style={{ position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', backgroundColor: '#2e5d8e', transition: 'filter 0.2s', minHeight: 130, flex: 1 }}
           onMouseEnter={e => e.currentTarget.style.filter = 'brightness(1.15)'}
           onMouseLeave={e => e.currentTarget.style.filter = 'brightness(1)'}
         >

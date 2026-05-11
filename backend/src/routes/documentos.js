@@ -33,6 +33,26 @@ router.post('/', authenticate, requireAdmin, uploadDocMiddleware, async (req, re
   } catch (err) { return res.status(500).json({ error: err.message }) }
 })
 
+// GET /:id/download — proxy com nome correto
+router.get('/:id/download', async (req, res) => {
+  try {
+    const id = Number(req.params.id)
+    if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' })
+    const doc = await prisma.documento.findUnique({ where: { id } })
+    if (!doc) return res.status(404).json({ error: 'Documento não encontrado.' })
+
+    const filename = `${doc.nome}.${doc.fileType}`
+    const upstream = await fetch(doc.fileUrl)
+    if (!upstream.ok) return res.status(502).json({ error: 'Erro ao buscar arquivo.' })
+
+    res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`)
+    res.setHeader('Content-Type', upstream.headers.get('content-type') || 'application/octet-stream')
+
+    const { Readable } = await import('stream')
+    Readable.fromWeb(upstream.body).pipe(res)
+  } catch (err) { return res.status(500).json({ error: err.message }) }
+})
+
 // DELETE /:id — admin
 router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
   try {
