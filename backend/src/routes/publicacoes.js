@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import { authenticate, requireAdmin } from '../middleware/auth.js'
 import uploadMiddleware from '../middleware/upload.js'
 import { uploadToCloudinary } from '../lib/uploadToCloudinary.js'
+import { sendPushToAll, isEnabled } from '../lib/sendPush.js'
 
 const router = Router()
 const prisma  = new PrismaClient()
@@ -53,6 +54,11 @@ router.post('/', authenticate, requireAdmin, uploadMiddleware, async (req, res) 
     const item = await prisma.publicacao.create({
       data: { titulo: titulo.trim(), conteudo: conteudo || '', capaUrl, publicado: publicado !== 'false' },
     })
+
+    if (await isEnabled('novaPublicacao')) {
+      sendPushToAll('Nova publicação nos Estudos', `"${item.titulo}" foi publicada. Confira!`, { url: '/estudos' }).catch(() => {})
+    }
+
     return res.status(201).json(item)
   } catch (err) { return res.status(500).json({ error: err.message }) }
 })
@@ -75,6 +81,11 @@ router.put('/:id', authenticate, requireAdmin, uploadMiddleware, async (req, res
     else if (removeCapa === 'true') data.capaUrl = null
 
     const item = await prisma.publicacao.update({ where: { id }, data })
+
+    if (await isEnabled('novaPublicacao')) {
+      sendPushToAll('Publicação atualizada nos Estudos', `"${item.titulo}" foi atualizada. Confira!`, { url: '/estudos' }).catch(() => {})
+    }
+
     return res.json(item)
   } catch (err) { return res.status(500).json({ error: err.message }) }
 })

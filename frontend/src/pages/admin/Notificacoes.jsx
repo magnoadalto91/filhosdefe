@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Bell, BellOff, Users, Leaf, Music, Calendar, Clock, Save } from 'lucide-react'
+import { Users, Leaf, Music, Calendar, Clock, Save, BookOpen, FileText } from 'lucide-react'
 import api from '../../api/axios'
 import LoadingSpinner from '../../components/LoadingSpinner'
 
@@ -85,6 +85,10 @@ export default function AdminNotificacoes() {
         <Row Icon={Music}    label="Novo Ponto Cantado"      field="novaMusica"   cfg={cfg} onChange={set}/>
         <Row Icon={Calendar} label="Nova Gira cadastrada"    field="novaGira"     cfg={cfg} onChange={set}
           sub="Enviado assim que a gira for criada no admin"/>
+        <Row Icon={BookOpen} label="Nova publicação (Estudos)" field="novaPublicacao" cfg={cfg} onChange={set}
+          sub="Criação ou atualização de publicação"/>
+        <Row Icon={FileText} label="Novo documento (Estudos)"  field="novoDocumento"  cfg={cfg} onChange={set}
+          sub="Enviado ao fazer upload de um novo documento"/>
       </div>
 
       {/* Lembretes de gira */}

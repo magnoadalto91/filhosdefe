@@ -6,14 +6,16 @@ const router = Router()
 const prisma = new PrismaClient()
 
 const DEFAULT_CONFIG = {
-  novaEntidade: true,
-  novaErva:     true,
-  novaMusica:   true,
-  novaGira:     true,
-  gira1Semana:  true,
-  gira1Dia:     true,
-  giraNoDia:    true,
-  horaEnvio:    '08:00',
+  novaEntidade:   true,
+  novaErva:       true,
+  novaMusica:     true,
+  novaGira:       true,
+  novaPublicacao: true,
+  novoDocumento:  true,
+  gira1Semana:    true,
+  gira1Dia:       true,
+  giraNoDia:      true,
+  horaEnvio:      '08:00',
 }
 
 // GET /api/notificacoes/playlist  (público — retorna só a URL da playlist)
@@ -41,7 +43,7 @@ router.get('/config', authenticate, requireAdmin, async (_req, res) => {
 
 // PUT /api/notificacoes/config
 router.put('/config', authenticate, requireAdmin, async (req, res) => {
-  const fields = ['novaEntidade','novaErva','novaMusica','novaGira','gira1Semana','gira1Dia','giraNoDia','horaEnvio','playlistUrl']
+  const fields = ['novaEntidade','novaErva','novaMusica','novaGira','novaPublicacao','novoDocumento','gira1Semana','gira1Dia','giraNoDia','horaEnvio','playlistUrl']
   const data = {}
   fields.forEach(f => { if (req.body[f] !== undefined) data[f] = req.body[f] })
 

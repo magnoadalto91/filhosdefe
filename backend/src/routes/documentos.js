@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import { authenticate, requireAdmin } from '../middleware/auth.js'
 import uploadDocMiddleware from '../middleware/uploadDoc.js'
 import { uploadDocToCloudinary } from '../lib/uploadToCloudinary.js'
+import { sendPushToAll, isEnabled } from '../lib/sendPush.js'
 
 const router = Router()
 const prisma  = new PrismaClient()
@@ -29,6 +30,11 @@ router.post('/', authenticate, requireAdmin, uploadDocMiddleware, async (req, re
     const item = await prisma.documento.create({
       data: { nome: nome.trim(), descricao: descricao?.trim() || null, fileUrl, fileType: ext, tamanho },
     })
+
+    if (await isEnabled('novoDocumento')) {
+      sendPushToAll('Novo documento disponível', `"${item.nome}" foi adicionado nos Estudos. Confira!`, { url: '/estudos' }).catch(() => {})
+    }
+
     return res.status(201).json(item)
   } catch (err) { return res.status(500).json({ error: err.message }) }
 })
