@@ -131,19 +131,21 @@ function GiraCard({ gira, onEdit, onDelete, onStatusChange }) {
               <Eye size={16}/>
             </button>
           ) : (
-            <button onClick={()=>onEdit(gira, false)}
-              style={{ display:'flex', padding:7, borderRadius:6, background:'none', border:'none', cursor:'pointer', color:'#9ca3af', transition:'color 0.15s' }}
-              title="Editar"
-              onMouseEnter={e=>e.currentTarget.style.color='#2c2c3e'} onMouseLeave={e=>e.currentTarget.style.color='#9ca3af'}>
-              <Pencil size={16}/>
-            </button>
+            <>
+              <button onClick={()=>onEdit(gira, false)}
+                style={{ display:'flex', padding:7, borderRadius:6, background:'none', border:'none', cursor:'pointer', color:'#9ca3af', transition:'color 0.15s' }}
+                title="Editar"
+                onMouseEnter={e=>e.currentTarget.style.color='#2c2c3e'} onMouseLeave={e=>e.currentTarget.style.color='#9ca3af'}>
+                <Pencil size={16}/>
+              </button>
+              <button onClick={()=>onDelete(gira)}
+                style={{ display:'flex', padding:7, borderRadius:6, background:'none', border:'none', cursor:'pointer', color:'#9ca3af', transition:'color 0.15s' }}
+                title="Excluir"
+                onMouseEnter={e=>e.currentTarget.style.color='#dc2626'} onMouseLeave={e=>e.currentTarget.style.color='#9ca3af'}>
+                <Trash2 size={16}/>
+              </button>
+            </>
           )}
-          <button onClick={()=>onDelete(gira)}
-            style={{ display:'flex', padding:7, borderRadius:6, background:'none', border:'none', cursor:'pointer', color:'#9ca3af', transition:'color 0.15s' }}
-            title="Excluir"
-            onMouseEnter={e=>e.currentTarget.style.color='#dc2626'} onMouseLeave={e=>e.currentTarget.style.color='#9ca3af'}>
-            <Trash2 size={16}/>
-          </button>
         </div>
       </div>
 
@@ -157,18 +159,20 @@ function GiraCard({ gira, onEdit, onDelete, onStatusChange }) {
           {gira.rotinas?.length>0   && <span style={{ display:'flex', alignItems:'center', gap:4, padding:'3px 10px', borderRadius:20, fontSize:12, backgroundColor:'#f8f5f0', border:'1px solid #e5e0d8', color:'#6b7280' }}><ListChecks size={10}/>{gira.rotinas.length} rotina{gira.rotinas.length!==1?'s':''}</span>}
         </div>
 
-        {/* Seletor de status */}
-        <select
-          value={gira.status}
-          onChange={e => onStatusChange(gira.id, e.target.value)}
-          style={{ padding:'5px 10px', borderRadius:6, border:'1px solid #e5e0d8', fontSize:12, fontFamily:"'Poppins',sans-serif", color:'#2c2c3e', backgroundColor:'#fff', cursor:'pointer', outline:'none' }}
-          onFocus={e=>e.currentTarget.style.borderColor='#c8972b'}
-          onBlur={e=>e.currentTarget.style.borderColor='#e5e0d8'}
-        >
-          <option value="AGUARDANDO">Aguardando</option>
-          <option value="EM_ANDAMENTO">Em andamento</option>
-          <option value="CONCLUIDA">Concluída</option>
-        </select>
+        {/* Seletor de status — apenas para não concluídas */}
+        {!concluida && (
+          <select
+            value={gira.status}
+            onChange={e => onStatusChange(gira.id, e.target.value)}
+            style={{ padding:'5px 10px', borderRadius:6, border:'1px solid #e5e0d8', fontSize:12, fontFamily:"'Poppins',sans-serif", color:'#2c2c3e', backgroundColor:'#fff', cursor:'pointer', outline:'none' }}
+            onFocus={e=>e.currentTarget.style.borderColor='#c8972b'}
+            onBlur={e=>e.currentTarget.style.borderColor='#e5e0d8'}
+          >
+            <option value="AGUARDANDO">Aguardando</option>
+            <option value="EM_ANDAMENTO">Em andamento</option>
+            <option value="CONCLUIDA">Concluída</option>
+          </select>
+        )}
       </div>
     </div>
   )
@@ -178,6 +182,7 @@ function GiraCard({ gira, onEdit, onDelete, onStatusChange }) {
 export default function AdminGiras() {
   const [giras,        setGiras]        = useState([])
   const [loading,      setLoading]      = useState(true)
+  const [filtro,       setFiltro]       = useState('TODOS')
   const [modalOpen,    setModalOpen]    = useState(false)
   const [viewOnly,     setViewOnly]     = useState(false)
   const [editTarget,   setEditTarget]   = useState(null)
@@ -255,10 +260,18 @@ export default function AdminGiras() {
     } catch {}
   }
 
-  // Grupos por status, ordenados: EM_ANDAMENTO → AGUARDANDO → CONCLUIDA
   const emAndamento = giras.filter(g => g.status === 'EM_ANDAMENTO')
   const aguardando  = giras.filter(g => g.status === 'AGUARDANDO')
   const concluidas  = giras.filter(g => g.status === 'CONCLUIDA')
+
+  const FILTROS = [
+    { id:'TODOS',        label:'Todas',        count: giras.length },
+    { id:'EM_ANDAMENTO', label:'Em andamento', count: emAndamento.length },
+    { id:'AGUARDANDO',   label:'Aguardando',   count: aguardando.length },
+    { id:'CONCLUIDA',    label:'Concluídas',   count: concluidas.length },
+  ]
+
+  const girasVisiveis = filtro === 'TODOS' ? giras : giras.filter(g => g.status === filtro)
 
   const sectionLabel = (txt, cor='#c8972b') => (
     <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'2px', color:cor, marginBottom:14 }}>{txt}</div>
@@ -267,7 +280,7 @@ export default function AdminGiras() {
   return (
     <div style={S.page}>
 
-      <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:16, marginBottom:24 }}>
+      <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:16, marginBottom:20 }}>
         <div>
           <h1 style={{ margin:'0 0 4px', fontSize:22, fontWeight:800, color:'#2c2c3e' }}>Giras</h1>
           <p style={{ margin:0, fontSize:13, color:'#6b7280' }}>
@@ -281,11 +294,24 @@ export default function AdminGiras() {
         </button>
       </div>
 
-      {loading ? <LoadingSpinner/> : giras.length===0 ? (
+      {/* Filtros */}
+      <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:24 }}>
+        {FILTROS.map(f => (
+          <button key={f.id} onClick={()=>setFiltro(f.id)}
+            style={{ display:'flex', alignItems:'center', gap:6, padding:'7px 14px', borderRadius:6, fontSize:13, fontWeight:600, fontFamily:"'Poppins',sans-serif", cursor:'pointer', transition:'all 0.15s', border: filtro===f.id ? '1px solid #c8972b' : '1px solid #e5e0d8', backgroundColor: filtro===f.id ? 'rgba(200,151,43,0.08)' : '#fff', color: filtro===f.id ? '#c8972b' : '#6b7280' }}>
+            {f.label}
+            <span style={{ fontSize:11, fontWeight:700, padding:'1px 6px', borderRadius:10, backgroundColor: filtro===f.id ? '#c8972b' : '#f0ece5', color: filtro===f.id ? '#fff' : '#9ca3af' }}>{f.count}</span>
+          </button>
+        ))}
+      </div>
+
+      {loading ? <LoadingSpinner/> : girasVisiveis.length===0 ? (
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', padding:'64px 0', gap:12 }}>
           <Calendar size={44} color="#e5e0d8"/>
-          <p style={{ margin:0, fontSize:14, color:'#9ca3af' }}>Nenhuma gira cadastrada.</p>
+          <p style={{ margin:0, fontSize:14, color:'#9ca3af' }}>{giras.length===0 ? 'Nenhuma gira cadastrada.' : 'Nenhuma gira neste filtro.'}</p>
         </div>
+      ) : filtro !== 'TODOS' ? (
+        <div>{girasVisiveis.map(g=><GiraCard key={g.id} gira={g} onEdit={openEdit} onDelete={setDeleteTarget} onStatusChange={handleStatusChange}/>)}</div>
       ) : (
         <>
           {emAndamento.length>0 && (

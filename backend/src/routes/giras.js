@@ -191,6 +191,10 @@ router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
     const existing = await prisma.gira.findUnique({ where: { id } });
     if (!existing) return res.status(404).json({ error: 'Gira not found' });
 
+    if (existing.status === 'CONCLUIDA') {
+      return res.status(400).json({ error: 'Giras concluídas não podem ser excluídas.' });
+    }
+
     await prisma.gira.delete({ where: { id } });
     return res.json({ message: 'Gira deleted successfully' });
   } catch (err) {
