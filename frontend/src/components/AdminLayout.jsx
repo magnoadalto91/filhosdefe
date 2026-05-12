@@ -85,7 +85,6 @@ function CloudinaryModal({ onClose }) {
         style={{ backgroundColor: '#fff', borderRadius: 16, width: '100%', maxWidth: 420, padding: 28, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', fontFamily: "'Poppins', sans-serif" }}
         onClick={e => e.stopPropagation()}
       >
-        {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#1f2937' }}>Uso dos Serviços</h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex', padding: 4, borderRadius: 6 }}>
@@ -110,7 +109,6 @@ function CloudinaryModal({ onClose }) {
 
         {data && !loading && (
           <>
-            {/* Plan badge */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', backgroundColor: '#f8f5f0', borderRadius: 10, marginBottom: 20 }}>
               <Cloud size={18} color="#c8972b" />
               <div>
@@ -145,7 +143,7 @@ function CloudinaryModal({ onClose }) {
   )
 }
 
-function Sidebar({ onClose, onOpenCloud }) {
+function Sidebar({ onClose }) {
   const { logout } = useAuth()
   const navigate   = useNavigate()
   const doLogout   = () => { logout(); navigate('/login') }
@@ -203,29 +201,6 @@ function Sidebar({ onClose, onOpenCloud }) {
         </ul>
       </nav>
 
-      {/* Ver site público */}
-      <div style={{ padding: '8px 12px 0' }}>
-        <Link to="/"
-          style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 18px', borderRadius: 8, fontSize: 15, fontWeight: 600, textDecoration: 'none', color: '#6b7280', transition: 'all 0.15s' }}
-          onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(200,151,43,0.08)'; e.currentTarget.style.color = '#c8972b' }}
-          onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#6b7280' }}
-        >
-          <Globe size={22} /> Ver site público
-        </Link>
-      </div>
-
-      {/* Cloudinary */}
-      <div style={{ padding: '8px 12px 0' }}>
-        <button
-          onClick={() => { onClose?.(); onOpenCloud() }}
-          style={{ display: 'flex', alignItems: 'center', gap: 14, width: '100%', padding: '12px 18px', borderRadius: 8, border: 'none', fontSize: 15, fontWeight: 600, color: '#6b7280', background: 'transparent', cursor: 'pointer', fontFamily: "'Poppins', sans-serif", transition: 'all 0.15s' }}
-          onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(200,151,43,0.08)'; e.currentTarget.style.color = '#c8972b' }}
-          onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#6b7280' }}
-        >
-          <Cloud size={22} /> Armazenamento
-        </button>
-      </div>
-
       {/* Logout */}
       <div style={{ padding: '8px 12px 16px', borderTop: '1px solid #e5e0d8', marginTop: 8 }}>
         <button
@@ -238,6 +213,33 @@ function Sidebar({ onClose, onOpenCloud }) {
           Sair
         </button>
       </div>
+    </div>
+  )
+}
+
+function TopBar({ onOpenCloud }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, padding: '10px 36px', backgroundColor: '#ffffff', borderBottom: '1px solid #e5e0d8' }}>
+      <Link
+        to="/"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e0d8', fontSize: 14, fontWeight: 600, textDecoration: 'none', color: '#6b7280', backgroundColor: '#fff', transition: 'all 0.15s' }}
+        onMouseEnter={e => { e.currentTarget.style.borderColor = '#c8972b'; e.currentTarget.style.color = '#c8972b' }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e0d8'; e.currentTarget.style.color = '#6b7280' }}
+      >
+        <Globe size={16} />
+        Ver site público
+      </Link>
+      <button
+        onClick={onOpenCloud}
+        style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e0d8', fontSize: 14, fontWeight: 600, color: '#6b7280', backgroundColor: '#fff', cursor: 'pointer', fontFamily: "'Poppins', sans-serif", transition: 'all 0.15s' }}
+        onMouseEnter={e => { e.currentTarget.style.borderColor = '#c8972b'; e.currentTarget.style.color = '#c8972b' }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e0d8'; e.currentTarget.style.color = '#6b7280' }}
+      >
+        <Cloud size={16} />
+        Armazenamento
+      </button>
     </div>
   )
 }
@@ -255,14 +257,14 @@ export default function AdminLayout({ children }) {
         style={{ display: 'none', width: 256, flexShrink: 0, backgroundColor: '#ffffff', borderRight: '1px solid #e5e0d8', position: 'sticky', top: 0, height: '100dvh', overflowY: 'auto' }}
       >
         <style>{`@media (min-width:1024px){.admin-sidebar{display:flex!important;flex-direction:column;}}`}</style>
-        <Sidebar onOpenCloud={() => setCloudOpen(true)} />
+        <Sidebar />
       </aside>
 
       {/* Overlay mobile */}
       {open && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 50, backgroundColor: 'rgba(28,28,46,0.45)', backdropFilter: 'blur(2px)' }} onClick={() => setOpen(false)}>
           <aside style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 280, backgroundColor: '#ffffff', borderRight: '1px solid #e5e0d8', boxShadow: '4px 0 32px rgba(0,0,0,0.12)' }} onClick={e => e.stopPropagation()}>
-            <Sidebar onClose={() => setOpen(false)} onOpenCloud={() => { setOpen(false); setCloudOpen(true) }} />
+            <Sidebar onClose={() => setOpen(false)} />
           </aside>
         </div>
       )}
@@ -280,14 +282,23 @@ export default function AdminLayout({ children }) {
             <Menu size={22} />
           </button>
           <span style={{ fontSize: 18, fontWeight: 800, color: '#c8972b', flex: 1 }}>Filhos de Fé</span>
+          <Link to="/" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 8, border: '1px solid #e5e0d8', background: '#fff', color: '#6b7280' }} title="Ver site público">
+            <Globe size={20} />
+          </Link>
           <button
             onClick={() => setCloudOpen(true)}
-            title="Uso do Cloudinary"
+            title="Armazenamento"
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 8, border: '1px solid #e5e0d8', background: '#fff', color: '#6b7280', cursor: 'pointer' }}
           >
             <Cloud size={20} />
           </button>
         </header>
+
+        {/* Desktop top bar */}
+        <div className="admin-topbar" style={{ display: 'none' }}>
+          <style>{`@media (min-width:1024px){.admin-topbar{display:block!important;}}`}</style>
+          <TopBar onOpenCloud={() => setCloudOpen(true)} />
+        </div>
 
         <main
           className="admin-main"
