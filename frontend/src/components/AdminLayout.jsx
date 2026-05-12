@@ -219,7 +219,7 @@ function Sidebar({ onClose }) {
 
 function TopBar({ onOpenCloud }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, padding: '10px 36px', backgroundColor: '#ffffff', borderBottom: '1px solid #e5e0d8' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, padding: '0 36px', minHeight: 88, backgroundColor: '#ffffff', borderBottom: '1px solid #e5e0d8' }}>
       <Link
         to="/"
         target="_blank"
