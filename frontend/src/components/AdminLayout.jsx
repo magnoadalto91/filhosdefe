@@ -6,9 +6,7 @@ import {
   Cloud, AlertCircle,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import axios from 'axios'
-
-const API = import.meta.env.VITE_API_URL
+import api from '../api/axios'
 
 const NAV = [
   { to: '/admin',           label: 'Dashboard',  Icon: LayoutDashboard, exact: true },
@@ -52,7 +50,6 @@ function UsageBar({ used, limit, label, sublabel }) {
 }
 
 function CloudinaryModal({ onClose }) {
-  const { token } = useAuth()
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -61,16 +58,14 @@ function CloudinaryModal({ onClose }) {
     try {
       setLoading(true)
       setError(null)
-      const res = await axios.get(`${API}/api/cloudinary/usage`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const res = await api.get('/cloudinary/usage')
       setData(res.data)
     } catch {
       setError('Não foi possível carregar os dados do Cloudinary.')
     } finally {
       setLoading(false)
     }
-  }, [token])
+  }, [])
 
   useState(() => { load() }, [])
 
