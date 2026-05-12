@@ -282,6 +282,9 @@ export default function AdminLayout({ children }) {
             <Menu size={22} />
           </button>
           <span style={{ fontSize: 18, fontWeight: 800, color: '#c8972b', flex: 1 }}>Filhos de Fé</span>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 8, border: '1px solid #e5e0d8', background: '#fff', color: '#6b7280' }} title="Ver site público">
+            <Globe size={20} />
+          </Link>
           <button
             onClick={() => setCloudOpen(true)}
             title="Armazenamento"
