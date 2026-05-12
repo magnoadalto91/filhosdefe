@@ -222,7 +222,7 @@ function Sidebar({ onClose, onOpenCloud }) {
           onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(200,151,43,0.08)'; e.currentTarget.style.color = '#c8972b' }}
           onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#6b7280' }}
         >
-          <Cloud size={22} /> Uso do Armazenamento
+          <Cloud size={22} /> Armazenamento
         </button>
       </div>
 
