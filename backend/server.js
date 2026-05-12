@@ -14,6 +14,7 @@ import pushRoutes from './src/routes/push.js';
 import notificacoesRoutes from './src/routes/notificacoes.js';
 import publicacoesRoutes from './src/routes/publicacoes.js';
 import documentosRoutes from './src/routes/documentos.js';
+import cloudinaryRoutes from './src/routes/cloudinary.js';
 import { startGirasReminderJob } from './src/jobs/girasReminder.js';
 
 const app = express();
@@ -42,6 +43,7 @@ app.use('/api/push', pushRoutes);
 app.use('/api/notificacoes', notificacoesRoutes);
 app.use('/api/publicacoes', publicacoesRoutes);
 app.use('/api/documentos', documentosRoutes);
+app.use('/api/cloudinary', cloudinaryRoutes);
 
 // 404 handler
 app.use((_req, res) => {

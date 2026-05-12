@@ -1,10 +1,14 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { NavLink, useNavigate, Link } from 'react-router'
 import {
   LayoutDashboard, Music, Leaf, Users, Calendar,
   ListChecks, LogOut, Menu, X, Star, Globe, Layers, Bell, BookOpen,
+  Cloud, AlertCircle,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import axios from 'axios'
+
+const API = import.meta.env.VITE_API_URL
 
 const NAV = [
   { to: '/admin',           label: 'Dashboard',  Icon: LayoutDashboard, exact: true },
@@ -19,7 +23,134 @@ const NAV = [
   { to: '/admin/notificacoes', label: 'Notificações',  Icon: Bell },
 ]
 
-function Sidebar({ onClose }) {
+function formatBytes(bytes) {
+  if (!bytes) return '0 B'
+  const gb = bytes / (1024 ** 3)
+  if (gb >= 1) return `${gb.toFixed(2)} GB`
+  const mb = bytes / (1024 ** 2)
+  if (mb >= 1) return `${mb.toFixed(1)} MB`
+  return `${(bytes / 1024).toFixed(0)} KB`
+}
+
+function UsageBar({ used, limit, label, sublabel }) {
+  const pct = limit > 0 ? Math.min((used / limit) * 100, 100) : 0
+  const pctLabel = pct < 0.01 ? '< 0,01%' : `${pct.toFixed(2)}%`
+  const barColor = pct > 80 ? '#ef4444' : pct > 60 ? '#f59e0b' : '#c8972b'
+
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+        <span style={{ fontSize: 14, fontWeight: 600, color: '#374151' }}>{label}</span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: barColor }}>{pctLabel}</span>
+      </div>
+      <div style={{ height: 6, backgroundColor: '#e5e7eb', borderRadius: 99, overflow: 'hidden', marginBottom: 5 }}>
+        <div style={{ height: '100%', width: `${Math.max(pct, 0.3)}%`, backgroundColor: barColor, borderRadius: 99, transition: 'width 0.6s ease' }} />
+      </div>
+      <span style={{ fontSize: 12, color: '#9ca3af' }}>{sublabel}</span>
+    </div>
+  )
+}
+
+function CloudinaryModal({ onClose }) {
+  const { token } = useAuth()
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  const load = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const res = await axios.get(`${API}/api/cloudinary/usage`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      setData(res.data)
+    } catch {
+      setError('Não foi possível carregar os dados do Cloudinary.')
+    } finally {
+      setLoading(false)
+    }
+  }, [token])
+
+  useState(() => { load() }, [])
+
+  const storageUsed  = data?.storage?.usage ?? 0
+  const storageLimit = data?.storage?.limit ?? 0
+  const bwUsed       = data?.bandwidth?.usage ?? 0
+  const bwLimit      = data?.bandwidth?.limit ?? 0
+  const resources    = data?.resources ?? 0
+  const plan         = (data?.plan ?? 'free').toUpperCase()
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(28,28,46,0.5)', backdropFilter: 'blur(3px)', padding: 20 }}
+      onClick={onClose}
+    >
+      <div
+        style={{ backgroundColor: '#fff', borderRadius: 16, width: '100%', maxWidth: 420, padding: 28, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', fontFamily: "'Poppins', sans-serif" }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#1f2937' }}>Uso dos Serviços</h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex', padding: 4, borderRadius: 6 }}>
+            <X size={20} />
+          </button>
+        </div>
+
+        {loading && (
+          <div style={{ textAlign: 'center', padding: '32px 0', color: '#9ca3af' }}>
+            <div style={{ width: 36, height: 36, border: '3px solid #e5e7eb', borderTopColor: '#c8972b', borderRadius: '50%', margin: '0 auto 12px', animation: 'spin 0.8s linear infinite' }} />
+            <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+            <span style={{ fontSize: 14 }}>Carregando...</span>
+          </div>
+        )}
+
+        {error && !loading && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px', backgroundColor: '#fef2f2', borderRadius: 10, marginBottom: 16 }}>
+            <AlertCircle size={18} color="#dc2626" />
+            <span style={{ fontSize: 13, color: '#dc2626' }}>{error}</span>
+          </div>
+        )}
+
+        {data && !loading && (
+          <>
+            {/* Plan badge */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', backgroundColor: '#f8f5f0', borderRadius: 10, marginBottom: 20 }}>
+              <Cloud size={18} color="#c8972b" />
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#374151', letterSpacing: '0.04em' }}>
+                  SERVIÇO DE FOTOS · PLANO {plan}
+                </div>
+                <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 1 }}>Limites renovam automaticamente todo mês.</div>
+              </div>
+            </div>
+
+            <UsageBar
+              label="Espaço para fotos"
+              used={storageUsed}
+              limit={storageLimit}
+              sublabel={`${formatBytes(storageUsed)} de ${formatBytes(storageLimit)}`}
+            />
+
+            <UsageBar
+              label="Acessos às fotos este mês"
+              used={bwUsed}
+              limit={bwLimit}
+              sublabel={`${formatBytes(bwUsed)} de ${formatBytes(bwLimit)}`}
+            />
+
+            <div style={{ paddingTop: 12, borderTop: '1px solid #f3f4f6', fontSize: 13, color: '#6b7280', fontWeight: 500 }}>
+              {resources.toLocaleString('pt-BR')} arquivos armazenados
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function Sidebar({ onClose, onOpenCloud }) {
   const { logout } = useAuth()
   const navigate   = useNavigate()
   const doLogout   = () => { logout(); navigate('/login') }
@@ -88,6 +219,18 @@ function Sidebar({ onClose }) {
         </Link>
       </div>
 
+      {/* Cloudinary */}
+      <div style={{ padding: '8px 12px 0' }}>
+        <button
+          onClick={() => { onClose?.(); onOpenCloud() }}
+          style={{ display: 'flex', alignItems: 'center', gap: 14, width: '100%', padding: '12px 18px', borderRadius: 8, border: 'none', fontSize: 15, fontWeight: 600, color: '#6b7280', background: 'transparent', cursor: 'pointer', fontFamily: "'Poppins', sans-serif", transition: 'all 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(200,151,43,0.08)'; e.currentTarget.style.color = '#c8972b' }}
+          onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#6b7280' }}
+        >
+          <Cloud size={22} /> Uso do Cloudinary
+        </button>
+      </div>
+
       {/* Logout */}
       <div style={{ padding: '8px 12px 16px', borderTop: '1px solid #e5e0d8', marginTop: 8 }}>
         <button
@@ -106,6 +249,7 @@ function Sidebar({ onClose }) {
 
 export default function AdminLayout({ children }) {
   const [open, setOpen] = useState(false)
+  const [cloudOpen, setCloudOpen] = useState(false)
 
   return (
     <div style={{ display: 'flex', minHeight: '100dvh', backgroundColor: '#f8f5f0', fontFamily: "'Poppins', sans-serif" }}>
@@ -116,14 +260,14 @@ export default function AdminLayout({ children }) {
         style={{ display: 'none', width: 256, flexShrink: 0, backgroundColor: '#ffffff', borderRight: '1px solid #e5e0d8', position: 'sticky', top: 0, height: '100dvh', overflowY: 'auto' }}
       >
         <style>{`@media (min-width:1024px){.admin-sidebar{display:flex!important;flex-direction:column;}}`}</style>
-        <Sidebar />
+        <Sidebar onOpenCloud={() => setCloudOpen(true)} />
       </aside>
 
       {/* Overlay mobile */}
       {open && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 50, backgroundColor: 'rgba(28,28,46,0.45)', backdropFilter: 'blur(2px)' }} onClick={() => setOpen(false)}>
           <aside style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 280, backgroundColor: '#ffffff', borderRight: '1px solid #e5e0d8', boxShadow: '4px 0 32px rgba(0,0,0,0.12)' }} onClick={e => e.stopPropagation()}>
-            <Sidebar onClose={() => setOpen(false)} />
+            <Sidebar onClose={() => setOpen(false)} onOpenCloud={() => { setOpen(false); setCloudOpen(true) }} />
           </aside>
         </div>
       )}
@@ -140,7 +284,14 @@ export default function AdminLayout({ children }) {
           <button onClick={() => setOpen(true)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 8, border: '1px solid #e5e0d8', background: '#fff', color: '#2c2c3e', cursor: 'pointer' }}>
             <Menu size={22} />
           </button>
-          <span style={{ fontSize: 18, fontWeight: 800, color: '#c8972b' }}>Filhos de Fé</span>
+          <span style={{ fontSize: 18, fontWeight: 800, color: '#c8972b', flex: 1 }}>Filhos de Fé</span>
+          <button
+            onClick={() => setCloudOpen(true)}
+            title="Uso do Cloudinary"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 8, border: '1px solid #e5e0d8', background: '#fff', color: '#6b7280', cursor: 'pointer' }}
+          >
+            <Cloud size={20} />
+          </button>
         </header>
 
         <main
@@ -151,6 +302,8 @@ export default function AdminLayout({ children }) {
           {children}
         </main>
       </div>
+
+      {cloudOpen && <CloudinaryModal onClose={() => setCloudOpen(false)} />}
     </div>
   )
 }
