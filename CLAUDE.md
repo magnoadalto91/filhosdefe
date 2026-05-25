@@ -15,7 +15,7 @@ Site para gerenciar / controlar as obrigações no terreiro de umbanda, o nome d
 
 ### Backend (criar pasta separada)
 - Node.js + Express 5
-- Prisma ORM + PostgreSQL (Railway)
+- Prisma ORM + PostgreSQL (Neon)
 - Cloudinary para storage de imagens
 - JWT + bcrypt para autenticação
 - Multer para upload de arquivos (memoryStorage)
@@ -32,17 +32,26 @@ Site para gerenciar / controlar as obrigações no terreiro de umbanda, o nome d
   ```
   npm install axios@1.7.9
   ```
-- **Node.js**: os pacotes exigem Node >= 20. O Railway é forçado via `nixpacks.toml` em ambas as pastas.
+- **Node.js**: os pacotes exigem Node >= 20.
 
-## Deploy — Railway
+## Deploy — Vercel + Neon
 
 - Repositório: https://github.com/magnoadalto91/filhosdefe.git
-- Projeto Railway com 3 serviços: PostgreSQL, backend, frontend
-- `railway.json` em cada pasta define o start command
-- **Backend start:** `npx prisma migrate deploy && node server.js`
-  (migrations rodam automaticamente no deploy)
-- **Frontend start:** `npx serve dist -s -l $PORT`
-  (build estático servido pelo `serve`)
+- **Banco de dados:** Neon PostgreSQL (sa-east-1) — pooler URL configurada em `DATABASE_URL`
+- **Backend:** Vercel (projeto separado) — `backend/vercel.json` roteia tudo para `server.js`
+  - Build command: `prisma generate && prisma migrate deploy` (script `vercel-build`)
+  - Migrations rodam automaticamente em cada deploy
+  - Cron job de lembretes de Gira: `POST /api/cron/giras-reminder` — agendado às 11:00 UTC (08:00 BRT) via Vercel Crons
+- **Frontend:** Vercel (projeto separado) — `frontend/vercel.json` redireciona tudo para `index.html` (SPA)
+  - Env var obrigatória no painel Vercel: `VITE_API_URL=<url-do-backend-vercel>`
+
+### Env vars necessárias no backend Vercel:
+- `DATABASE_URL` — URL do Neon (pooler)
+- `JWT_SECRET`
+- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
+- `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_MAILTO`
+- `RESEND_API_KEY`
+- `CRON_SECRET` — gerado automaticamente pelo Vercel (protege o endpoint de cron)
 
 ## Permissões e fluxo de trabalho
 

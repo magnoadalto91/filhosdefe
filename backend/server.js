@@ -15,7 +15,7 @@ import notificacoesRoutes from './src/routes/notificacoes.js';
 import publicacoesRoutes from './src/routes/publicacoes.js';
 import documentosRoutes from './src/routes/documentos.js';
 import cloudinaryRoutes from './src/routes/cloudinary.js';
-import { startGirasReminderJob } from './src/jobs/girasReminder.js';
+import cronRoutes from './src/routes/cron.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -44,6 +44,7 @@ app.use('/api/notificacoes', notificacoesRoutes);
 app.use('/api/publicacoes', publicacoesRoutes);
 app.use('/api/documentos', documentosRoutes);
 app.use('/api/cloudinary', cloudinaryRoutes);
+app.use('/api/cron', cronRoutes);
 
 // 404 handler
 app.use((_req, res) => {
@@ -58,7 +59,13 @@ app.use((err, _req, res, _next) => {
   res.status(status).json({ error: message });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  startGirasReminderJob();
-});
+// Em desenvolvimento local, sobe o servidor normalmente
+if (process.env.VERCEL !== '1') {
+  const { startGirasReminderJob } = await import('./src/jobs/girasReminder.js');
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    startGirasReminderJob();
+  });
+}
+
+export default app;
