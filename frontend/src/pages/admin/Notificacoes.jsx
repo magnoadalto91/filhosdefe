@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Users, Leaf, Music, Calendar, Clock, Save, BookOpen, FileText } from 'lucide-react'
+import { Users, Leaf, Music, Calendar, Save, BookOpen, FileText } from 'lucide-react'
 import api from '../../api/axios'
 import LoadingSpinner from '../../components/LoadingSpinner'
 
@@ -94,30 +94,11 @@ export default function AdminNotificacoes() {
       {/* Lembretes de gira */}
       <div style={S.card}>
         <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'1.5px', color:'#c8972b', marginBottom:4 }}>Lembretes de Gira</div>
-        <p style={{ margin:'0 0 4px', fontSize:12, color:'#9ca3af' }}>Enviados automaticamente no horário configurado</p>
+        <p style={{ margin:'0 0 4px', fontSize:12, color:'#9ca3af' }}>Enviados automaticamente às 08h (horário de Brasília)</p>
 
         <Row Icon={Calendar} label="1 semana antes" sub="7 dias antes da data da gira" field="gira1Semana" cfg={cfg} onChange={set}/>
         <Row Icon={Calendar} label="1 dia antes"    sub="Na véspera da gira"            field="gira1Dia"   cfg={cfg} onChange={set}/>
         <Row Icon={Calendar} label="No dia"         sub="Na manhã do dia da gira"       field="giraNoDia"  cfg={cfg} onChange={set}/>
-
-        {/* Hora de envio */}
-        <div style={{ display:'flex', alignItems:'center', gap:14, paddingTop:16, marginTop:4 }}>
-          <div style={{ width:36, height:36, borderRadius:8, backgroundColor:'rgba(200,151,43,0.1)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-            <Clock size={16} color="#c8972b"/>
-          </div>
-          <div style={{ flex:1 }}>
-            <div style={S.label}>Horário de envio</div>
-            <div style={S.sub}>Hora do dia em que os lembretes serão disparados</div>
-          </div>
-          <input
-            type="time"
-            value={cfg.horaEnvio}
-            onChange={e => set('horaEnvio', e.target.value)}
-            style={S.input}
-            onFocus={e=>e.currentTarget.style.borderColor='#c8972b'}
-            onBlur={e=>e.currentTarget.style.borderColor='#e5e0d8'}
-          />
-        </div>
       </div>
 
       {/* Salvar */}

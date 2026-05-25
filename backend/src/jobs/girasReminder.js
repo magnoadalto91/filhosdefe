@@ -61,17 +61,10 @@ async function checkReminders() {
 }
 
 export function startGirasReminderJob() {
-  // Roda todo dia no horário configurado (checa a cada minuto, executa 1x/dia na hora certa)
-  cron.schedule('* * * * *', async () => {
+  // Roda todo dia às 08:00 (dev local) — em produção o Vercel Cron dispara o endpoint
+  cron.schedule('0 8 * * *', async () => {
     try {
-      const cfg = await prisma.notificacaoConfig.findUnique({ where: { id: 1 } })
-      if (!cfg) return
-
-      const [hh, mm] = cfg.horaEnvio.split(':').map(Number)
-      const now = new Date()
-      if (now.getHours() === hh && now.getMinutes() === mm) {
-        await checkReminders()
-      }
+      await checkReminders()
     } catch (err) {
       console.error('[girasReminder]', err.message)
     }
