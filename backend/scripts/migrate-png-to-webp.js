@@ -2,6 +2,7 @@
  * Migra todas as imagens PNG salvas no banco para WebP no Cloudinary.
  * Uso: node scripts/migrate-png-to-webp.js
  */
+
 import 'dotenv/config'
 import { PrismaClient } from '@prisma/client'
 import { v2 as cloudinary } from 'cloudinary'
