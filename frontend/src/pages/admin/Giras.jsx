@@ -22,7 +22,12 @@ const STATUS_META = {
   CONCLUIDA:    { label: 'Concluída',    color: '#16a34a', bg: 'rgba(22,163,74,0.08)',   border: 'rgba(22,163,74,0.25)' },
 }
 
-const emptyForm = { titulo:'', data:'', descricao:'', instrucoes:'' }
+const emptyForm = { titulo:'', data:'', hora:'19:00', descricao:'', instrucoes:'' }
+
+function fmtHora(iso) {
+  const d = new Date(iso)
+  return `${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}`
+}
 
 /* ── MultiSelect ──────────────────────────────── */
 function MultiSelect({ label, Icon, allItems, selectedIds, onChange, nameKey='titulo' }) {
@@ -78,9 +83,15 @@ function GiraForm({ form, setForm, error, assoc, setAssoc, allEntidades, allMusi
         <label style={S.label}>Título *</label>
         <input style={S.input} value={form.titulo} onChange={e=>setForm(f=>({...f,titulo:e.target.value}))} placeholder="Título da gira" onFocus={focus} onBlur={blur}/>
       </div>
-      <div style={{ marginBottom:16 }}>
-        <label style={S.label}>Data *</label>
-        <input type="date" style={{...S.input,colorScheme:'light'}} value={form.data} onChange={e=>setForm(f=>({...f,data:e.target.value}))} onFocus={focus} onBlur={blur}/>
+      <div style={{ display:'flex', gap:12, marginBottom:16 }}>
+        <div style={{ flex:2 }}>
+          <label style={S.label}>Data *</label>
+          <input type="date" style={{...S.input,colorScheme:'light'}} value={form.data} onChange={e=>setForm(f=>({...f,data:e.target.value}))} onFocus={focus} onBlur={blur}/>
+        </div>
+        <div style={{ flex:1 }}>
+          <label style={S.label}>Horário *</label>
+          <input type="time" style={{...S.input,colorScheme:'light'}} value={form.hora} onChange={e=>setForm(f=>({...f,hora:e.target.value}))} onFocus={focus} onBlur={blur}/>
+        </div>
       </div>
       <div style={{ marginBottom:16 }}>
         <label style={S.label}>Descrição</label>
@@ -107,6 +118,7 @@ function GiraCard({ gira, onEdit, onDelete, onStatusChange }) {
   const d = new Date(gira.data)
   const dateLocal = new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
   const dateStr = dateLocal.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'})
+  const timeStr = fmtHora(gira.data)
 
   return (
     <div style={{ backgroundColor:'#fff', borderRadius:10, border:'1px solid #e5e0d8', padding:'18px 20px', marginBottom:10, boxShadow:'0 2px 8px rgba(0,0,0,0.05)', opacity: concluida ? 0.8 : 1 }}>
@@ -115,7 +127,7 @@ function GiraCard({ gira, onEdit, onDelete, onStatusChange }) {
           <div style={{ fontSize:16, fontWeight:700, color:'#2c2c3e', marginBottom:6 }}>{gira.titulo}</div>
           <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
             <span style={{ display:'flex', alignItems:'center', gap:4, fontSize:12, color:'#9ca3af' }}>
-              <Clock size={11}/>{dateStr}
+              <Clock size={11}/>{dateStr} às {timeStr}
             </span>
             {/* Badge de status */}
             <span style={{ fontSize:11, fontWeight:700, padding:'2px 10px', borderRadius:20, backgroundColor:meta.bg, color:meta.color, border:`1px solid ${meta.border}` }}>
@@ -226,7 +238,7 @@ export default function AdminGiras() {
 
   const openEdit = async (g, readOnly=false) => {
     setEditTarget(g); setViewOnly(readOnly)
-    setForm({ titulo:g.titulo||'', data:g.data?g.data.split('T')[0]:'', descricao:g.descricao||'', instrucoes:g.instrucoes||'' })
+    setForm({ titulo:g.titulo||'', data:g.data?g.data.split('T')[0]:'', hora:g.data?fmtHora(g.data):'19:00', descricao:g.descricao||'', instrucoes:g.instrucoes||'' })
     setAssoc({ entidades:[], musicas:[], rotinas:[] })
     setFormError(''); setModalOpen(true)
     try {
@@ -242,9 +254,10 @@ export default function AdminGiras() {
   const handleSave = async () => {
     if (!form.titulo.trim()) { setFormError('Título é obrigatório.'); return }
     if (!form.data)          { setFormError('Data é obrigatória.');   return }
+    if (!form.hora)          { setFormError('Horário é obrigatório.'); return }
     setSaving(true); setFormError('')
     try {
-      const payload = { ...form, ...assoc }
+      const payload = { ...form, data: `${form.data}T${form.hora}:00.000Z`, ...assoc }
       editTarget ? await api.put(`/giras/${editTarget.id}`, payload) : await api.post('/giras', payload)
       setModalOpen(false); load()
     } catch(err) { setFormError(err.response?.data?.error || 'Erro ao salvar.') }

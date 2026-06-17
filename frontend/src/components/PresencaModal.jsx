@@ -4,9 +4,10 @@ import { useAuth } from '../contexts/AuthContext'
 import api from '../api/axios'
 
 function fmtData(iso) {
-  return new Date(iso).toLocaleDateString('pt-BR', {
-    weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
-  })
+  const d = new Date(iso)
+  const date = new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+  const hora = `${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}`
+  return `${date.toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' })} às ${hora}`
 }
 
 export default function PresencaModal() {

@@ -11,6 +11,13 @@ function parseUTC(iso) {
   return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
 }
 
+function fmtHora(iso) {
+  const d = new Date(iso)
+  const h = String(d.getUTCHours()).padStart(2, '0')
+  const m = String(d.getUTCMinutes()).padStart(2, '0')
+  return `${h}:${m}`
+}
+
 const DAYS_OF_WEEK = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 const MONTHS = [
   'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
@@ -153,13 +160,14 @@ function GiraDetailModal({ giraId, onClose, onEntityClick, onMusicClick }) {
   const dateStr = gira
     ? parseUTC(gira.data).toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
     : ''
+  const timeStr = gira ? fmtHora(gira.data) : ''
 
   return (
     <Modal isOpen={!!giraId} onClose={onClose} title={gira?.titulo || '...'}>
       {loading ? <LoadingSpinner/> : gira ? (
         <div style={{ display:'flex', flexDirection:'column', gap:20, ...S }}>
 
-          <div style={{ fontSize:13, fontWeight:600, color:'#c8972b', textTransform:'capitalize' }}>{dateStr}</div>
+          <div style={{ fontSize:13, fontWeight:600, color:'#c8972b', textTransform:'capitalize' }}>{dateStr} às {timeStr}</div>
 
           {gira.descricao && (
             <p style={{ margin:0, fontSize:14, lineHeight:1.7, color:'#2c2c3e' }}>{gira.descricao}</p>
@@ -267,7 +275,8 @@ function GiraListCard({ gira, onClick }) {
       </div>
       <div style={{ flex:1, minWidth:0 }}>
         <div style={{ fontSize:14, fontWeight:600, color:'#2c2c3e', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{gira.titulo}</div>
-        {gira.descricao && <div style={{ fontSize:12, color:'#6b7280', marginTop:2, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{gira.descricao}</div>}
+        <div style={{ fontSize:12, color:'#9ca3af', marginTop:2 }}>{fmtHora(gira.data)}</div>
+        {gira.descricao && <div style={{ fontSize:12, color:'#6b7280', marginTop:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{gira.descricao}</div>}
       </div>
     </button>
   )
