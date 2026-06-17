@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Music, Leaf, Users, Calendar, ListChecks, Plus, GlassWater, Droplets, Wind } from 'lucide-react'
+import { Music, Leaf, Users, Calendar, Plus, GlassWater, Droplets, Wind } from 'lucide-react'
 import { Link } from 'react-router'
 import api from '../../api/axios'
 import { useAuth } from '../../contexts/AuthContext'
@@ -13,7 +13,6 @@ const STAT_CARDS = [
   { key:'cigarros',  label:'Cigarros / Charutos', Icon:Wind,        color:'#6b7280', to:'/admin/cigarros' },
   { key:'entidades', label:'Orixás / Entidades',  Icon:Users,       color:'#c8972b', to:'/admin/entidades' },
   { key:'giras',     label:'Giras',               Icon:Calendar,    color:'#dc2626', to:'/admin/giras' },
-  { key:'rotinas',   label:'Rotinas',             Icon:ListChecks,  color:'#0284c7', to:'/admin/rotinas' },
 ]
 
 const QUICK = [
@@ -37,10 +36,10 @@ export default function Dashboard() {
     Promise.allSettled([
       api.get('/musicas'), api.get('/ervas'), api.get('/bebidas'),
       api.get('/banhos'), api.get('/cigarros'),
-      api.get('/entidades'), api.get('/giras'), api.get('/rotinas'),
-    ]).then(([m, e, b, bh, ci, en, g, r]) => {
+      api.get('/entidades'), api.get('/giras'),
+    ]).then(([m, e, b, bh, ci, en, g]) => {
       const n = res => res.status === 'rejected' ? 0 : (Array.isArray(res.value.data) ? res.value.data.length : (res.value.data.total || res.value.data.count || 0))
-      setStats({ musicas:n(m), ervas:n(e), bebidas:n(b), banhos:n(bh), cigarros:n(ci), entidades:n(en), giras:n(g), rotinas:n(r) })
+      setStats({ musicas:n(m), ervas:n(e), bebidas:n(b), banhos:n(bh), cigarros:n(ci), entidades:n(en), giras:n(g) })
     }).finally(() => setLoading(false))
   }, [])
 

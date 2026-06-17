@@ -24,7 +24,6 @@ import AdminBanhos from './pages/admin/Banhos'
 import AdminCigarros from './pages/admin/Cigarros'
 import AdminEntidades from './pages/admin/Entidades'
 import AdminGiras from './pages/admin/Giras'
-import AdminRotinas from './pages/admin/Rotinas'
 import AdminUsuarios from './pages/admin/Usuarios'
 import AdminAgregadores from './pages/admin/Agregadores'
 import AdminNotificacoes from './pages/admin/Notificacoes'
@@ -77,7 +76,6 @@ export default function App() {
           <Route path="/admin/cigarros" element={<AdminPage><AdminCigarros /></AdminPage>} />
           <Route path="/admin/entidades" element={<AdminPage><AdminEntidades /></AdminPage>} />
           <Route path="/admin/giras" element={<AdminPage><AdminGiras /></AdminPage>} />
-          <Route path="/admin/rotinas" element={<AdminPage><AdminRotinas /></AdminPage>} />
           <Route path="/admin/usuarios"    element={<AdminPage><AdminUsuarios /></AdminPage>} />
           <Route path="/admin/agregadores"   element={<AdminPage><AdminAgregadores /></AdminPage>} />
           <Route path="/admin/estudos"      element={<AdminPage><AdminEstudos /></AdminPage>} />

@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from 'react'
-import { ChevronLeft, ChevronRight, Calendar, Users, Music, ListChecks, FileText, Play, ArrowLeft } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar, Users, Music, FileText, Play, ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import api from '../api/axios'
 import Modal from '../components/Modal'
@@ -156,7 +156,6 @@ function GiraDetailModal({ giraId, onClose, onEntityClick, onMusicClick }) {
 
   const entidades = gira?.entidades?.map(e => e.entidade).filter(Boolean) || []
   const musicas   = gira?.musicas?.map(m => m.musica).filter(Boolean)     || []
-  const rotinas   = gira?.rotinas?.map(r => r.rotina).filter(Boolean)     || []
 
   const dateStr = gira
     ? parseUTC(gira.data).toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
@@ -218,25 +217,7 @@ function GiraDetailModal({ giraId, onClose, onEntityClick, onMusicClick }) {
             </div>
           )}
 
-          {/* Rotinas */}
-          {rotinas.length > 0 && (
-            <div>
-              <SecLabel Icon={ListChecks} text="Rotinas"/>
-              <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-                {rotinas.map((r, i) => (
-                  <div key={r.id} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 14px', borderRadius:6, backgroundColor:'#f8f5f0', border:'1px solid #e5e0d8' }}>
-                    <span style={{ fontSize:11, fontWeight:700, color:'#c8972b', minWidth:22, fontFamily:'monospace', marginTop:2 }}>{String(i+1).padStart(2,'0')}.</span>
-                    <div>
-                      <div style={{ fontSize:14, color:'#2c2c3e', fontWeight:500 }}>{r.titulo}</div>
-                      {r.descricao && <div style={{ fontSize:12, color:'#6b7280', marginTop:2 }}>{r.descricao}</div>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {entidades.length===0 && musicas.length===0 && rotinas.length===0 && (
+          {entidades.length===0 && musicas.length===0 && (
             <p style={{ margin:0, fontSize:13, color:'#9ca3af' }}>Nenhum vínculo cadastrado para esta gira.</p>
           )}
         </div>
