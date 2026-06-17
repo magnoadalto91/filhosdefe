@@ -11,14 +11,25 @@ export async function registerPush() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
 
   try {
-    // Garante que o SW está registrado e aguarda ele ficar ativo
+    // Registra o SW e aguarda ficar ativo
     await navigator.serviceWorker.register('/sw.js')
     const reg = await navigator.serviceWorker.ready
 
-    if (Notification.permission === 'denied') return
-    const permission = Notification.permission === 'granted'
+    // Reporta o estado atual de permissão ao servidor (sempre, antes de qualquer decisão)
+    const currentPermission = Notification.permission
+    api.post('/push/permissao', { permissao: currentPermission }).catch(() => {})
+
+    if (currentPermission === 'denied') return
+
+    const permission = currentPermission === 'granted'
       ? 'granted'
       : await Notification.requestPermission()
+
+    // Reporta novamente se mudou (ex.: usuário acabou de conceder ou negar)
+    if (permission !== currentPermission) {
+      api.post('/push/permissao', { permissao: permission }).catch(() => {})
+    }
+
     if (permission !== 'granted') return
 
     const { data } = await api.get('/push/vapid-public-key')

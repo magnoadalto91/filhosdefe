@@ -24,6 +24,11 @@ export async function sendPushToAll(title, body, data = {}) {
         // Subscription expirada ou inválida → remove do banco
         if (err.statusCode === 404 || err.statusCode === 410) {
           await prisma.pushSubscription.delete({ where: { id: s.id } }).catch(() => {})
+          // Se o usuário ficou sem nenhuma subscrição, marca como revogada
+          const remaining = await prisma.pushSubscription.count({ where: { userId: s.userId } }).catch(() => 1)
+          if (remaining === 0) {
+            await prisma.user.update({ where: { id: s.userId }, data: { pushPermissao: 'revogada' } }).catch(() => {})
+          }
         }
         throw err
       })

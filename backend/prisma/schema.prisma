@@ -25,6 +25,7 @@ model User {
   nome              String?
   password          String
   role              Role               @default(USER)
+  pushPermissao     String?
   createdAt         DateTime           @default(now())
   pushSubscriptions PushSubscription[]
   presencas         PresencaGira[]

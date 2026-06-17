@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Users, Leaf, Music, Calendar, Save, BookOpen, FileText, Bell, BellOff } from 'lucide-react'
+import { Users, Leaf, Music, Calendar, Save, BookOpen, FileText, Bell, BellOff, AlertTriangle, HelpCircle } from 'lucide-react'
 import api from '../../api/axios'
 import LoadingSpinner from '../../components/LoadingSpinner'
 
@@ -37,6 +37,46 @@ function Row({ Icon, label, sub, field, cfg, onChange }) {
       <Toggle value={!!cfg[field]} onChange={v => onChange(field, v)}/>
     </div>
   )
+}
+
+function pushEstado(u) {
+  if (u.pushAtivo) return {
+    label: 'Ativo', Icon: Bell,
+    bg: 'rgba(22,163,74,0.04)', border: 'rgba(22,163,74,0.18)',
+    iconBg: 'rgba(22,163,74,0.1)', iconColor: '#16a34a',
+    badgeBg: 'rgba(22,163,74,0.1)', badgeColor: '#16a34a',
+  }
+  if (u.pushPermissao === 'denied') return {
+    label: 'Bloqueado', Icon: BellOff,
+    bg: 'rgba(220,38,38,0.03)', border: 'rgba(220,38,38,0.15)',
+    iconBg: 'rgba(220,38,38,0.08)', iconColor: '#dc2626',
+    badgeBg: 'rgba(220,38,38,0.08)', badgeColor: '#dc2626',
+  }
+  if (u.pushPermissao === 'revogada') return {
+    label: 'Revogada', Icon: AlertTriangle,
+    bg: 'rgba(217,119,6,0.04)', border: 'rgba(217,119,6,0.2)',
+    iconBg: 'rgba(217,119,6,0.1)', iconColor: '#d97706',
+    badgeBg: 'rgba(217,119,6,0.1)', badgeColor: '#d97706',
+  }
+  if (u.pushPermissao === 'default') return {
+    label: 'Nunca ativou', Icon: BellOff,
+    bg: '#fafafa', border: '#f0ece5',
+    iconBg: 'rgba(200,151,43,0.07)', iconColor: '#d1cdc8',
+    badgeBg: 'rgba(200,185,170,0.15)', badgeColor: '#b0a89e',
+  }
+  // null ou 'granted' sem subscrição (expirou)
+  if (u.pushPermissao === 'granted') return {
+    label: 'Expirada', Icon: AlertTriangle,
+    bg: 'rgba(217,119,6,0.04)', border: 'rgba(217,119,6,0.15)',
+    iconBg: 'rgba(217,119,6,0.1)', iconColor: '#d97706',
+    badgeBg: 'rgba(217,119,6,0.1)', badgeColor: '#d97706',
+  }
+  return {
+    label: 'Sem info', Icon: HelpCircle,
+    bg: '#fafafa', border: '#f0ece5',
+    iconBg: '#f0ece5', iconColor: '#d1cdc8',
+    badgeBg: '#f0ece5', badgeColor: '#b0a89e',
+  }
 }
 
 export default function AdminNotificacoes() {
@@ -133,24 +173,25 @@ export default function AdminNotificacoes() {
           <p style={{ margin:0, fontSize:13, color:'#9ca3af' }}>Nenhum usuário cadastrado.</p>
         ) : (
           <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-            {usuarios.map(u => (
-              <div key={u.id} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', borderRadius:8, backgroundColor: u.pushAtivo ? 'rgba(22,163,74,0.04)' : '#fafafa', border:`1px solid ${u.pushAtivo ? 'rgba(22,163,74,0.18)' : '#f0ece5'}` }}>
-                <div style={{ width:32, height:32, borderRadius:'50%', backgroundColor: u.pushAtivo ? 'rgba(22,163,74,0.1)' : 'rgba(200,151,43,0.07)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                  {u.pushAtivo
-                    ? <Bell    size={14} color="#16a34a"/>
-                    : <BellOff size={14} color="#d1cdc8"/>}
-                </div>
-                <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontSize:13, fontWeight:600, color:'#2c2c3e', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                    {u.nome || u.email}
+            {usuarios.map(u => {
+              const estado = pushEstado(u)
+              return (
+                <div key={u.id} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', borderRadius:8, backgroundColor: estado.bg, border:`1px solid ${estado.border}` }}>
+                  <div style={{ width:32, height:32, borderRadius:'50%', backgroundColor: estado.iconBg, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    <estado.Icon size={14} color={estado.iconColor}/>
                   </div>
-                  {u.nome && <div style={{ fontSize:11, color:'#9ca3af', marginTop:1 }}>{u.email}</div>}
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontSize:13, fontWeight:600, color:'#2c2c3e', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                      {u.nome || u.email}
+                    </div>
+                    {u.nome && <div style={{ fontSize:11, color:'#9ca3af', marginTop:1 }}>{u.email}</div>}
+                  </div>
+                  <span style={{ fontSize:11, fontWeight:700, padding:'3px 10px', borderRadius:20, flexShrink:0, backgroundColor: estado.badgeBg, color: estado.badgeColor }}>
+                    {estado.label}
+                  </span>
                 </div>
-                <span style={{ fontSize:11, fontWeight:700, padding:'3px 10px', borderRadius:20, flexShrink:0, backgroundColor: u.pushAtivo ? 'rgba(22,163,74,0.1)' : 'rgba(200,185,170,0.15)', color: u.pushAtivo ? '#16a34a' : '#b0a89e' }}>
-                  {u.pushAtivo ? 'Ativo' : 'Não ativado'}
-                </span>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>

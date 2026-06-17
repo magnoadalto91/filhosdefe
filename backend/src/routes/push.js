@@ -28,6 +28,20 @@ router.post('/subscribe', authenticate, async (req, res) => {
   }
 })
 
+// POST /api/push/permissao — salva o estado de Notification.permission do cliente
+router.post('/permissao', authenticate, async (req, res) => {
+  const { permissao } = req.body
+  if (!['granted', 'denied', 'default'].includes(permissao)) {
+    return res.status(400).json({ error: 'Valor inválido.' })
+  }
+  try {
+    await prisma.user.update({ where: { id: req.user.id }, data: { pushPermissao: permissao } })
+    return res.json({ ok: true })
+  } catch (err) {
+    return res.status(500).json({ error: err.message })
+  }
+})
+
 // DELETE /api/push/unsubscribe
 router.delete('/unsubscribe', authenticate, async (req, res) => {
   const { endpoint } = req.body
