@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react'
 /* ─── Participate cards ──────────────────────────────────── */
 const CARDS = [
   { title: 'Orixás / Entidades', to: '/aprenda?tab=entidades', bg: '#2c2c3e' },
-  { title: 'Ervas Sagradas',     to: '/aprenda?tab=ervas',     bg: '#1a3a2a' },
+  { title: 'Ervas / Bebidas',     to: '/aprenda?tab=ervas',     bg: '#1a3a2a' },
   { title: 'Pontos Cantados',    to: '/aprenda?tab=musicas',   bg: '#3a2a1a' },
   { title: 'Giras',              to: '/calendario',             bg: '#1a1a3a' },
 ]

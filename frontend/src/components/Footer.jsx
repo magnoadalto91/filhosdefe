@@ -60,7 +60,7 @@ export default function Footer() {
         <div>
           <h3 style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', color: '#ffffff', marginBottom: 20 }}>Conteúdo</h3>
           <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {['Orixás / Entidades', 'Ervas Sagradas', 'Pontos Cantados', 'Próximas Giras', 'Ervas do Quintal'].map(item => (
+            {['Orixás / Entidades', 'Ervas / Bebidas', 'Pontos Cantados', 'Próximas Giras', 'Ervas do Quintal'].map(item => (
               <li key={item} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, color: '#9ca3af' }}>
                 <ArrowRight size={13} style={{ color: '#c8972b', flexShrink: 0 }} /> {item}
               </li>

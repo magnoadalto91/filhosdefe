@@ -64,6 +64,7 @@ model NotificacaoConfig {
   id           Int      @id @default(1)
   novaEntidade Boolean  @default(true)
   novaErva     Boolean  @default(true)
+  novaBebida   Boolean  @default(true)
   novaMusica   Boolean  @default(true)
   novaGira       Boolean  @default(true)
   novaPublicacao Boolean  @default(true)
@@ -106,6 +107,17 @@ model Erva {
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
   entidades  EntidadeErva[]
+}
+
+model Bebida {
+  id           Int      @id @default(autoincrement())
+  nome         String
+  descricao    String
+  ingredientes String
+  preparo      String?
+  fotoUrl      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Entidade {

@@ -3,7 +3,7 @@ import { NavLink, useNavigate, Link } from 'react-router'
 import {
   LayoutDashboard, Music, Leaf, Users, Calendar,
   ListChecks, LogOut, Menu, X, Star, Globe, Layers, Bell, BookOpen,
-  Cloud, AlertCircle,
+  Cloud, AlertCircle, GlassWater,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../api/axios'
@@ -13,6 +13,7 @@ const NAV = [
   { to: '/admin/musicas',     label: 'Músicas',    Icon: Music },
   { to: '/admin/agregadores', label: 'Agregadores', Icon: Layers },
   { to: '/admin/ervas',     label: 'Ervas',      Icon: Leaf },
+  { to: '/admin/bebidas',   label: 'Bebidas',    Icon: GlassWater },
   { to: '/admin/entidades', label: 'Orixás / Entidades', Icon: Users },
   { to: '/admin/giras',     label: 'Giras',      Icon: Calendar },
   { to: '/admin/rotinas',   label: 'Rotinas',    Icon: ListChecks },

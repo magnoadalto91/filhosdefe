@@ -14,6 +14,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/admin/Dashboard'
 import AdminMusicas from './pages/admin/Musicas'
 import AdminErvas from './pages/admin/Ervas'
+import AdminBebidas from './pages/admin/Bebidas'
 import AdminEntidades from './pages/admin/Entidades'
 import AdminGiras from './pages/admin/Giras'
 import AdminRotinas from './pages/admin/Rotinas'
@@ -59,6 +60,7 @@ export default function App() {
           <Route path="/admin" element={<AdminPage><Dashboard /></AdminPage>} />
           <Route path="/admin/musicas" element={<AdminPage><AdminMusicas /></AdminPage>} />
           <Route path="/admin/ervas" element={<AdminPage><AdminErvas /></AdminPage>} />
+          <Route path="/admin/bebidas" element={<AdminPage><AdminBebidas /></AdminPage>} />
           <Route path="/admin/entidades" element={<AdminPage><AdminEntidades /></AdminPage>} />
           <Route path="/admin/giras" element={<AdminPage><AdminGiras /></AdminPage>} />
           <Route path="/admin/rotinas" element={<AdminPage><AdminRotinas /></AdminPage>} />

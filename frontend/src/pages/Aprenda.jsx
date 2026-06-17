@@ -1,14 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router'
-import { Users, Leaf, Music, Play, ChevronDown, Search, X, Youtube } from 'lucide-react'
+import { Users, Leaf, Music, Play, ChevronDown, Search, X, Youtube, GlassWater } from 'lucide-react'
 import api from '../api/axios'
 import LoadingSpinner from '../components/LoadingSpinner'
 import Modal from '../components/Modal'
 
 const TABS = [
   { id: 'entidades', label: 'Orixás / Entidades', Icon: Users },
-  { id: 'ervas', label: 'Ervas', Icon: Leaf },
-  { id: 'musicas', label: 'Musicas', Icon: Music },
+  { id: 'ervas',     label: 'Ervas / Bebidas',    Icon: Leaf },
+  { id: 'musicas',   label: 'Musicas',             Icon: Music },
+]
+
+const ERVA_SUBTABS = [
+  { id: 'ervas',    label: 'Ervas',    Icon: Leaf },
+  { id: 'bebidas',  label: 'Bebidas',  Icon: GlassWater },
 ]
 
 /* ── Entity Card ─────────────────────────────────────────── */
@@ -32,27 +37,22 @@ function EntityCard({ entity, onClick }) {
       onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,0.14)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
       onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.07)'; e.currentTarget.style.transform = 'translateY(0)' }}
     >
-      {/* Imagem */}
       <div style={{ width: 110, flexShrink: 0, backgroundColor: '#f8f5f0', position: 'relative', overflow: 'hidden' }}>
         {entity.fotoUrl
           ? <img src={entity.fotoUrl} alt={entity.nome} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', minHeight: 110 }}/>
           : <div style={{ width: '100%', minHeight: 110, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Users size={32} style={{ color: '#e5e0d8' }}/></div>}
       </div>
-
-      {/* Conteúdo com seções */}
       <div style={{ flex: 1, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0, textAlign: 'left' }}>
         <div>
           <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#c8972b', marginBottom: 2 }}>Nome</div>
           <div style={{ fontSize: 15, fontWeight: 700, color: '#2c2c3e', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entity.nome}</div>
         </div>
-
         {entity.saudacao && (
           <div>
             <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#c8972b', marginBottom: 2 }}>Saudação</div>
             <div style={{ fontSize: 13, fontStyle: 'italic', color: '#6b7280' }}>"{entity.saudacao}"</div>
           </div>
         )}
-
         {entity.historia && (
           <div>
             <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#c8972b', marginBottom: 2 }}>História</div>
@@ -76,7 +76,7 @@ function HerbCard({ herb, onClick }) {
       onMouseLeave={() => setHovered(false)}
       style={{
         width: '100%',
-        height: '100%',          /* estica para preencher a célula da grid */
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
         textAlign: 'left',
@@ -91,7 +91,6 @@ function HerbCard({ herb, onClick }) {
         fontFamily: "'Poppins', sans-serif",
       }}
     >
-      {/* Imagem com position absolute para preencher o container sem faixa branca */}
       <div style={{ position: 'relative', aspectRatio: '4/3', backgroundColor: '#f8f5f0', overflow: 'hidden', flexShrink: 0 }}>
         {herb.fotoUrl ? (
           <img src={herb.fotoUrl} alt={herb.nome}
@@ -119,6 +118,53 @@ function HerbCard({ herb, onClick }) {
   )
 }
 
+/* ── Drink Card ──────────────────────────────────────────── */
+function DrinkCard({ drink, onClick }) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        textAlign: 'left',
+        borderRadius: '8px',
+        overflow: 'hidden',
+        backgroundColor: '#ffffff',
+        border: '1px solid #e5e0d8',
+        boxShadow: hovered ? '0 8px 28px rgba(0,0,0,0.14)' : '0 2px 12px rgba(0,0,0,0.07)',
+        cursor: 'pointer',
+        transition: 'box-shadow 0.2s, transform 0.2s',
+        transform: hovered ? 'translateY(-2px)' : 'translateY(0)',
+        fontFamily: "'Poppins', sans-serif",
+      }}
+    >
+      <div style={{ position: 'relative', aspectRatio: '4/3', backgroundColor: '#f8f5f0', overflow: 'hidden', flexShrink: 0 }}>
+        {drink.fotoUrl ? (
+          <img src={drink.fotoUrl} alt={drink.nome}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}/>
+        ) : (
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <GlassWater size={32} style={{ color: '#e5e0d8' }} />
+          </div>
+        )}
+      </div>
+      <div style={{ padding: '12px 14px', flex: 1 }}>
+        <div style={{ fontSize: '14px', fontWeight: 700, color: '#2c2c3e' }}>{drink.nome}</div>
+        {drink.descricao && (
+          <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+            {drink.descricao}
+          </div>
+        )}
+      </div>
+    </button>
+  )
+}
+
 /* ── Herb Detail Modal ───────────────────────────────────── */
 function HerbModal({ herb, onClose }) {
   if (!herb) return null
@@ -131,7 +177,6 @@ function HerbModal({ herb, onClose }) {
         <img src={herb.fotoUrl} alt={herb.nome}
           style={{ width: '100%', height: 'auto', borderRadius: 6, marginBottom: 20, display: 'block' }}/>
       )}
-
       <div style={{ marginBottom: 16 }}>
         {secLabel('Nome')}
         <div style={{ fontSize: 20, fontWeight: 800, color: '#2c2c3e', display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -143,11 +188,48 @@ function HerbModal({ herb, onClose }) {
           )}
         </div>
       </div>
-
       {herb.usos && (
         <div>
           {secLabel('Usos e propriedades')}
           <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{herb.usos}</p>
+        </div>
+      )}
+    </Modal>
+  )
+}
+
+/* ── Drink Detail Modal ──────────────────────────────────── */
+function DrinkModal({ drink, onClose }) {
+  if (!drink) return null
+  const secLabel = txt => (
+    <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#c8972b', marginBottom: 6 }}>{txt}</div>
+  )
+  return (
+    <Modal isOpen={!!drink} onClose={onClose} title={drink.nome}>
+      {drink.fotoUrl && (
+        <img src={drink.fotoUrl} alt={drink.nome}
+          style={{ width: '100%', height: 'auto', borderRadius: 6, marginBottom: 20, display: 'block' }}/>
+      )}
+      <div style={{ marginBottom: 16 }}>
+        {secLabel('Nome')}
+        <div style={{ fontSize: 20, fontWeight: 800, color: '#2c2c3e' }}>{drink.nome}</div>
+      </div>
+      {drink.descricao && (
+        <div style={{ marginBottom: 16 }}>
+          {secLabel('Descrição')}
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{drink.descricao}</p>
+        </div>
+      )}
+      {drink.ingredientes && (
+        <div style={{ marginBottom: 16 }}>
+          {secLabel('Ingredientes')}
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{drink.ingredientes}</p>
+        </div>
+      )}
+      {drink.preparo && (
+        <div>
+          {secLabel('Modo de preparo')}
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{drink.preparo}</p>
         </div>
       )}
     </Modal>
@@ -178,33 +260,13 @@ function MusicCard({ music, onClick }) {
         fontFamily: "'Poppins', sans-serif",
       }}
     >
-      <div
-        style={{
-          width: '40px',
-          height: '40px',
-          borderRadius: '4px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-          backgroundColor: 'rgba(200,151,43,0.12)',
-        }}
-      >
+      <div style={{ width: '40px', height: '40px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, backgroundColor: 'rgba(200,151,43,0.12)' }}>
         <Music size={18} style={{ color: '#c8972b' }} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: '14px', fontWeight: 600, color: '#2c2c3e' }}>{music.titulo}</div>
         {music.letra && (
-          <div
-            style={{
-              fontSize: '13px',
-              color: '#6b7280',
-              marginTop: '2px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
+          <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {music.letra.slice(0, 100)}...
           </div>
         )}
@@ -222,19 +284,14 @@ function EntityModal({ entity, onClose }) {
   if (!entity) return null
   return (
     <Modal isOpen={!!entity} onClose={onClose} title={entity.nome}>
-
       {entity.fotoUrl && (
         <img src={entity.fotoUrl} alt={entity.nome}
           style={{ width: '100%', height: 'auto', borderRadius: 6, marginBottom: 20, display: 'block' }}/>
       )}
-
-      {/* Nome */}
       <div style={{ marginBottom: 16 }}>
         {secLabel('Nome')}
         <div style={{ fontSize: 20, fontWeight: 800, color: '#2c2c3e' }}>{entity.nome}</div>
       </div>
-
-      {/* Saudação */}
       {entity.saudacao && (
         <div style={{ marginBottom: 16 }}>
           {secLabel('Saudação')}
@@ -243,39 +300,30 @@ function EntityModal({ entity, onClose }) {
           </div>
         </div>
       )}
-
-      {/* Dia da Semana */}
       {entity.diaSemana && (
         <div style={{ marginBottom: 16 }}>
           {secLabel('Dia da Semana')}
           <div style={{ fontSize: 14, color: '#2c2c3e' }}>{entity.diaSemana}</div>
         </div>
       )}
-
-      {/* Cores das Velas */}
       {entity.coresVelas && (
         <div style={{ marginBottom: 16 }}>
           {secLabel('Cores das Velas')}
           <div style={{ fontSize: 14, color: '#2c2c3e' }}>{entity.coresVelas}</div>
         </div>
       )}
-
-      {/* História */}
       {entity.historia && (
         <div style={{ marginBottom: 16 }}>
           {secLabel('História')}
           <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{entity.historia}</p>
         </div>
       )}
-
-      {/* Oferendas */}
       {entity.oferendas && (
         <div>
           {secLabel('Oferendas')}
           <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{entity.oferendas}</p>
         </div>
       )}
-
     </Modal>
   )
 }
@@ -304,11 +352,7 @@ function MusicGroup({ label, musicas, onSelect, defaultOpen, forceOpen }) {
     <div style={{ marginBottom: 8, borderRadius: 8, overflow: 'hidden', border: '1px solid #e5e0d8', backgroundColor: '#fff' }}>
       <button
         onClick={() => { if (!forceOpen) setOpen(o => !o) }}
-        style={{
-          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer',
-          fontFamily: "'Poppins', sans-serif",
-        }}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'Poppins', sans-serif" }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#c8972b', flexShrink: 0 }}/>
@@ -317,7 +361,6 @@ function MusicGroup({ label, musicas, onSelect, defaultOpen, forceOpen }) {
         </div>
         <ChevronDown size={16} style={{ color: '#9ca3af', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', flexShrink: 0 }}/>
       </button>
-
       {isOpen && (
         <div style={{ borderTop: '1px solid #f0ece5', padding: '8px 8px 8px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -361,6 +404,29 @@ function MusicGroups({ musicas, onSelect, search }) {
   )
 }
 
+/* ── Search Bar ──────────────────────────────────────────── */
+function SearchBar({ value, onChange, placeholder }) {
+  return (
+    <div style={{ position: 'relative' }}>
+      <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', pointerEvents: 'none' }}/>
+      <input
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        style={{ width: '100%', padding: '9px 36px', border: '1px solid #e5e0d8', borderRadius: 6, fontSize: 14, fontFamily: "'Poppins', sans-serif", color: '#2c2c3e', outline: 'none', boxSizing: 'border-box', backgroundColor: '#f8f5f0', transition: 'border-color 0.2s' }}
+        onFocus={e => e.currentTarget.style.borderColor = '#c8972b'}
+        onBlur={e => e.currentTarget.style.borderColor = '#e5e0d8'}
+      />
+      {value && (
+        <button onClick={() => onChange('')}
+          style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex', padding: 2 }}>
+          <X size={15}/>
+        </button>
+      )}
+    </div>
+  )
+}
+
 /* ── Empty State ─────────────────────────────────────────── */
 function EmptyState({ icon: Icon, message }) {
   return (
@@ -379,32 +445,46 @@ export default function Aprenda() {
     const t = p.get('tab')
     return ['entidades','ervas','musicas'].includes(t) ? t : 'entidades'
   })
-  const [data, setData] = useState({ entidades: [], ervas: [], musicas: [] })
-  const [loading, setLoading] = useState({ entidades: false, ervas: false, musicas: false })
-  const [loaded, setLoaded] = useState({ entidades: false, ervas: false, musicas: false })
-  const [search,      setSearch]      = useState('')
+  const [ervaSubTab, setErvaSubTab] = useState('ervas')
+
+  const [data, setData] = useState({ entidades: [], ervas: [], bebidas: [], musicas: [] })
+  const [loading, setLoading] = useState({ entidades: false, ervas: false, bebidas: false, musicas: false })
+  const [loaded, setLoaded] = useState({ entidades: false, ervas: false, bebidas: false, musicas: false })
+
+  // Busca individual por sub-contexto
+  const [searches, setSearches] = useState({ entidades: '', ervas: '', bebidas: '', musicas: '' })
+  const setSearch = (key, val) => setSearches(s => ({ ...s, [key]: val }))
+
   const [playlistUrl, setPlaylistUrl] = useState(null)
   const [selectedEntity, setSelectedEntity] = useState(null)
   const [selectedHerb,   setSelectedHerb]   = useState(null)
+  const [selectedDrink,  setSelectedDrink]  = useState(null)
   const [selectedMusic,  setSelectedMusic]  = useState(null)
 
-  const fetchTab = async (tabId) => {
-    if (loaded[tabId]) return
-    setLoading((l) => ({ ...l, [tabId]: true }))
+  const fetchKey = async (key) => {
+    if (loaded[key]) return
+    setLoading(l => ({ ...l, [key]: true }))
     try {
-      const endpoints = { entidades: '/entidades', ervas: '/ervas', musicas: '/musicas' }
-      const res = await api.get(endpoints[tabId])
-      const list = Array.isArray(res.data) ? res.data : res.data[tabId] || []
-      setData((d) => ({ ...d, [tabId]: list }))
-      setLoaded((l) => ({ ...l, [tabId]: true }))
+      const endpoints = { entidades: '/entidades', ervas: '/ervas', bebidas: '/bebidas', musicas: '/musicas' }
+      const res = await api.get(endpoints[key])
+      const list = Array.isArray(res.data) ? res.data : res.data[key] || []
+      setData(d => ({ ...d, [key]: list }))
+      setLoaded(l => ({ ...l, [key]: true }))
     } catch {
       // ignore
     } finally {
-      setLoading((l) => ({ ...l, [tabId]: false }))
+      setLoading(l => ({ ...l, [key]: false }))
     }
   }
 
-  useEffect(() => { fetchTab(tab); setSearch('') }, [tab])
+  useEffect(() => {
+    if (tab === 'ervas') {
+      fetchKey('ervas')
+      fetchKey('bebidas')
+    } else {
+      fetchKey(tab)
+    }
+  }, [tab])
 
   useEffect(() => {
     api.get('/notificacoes/playlist')
@@ -412,20 +492,20 @@ export default function Aprenda() {
       .catch(() => {})
   }, [])
 
+  // Chave de busca ativa: quando tab=ervas usa o sub-tab
+  const activeSearchKey = tab === 'ervas' ? ervaSubTab : tab
+  const activeSearch    = searches[activeSearchKey]
+
+  // Loading do conteúdo atual
+  const isLoadingCurrent = tab === 'ervas'
+    ? (loading.ervas || loading.bebidas)
+    : loading[tab]
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%', backgroundColor: '#ffffff', fontFamily: "'Poppins', sans-serif" }}>
 
-      {/* Tab bar */}
-      <div
-        style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 20,
-          display: 'flex',
-          backgroundColor: '#ffffff',
-          borderBottom: '1px solid #e5e0d8',
-        }}
-      >
+      {/* Tab bar principal */}
+      <div style={{ position: 'sticky', top: 0, zIndex: 20, display: 'flex', backgroundColor: '#ffffff', borderBottom: '1px solid #e5e0d8' }}>
         {TABS.map(({ id, label, Icon }) => (
           <button
             key={id}
@@ -457,38 +537,62 @@ export default function Aprenda() {
         ))}
       </div>
 
-      {/* Search bar */}
-      <div style={{ position: 'sticky', top: 65, zIndex: 19, backgroundColor: '#ffffff', borderBottom: '1px solid #e5e0d8', padding: '10px 16px' }}>
-        <div style={{ position: 'relative' }}>
-          <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', pointerEvents: 'none' }}/>
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder={tab === 'entidades' ? 'Buscar orixá ou entidade...' : tab === 'ervas' ? 'Buscar erva...' : 'Buscar ponto cantado...'}
-            style={{ width: '100%', padding: '9px 36px', border: '1px solid #e5e0d8', borderRadius: 6, fontSize: 14, fontFamily: "'Poppins', sans-serif", color: '#2c2c3e', outline: 'none', boxSizing: 'border-box', backgroundColor: '#f8f5f0', transition: 'border-color 0.2s' }}
-            onFocus={e => e.currentTarget.style.borderColor = '#c8972b'}
-            onBlur={e => e.currentTarget.style.borderColor = '#e5e0d8'}
-          />
-          {search && (
-            <button onClick={() => setSearch('')}
-              style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex', padding: 2 }}>
-              <X size={15}/>
+      {/* Sub-tabs de Ervas / Bebidas */}
+      {tab === 'ervas' && (
+        <div style={{ display: 'flex', backgroundColor: '#f8f5f0', borderBottom: '1px solid #e5e0d8' }}>
+          {ERVA_SUBTABS.map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              onClick={() => setErvaSubTab(id)}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                padding: '10px 8px',
+                fontSize: '13px',
+                fontWeight: 600,
+                background: 'none',
+                border: 'none',
+                borderBottom: ervaSubTab === id ? '2px solid #c8972b' : '2px solid transparent',
+                color: ervaSubTab === id ? '#c8972b' : '#9ca3af',
+                cursor: 'pointer',
+                transition: 'color 0.15s',
+                fontFamily: "'Poppins', sans-serif",
+                marginBottom: '-1px',
+              }}
+            >
+              <Icon size={15} />
+              {label}
             </button>
-          )}
+          ))}
         </div>
+      )}
+
+      {/* Search bar individual por contexto */}
+      <div style={{ position: 'sticky', top: tab === 'ervas' ? 108 : 65, zIndex: 19, backgroundColor: '#ffffff', borderBottom: '1px solid #e5e0d8', padding: '10px 16px' }}>
+        <SearchBar
+          value={activeSearch}
+          onChange={val => setSearch(activeSearchKey, val)}
+          placeholder={
+            tab === 'entidades' ? 'Buscar orixá ou entidade...'
+            : tab === 'ervas' && ervaSubTab === 'ervas' ? 'Buscar erva...'
+            : tab === 'ervas' && ervaSubTab === 'bebidas' ? 'Buscar bebida...'
+            : 'Buscar ponto cantado...'
+          }
+        />
       </div>
 
       {/* Content */}
       <div style={{ flex: 1, padding: '16px', backgroundColor: '#f8f5f0' }}>
-        {loading[tab] ? (
+        {isLoadingCurrent ? (
           <LoadingSpinner />
         ) : (
           <>
             {tab === 'entidades' && (() => {
-              const q = search.toLowerCase()
-              const list = q
-                ? data.entidades.filter(e => e.nome?.toLowerCase().includes(q))
-                : data.entidades
+              const q = activeSearch.toLowerCase()
+              const list = q ? data.entidades.filter(e => e.nome?.toLowerCase().includes(q)) : data.entidades
               return list.length === 0
                 ? <EmptyState icon={Users} message={q ? 'Nenhum resultado encontrado.' : 'Nenhuma entidade cadastrada.'} />
                 : (
@@ -498,16 +602,26 @@ export default function Aprenda() {
                 )
             })()}
 
-            {tab === 'ervas' && (() => {
-              const q = search.toLowerCase()
-              const list = q
-                ? data.ervas.filter(e => e.nome?.toLowerCase().includes(q))
-                : data.ervas
+            {tab === 'ervas' && ervaSubTab === 'ervas' && (() => {
+              const q = searches.ervas.toLowerCase()
+              const list = q ? data.ervas.filter(e => e.nome?.toLowerCase().includes(q)) : data.ervas
               return list.length === 0
                 ? <EmptyState icon={Leaf} message={q ? 'Nenhum resultado encontrado.' : 'Nenhuma erva cadastrada.'} />
                 : (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
                     {list.map(e => <HerbCard key={e.id} herb={e} onClick={() => setSelectedHerb(e)} />)}
+                  </div>
+                )
+            })()}
+
+            {tab === 'ervas' && ervaSubTab === 'bebidas' && (() => {
+              const q = searches.bebidas.toLowerCase()
+              const list = q ? data.bebidas.filter(b => b.nome?.toLowerCase().includes(q)) : data.bebidas
+              return list.length === 0
+                ? <EmptyState icon={GlassWater} message={q ? 'Nenhum resultado encontrado.' : 'Nenhuma bebida cadastrada.'} />
+                : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+                    {list.map(b => <DrinkCard key={b.id} drink={b} onClick={() => setSelectedDrink(b)} />)}
                   </div>
                 )
             })()}
@@ -531,7 +645,7 @@ export default function Aprenda() {
                         <Play size={14} color="#dc2626" style={{ flexShrink:0 }}/>
                       </a>
                     )}
-                    <MusicGroups musicas={data.musicas} onSelect={setSelectedMusic} search={search} />
+                    <MusicGroups musicas={data.musicas} onSelect={setSelectedMusic} search={searches.musicas} />
                   </>
             )}
           </>
@@ -540,6 +654,7 @@ export default function Aprenda() {
 
       <EntityModal entity={selectedEntity} onClose={() => setSelectedEntity(null)} />
       <HerbModal   herb={selectedHerb}     onClose={() => setSelectedHerb(null)} />
+      <DrinkModal  drink={selectedDrink}   onClose={() => setSelectedDrink(null)} />
       <MusicModal  music={selectedMusic}   onClose={() => setSelectedMusic(null)} />
     </div>
   )
