@@ -3,7 +3,7 @@ import { NavLink, useNavigate, Link } from 'react-router'
 import {
   LayoutDashboard, Music, Leaf, Users, Calendar,
   LogOut, Menu, X, Star, Globe, Layers, Bell, BookOpen,
-  Cloud, AlertCircle, GlassWater, Droplets, Wind,
+  Cloud, AlertCircle, GlassWater, Droplets, Wind, ShoppingCart,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../api/axios'
@@ -21,6 +21,7 @@ const NAV = [
 { to: '/admin/usuarios',      label: 'Usuários',      Icon: Users },
   { to: '/admin/estudos',      label: 'Estudos',        Icon: BookOpen },
   { to: '/admin/notificacoes', label: 'Notificações',  Icon: Bell },
+  { to: '/admin/estoque',      label: 'Estoque',        Icon: ShoppingCart },
 ]
 
 function formatBytes(bytes) {
@@ -242,6 +243,15 @@ function TopBar({ onOpenCloud }) {
         <Cloud size={16} />
         Armazenamento
       </button>
+      <Link
+        to="/admin/estoque"
+        style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 18px', borderRadius: 8, border: 'none', fontSize: 14, fontWeight: 700, textDecoration: 'none', color: '#fff', backgroundColor: '#c8972b', fontFamily: "'Poppins', sans-serif", transition: 'background 0.15s', boxShadow: '0 2px 8px rgba(200,151,43,0.3)' }}
+        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#a67a20'}
+        onMouseLeave={e => e.currentTarget.style.backgroundColor = '#c8972b'}
+      >
+        <ShoppingCart size={16} />
+        Estoque
+      </Link>
     </div>
   )
 }
@@ -294,6 +304,11 @@ export default function AdminLayout({ children }) {
           >
             <Cloud size={20} />
           </button>
+          <Link to="/admin/estoque" title="Estoque"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 8, border: 'none', background: '#c8972b', color: '#fff', boxShadow: '0 2px 8px rgba(200,151,43,0.3)' }}
+          >
+            <ShoppingCart size={20} />
+          </Link>
         </header>
 
         {/* Desktop top bar */}

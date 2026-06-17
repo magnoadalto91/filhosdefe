@@ -18,7 +18,8 @@ import notificacoesRoutes from './src/routes/notificacoes.js';
 import publicacoesRoutes from './src/routes/publicacoes.js';
 import documentosRoutes from './src/routes/documentos.js';
 import cloudinaryRoutes from './src/routes/cloudinary.js';
-import cronRoutes from './src/routes/cron.js';
+import cronRoutes from './src/routes/cron.js'
+import estoqueRoutes from './src/routes/estoque.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -50,7 +51,8 @@ app.use('/api/notificacoes', notificacoesRoutes);
 app.use('/api/publicacoes', publicacoesRoutes);
 app.use('/api/documentos', documentosRoutes);
 app.use('/api/cloudinary', cloudinaryRoutes);
-app.use('/api/cron', cronRoutes);
+app.use('/api/cron', cronRoutes)
+app.use('/api/estoque', estoqueRoutes);
 
 // 404 handler
 app.use((_req, res) => {

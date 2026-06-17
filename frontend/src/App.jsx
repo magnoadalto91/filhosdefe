@@ -28,6 +28,7 @@ import AdminUsuarios from './pages/admin/Usuarios'
 import AdminAgregadores from './pages/admin/Agregadores'
 import AdminNotificacoes from './pages/admin/Notificacoes'
 import AdminEstudos from './pages/admin/Estudos'
+import AdminEstoque from './pages/admin/Estoque'
 
 /* Todas as páginas públicas exigem login */
 function PublicPage({ children }) {
@@ -80,6 +81,7 @@ export default function App() {
           <Route path="/admin/agregadores"   element={<AdminPage><AdminAgregadores /></AdminPage>} />
           <Route path="/admin/estudos"      element={<AdminPage><AdminEstudos /></AdminPage>} />
           <Route path="/admin/notificacoes" element={<AdminPage><AdminNotificacoes /></AdminPage>} />
+          <Route path="/admin/estoque"      element={<AdminPage><AdminEstoque /></AdminPage>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

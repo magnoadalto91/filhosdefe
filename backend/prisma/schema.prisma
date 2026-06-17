@@ -241,3 +241,13 @@ model GiraBanho {
 
   @@id([giraId, banhoId])
 }
+
+model EstoqueItem {
+  id           Int      @id @default(autoincrement())
+  nome         String
+  fotoUrl      String?
+  quantidade   Int      @default(0)
+  precisaRepor Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
