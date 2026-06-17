@@ -58,4 +58,22 @@ router.put('/config', authenticate, requireAdmin, async (req, res) => {
   }
 })
 
+// GET /api/notificacoes/usuarios-push — admin: lista usuários + status push
+router.get('/usuarios-push', authenticate, requireAdmin, async (_req, res) => {
+  try {
+    const [users, subs] = await Promise.all([
+      prisma.user.findMany({
+        where: { role: 'USER' },
+        select: { id: true, nome: true, email: true },
+        orderBy: { nome: 'asc' },
+      }),
+      prisma.pushSubscription.findMany({ select: { userId: true } }),
+    ])
+    const subscribedIds = new Set(subs.map(s => s.userId))
+    return res.json(users.map(u => ({ ...u, pushAtivo: subscribedIds.has(u.id) })))
+  } catch (err) {
+    return res.status(500).json({ error: err.message })
+  }
+})
+
 export default router

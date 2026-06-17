@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Users, Leaf, Music, Calendar, Save, BookOpen, FileText } from 'lucide-react'
+import { Users, Leaf, Music, Calendar, Save, BookOpen, FileText, Bell, BellOff } from 'lucide-react'
 import api from '../../api/axios'
 import LoadingSpinner from '../../components/LoadingSpinner'
 
@@ -40,16 +40,20 @@ function Row({ Icon, label, sub, field, cfg, onChange }) {
 }
 
 export default function AdminNotificacoes() {
-  const [cfg,     setCfg]     = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [saving,  setSaving]  = useState(false)
-  const [saved,   setSaved]   = useState(false)
+  const [cfg,       setCfg]       = useState(null)
+  const [loading,   setLoading]   = useState(true)
+  const [saving,    setSaving]    = useState(false)
+  const [saved,     setSaved]     = useState(false)
+  const [usuarios,  setUsuarios]  = useState([])
 
   useEffect(() => {
-    api.get('/notificacoes/config')
-      .then(r => setCfg(r.data))
-      .catch(() => {})
-      .finally(() => setLoading(false))
+    Promise.all([
+      api.get('/notificacoes/config'),
+      api.get('/notificacoes/usuarios-push'),
+    ]).then(([cfgRes, usersRes]) => {
+      setCfg(cfgRes.data)
+      setUsuarios(Array.isArray(usersRes.data) ? usersRes.data : [])
+    }).catch(() => {}).finally(() => setLoading(false))
   }, [])
 
   const set = (field, value) => setCfg(c => ({ ...c, [field]: value }))
@@ -102,13 +106,53 @@ export default function AdminNotificacoes() {
       </div>
 
       {/* Salvar */}
-      <div style={{ display:'flex', alignItems:'center', gap:16 }}>
+      <div style={{ display:'flex', alignItems:'center', gap:16, marginBottom:32 }}>
         <button style={{...S.btnPrimary, opacity: saving ? 0.7 : 1}} onClick={handleSave} disabled={saving}
           onMouseEnter={e=>{if(!saving)e.currentTarget.style.backgroundColor='#a67a20'}}
           onMouseLeave={e=>e.currentTarget.style.backgroundColor='#c8972b'}>
           <Save size={15}/>{saving ? 'Salvando...' : 'Salvar configurações'}
         </button>
         {saved && <span style={{ fontSize:13, color:'#16a34a', fontWeight:600 }}>Configurações salvas!</span>}
+      </div>
+
+      {/* Usuários e status push */}
+      <div style={S.card}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
+          <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'1.5px', color:'#c8972b' }}>
+            Usuários — notificações push
+          </div>
+          <span style={{ fontSize:12, color:'#9ca3af' }}>
+            {usuarios.filter(u => u.pushAtivo).length} de {usuarios.length} ativaram
+          </span>
+        </div>
+        <p style={{ margin:'0 0 12px', fontSize:12, color:'#9ca3af' }}>
+          Usuários que instalaram o app e concederam permissão de notificação
+        </p>
+
+        {usuarios.length === 0 ? (
+          <p style={{ margin:0, fontSize:13, color:'#9ca3af' }}>Nenhum usuário cadastrado.</p>
+        ) : (
+          <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+            {usuarios.map(u => (
+              <div key={u.id} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', borderRadius:8, backgroundColor: u.pushAtivo ? 'rgba(22,163,74,0.04)' : '#fafafa', border:`1px solid ${u.pushAtivo ? 'rgba(22,163,74,0.18)' : '#f0ece5'}` }}>
+                <div style={{ width:32, height:32, borderRadius:'50%', backgroundColor: u.pushAtivo ? 'rgba(22,163,74,0.1)' : 'rgba(200,151,43,0.07)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                  {u.pushAtivo
+                    ? <Bell    size={14} color="#16a34a"/>
+                    : <BellOff size={14} color="#d1cdc8"/>}
+                </div>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:13, fontWeight:600, color:'#2c2c3e', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                    {u.nome || u.email}
+                  </div>
+                  {u.nome && <div style={{ fontSize:11, color:'#9ca3af', marginTop:1 }}>{u.email}</div>}
+                </div>
+                <span style={{ fontSize:11, fontWeight:700, padding:'3px 10px', borderRadius:20, flexShrink:0, backgroundColor: u.pushAtivo ? 'rgba(22,163,74,0.1)' : 'rgba(200,185,170,0.15)', color: u.pushAtivo ? '#16a34a' : '#b0a89e' }}>
+                  {u.pushAtivo ? 'Ativo' : 'Não ativado'}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
