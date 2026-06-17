@@ -431,6 +431,23 @@ router.post('/:id/presenca', authenticate, async (req, res) => {
   }
 });
 
+// GET /api/giras/:id/presencas - admin only
+router.get('/:id/presencas', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
+    const presencas = await prisma.presencaGira.findMany({
+      where: { giraId: id },
+      include: { user: { select: { id: true, nome: true, email: true } } },
+      orderBy: [{ confirmado: 'desc' }, { dataRespondida: 'asc' }],
+    });
+    return res.json(presencas);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // DELETE /api/giras/:id/banhos/:banhoId
 router.delete('/:id/banhos/:banhoId', authenticate, requireAdmin, async (req, res) => {
   try {

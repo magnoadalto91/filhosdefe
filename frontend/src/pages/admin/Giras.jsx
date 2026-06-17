@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Calendar, Pencil, Trash2, AlertCircle, Users, Music, Droplets, Clock, ChevronDown, ChevronUp, Eye } from 'lucide-react'
+import { Calendar, Pencil, Trash2, AlertCircle, Users, Music, Droplets, Clock, ChevronDown, ChevronUp, Eye, UserCheck, UserX } from 'lucide-react'
 import api from '../../api/axios'
 import Modal from '../../components/Modal'
 import ConfirmModal from '../../components/ConfirmModal'
@@ -110,6 +110,70 @@ function GiraForm({ form, setForm, error, assoc, setAssoc, allEntidades, allMusi
   )
 }
 
+/* ── PresencaSection ──────────────────────────── */
+function PresencaSection({ giraId }) {
+  const [open,      setOpen]      = useState(false)
+  const [presencas, setPresencas] = useState([])
+  const [loading,   setLoading]   = useState(false)
+  const [loaded,    setLoaded]    = useState(false)
+
+  const toggle = async () => {
+    if (!open && !loaded) {
+      setLoading(true)
+      try {
+        const r = await api.get(`/giras/${giraId}/presencas`)
+        setPresencas(Array.isArray(r.data) ? r.data : [])
+        setLoaded(true)
+      } catch {} finally { setLoading(false) }
+    }
+    setOpen(o => !o)
+  }
+
+  const confirmados = presencas.filter(p => p.confirmado)
+  const ausentes    = presencas.filter(p => !p.confirmado)
+
+  return (
+    <div style={{ marginTop: 12, borderTop: '1px solid #f0ece5', paddingTop: 10 }}>
+      <button onClick={toggle}
+        style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: "'Poppins',sans-serif" }}>
+        <Users size={12} color="#9ca3af"/>
+        <span style={{ fontSize: 12, fontWeight: 600, color: '#9ca3af' }}>
+          {loaded ? `Presenças (${confirmados.length} vão · ${ausentes.length} não vão)` : 'Ver presenças'}
+        </span>
+        {open ? <ChevronUp size={12} color="#9ca3af"/> : <ChevronDown size={12} color="#9ca3af"/>}
+      </button>
+
+      {open && (
+        <div style={{ marginTop: 10 }}>
+          {loading ? (
+            <p style={{ margin: 0, fontSize: 12, color: '#9ca3af' }}>Carregando...</p>
+          ) : presencas.length === 0 ? (
+            <p style={{ margin: 0, fontSize: 12, color: '#9ca3af' }}>Nenhuma resposta registrada.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {presencas.map(p => (
+                <div key={p.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 12px', borderRadius: 6, backgroundColor: p.confirmado ? 'rgba(22,163,74,0.05)' : 'rgba(220,38,38,0.05)', border: `1px solid ${p.confirmado ? 'rgba(22,163,74,0.2)' : 'rgba(220,38,38,0.15)'}` }}>
+                  {p.confirmado
+                    ? <UserCheck size={14} color="#16a34a" style={{ marginTop: 1, flexShrink: 0 }}/>
+                    : <UserX    size={14} color="#dc2626" style={{ marginTop: 1, flexShrink: 0 }}/>}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: '#2c2c3e' }}>
+                      {p.user?.nome || p.user?.email || `Usuário #${p.userId}`}
+                    </span>
+                    {!p.confirmado && p.justificativa && (
+                      <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>"{p.justificativa}"</div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 /* ── GiraCard ─────────────────────────────────── */
 function GiraCard({ gira, onEdit, onDelete, onStatusChange }) {
   const meta    = STATUS_META[gira.status] || STATUS_META.AGUARDANDO
@@ -189,6 +253,8 @@ function GiraCard({ gira, onEdit, onDelete, onStatusChange }) {
           </select>
         )}
       </div>
+
+      <PresencaSection giraId={gira.id}/>
     </div>
   )
 }
