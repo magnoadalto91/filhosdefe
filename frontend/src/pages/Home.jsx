@@ -3,10 +3,12 @@ import { ArrowRight } from 'lucide-react'
 
 /* ─── Participate cards ──────────────────────────────────── */
 const CARDS = [
-  { title: 'Orixás / Entidades', to: '/aprenda?tab=entidades', bg: '#2c2c3e' },
-  { title: 'Ervas / Bebidas',     to: '/aprenda?tab=ervas',     bg: '#1a3a2a' },
-  { title: 'Pontos Cantados',    to: '/aprenda?tab=musicas',   bg: '#3a2a1a' },
-  { title: 'Giras',              to: '/calendario',             bg: '#1a1a3a' },
+  { title: 'Orixás / Entidades',  to: '/aprenda?tab=entidades', bg: '#2c2c3e' },
+  { title: 'Ervas / Banhos',      to: '/aprenda?tab=ervas',     bg: '#1a3a2a' },
+  { title: 'Bebidas',             to: '/bebidas',               bg: '#0a2233' },
+  { title: 'Cigarros / Charutos', to: '/cigarros',              bg: '#3a1a1a' },
+  { title: 'Pontos Cantados',     to: '/aprenda?tab=musicas',   bg: '#3a2a1a' },
+  { title: 'Giras',               to: '/calendario',            bg: '#1a1a3a' },
 ]
 
 /* ─── Main ───────────────────────────────────────────────── */
@@ -53,7 +55,7 @@ export default function Home() {
       {/* ───────────────── CARDS + ESTUDOS ──────────────── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div className="participate-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gridAutoRows: '1fr' }}>
-          <style>{`@media (min-width: 768px) { .participate-grid { grid-template-columns: repeat(4, 1fr) !important; } }`}</style>
+          <style>{`@media (min-width: 768px) { .participate-grid { grid-template-columns: repeat(3, 1fr) !important; } }`}</style>
           {CARDS.map(({ title, to, bg }) => (
             <Link key={title} to={to}
               style={{ position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', backgroundColor: bg, transition: 'filter 0.2s', minHeight: 140 }}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Calendar, Pencil, Trash2, AlertCircle, Users, Music, ListChecks, Clock, ChevronDown, ChevronUp, Eye } from 'lucide-react'
+import { Calendar, Pencil, Trash2, AlertCircle, Users, Music, Droplets, Clock, ChevronDown, ChevronUp, Eye } from 'lucide-react'
 import api from '../../api/axios'
 import Modal from '../../components/Modal'
 import ConfirmModal from '../../components/ConfirmModal'
@@ -73,7 +73,7 @@ function MultiSelect({ label, Icon, allItems, selectedIds, onChange, nameKey='ti
 }
 
 /* ── GiraForm ─────────────────────────────────── */
-function GiraForm({ form, setForm, error, assoc, setAssoc, allEntidades, allMusicas, allRotinas }) {
+function GiraForm({ form, setForm, error, assoc, setAssoc, allEntidades, allMusicas, allBanhos }) {
   const focus = e => e.currentTarget.style.borderColor = '#c8972b'
   const blur  = e => e.currentTarget.style.borderColor = '#e5e0d8'
   return (
@@ -103,9 +103,9 @@ function GiraForm({ form, setForm, error, assoc, setAssoc, allEntidades, allMusi
       </div>
       <div style={S.divider}/>
       <div style={S.sectionTitle}>Vínculos</div>
-      <MultiSelect label="Orixás / Entidades" Icon={Users} allItems={allEntidades} selectedIds={assoc.entidades} onChange={v=>setAssoc(a=>({...a,entidades:v}))} nameKey="nome"/>
-      <MultiSelect label="Músicas / Pontos"   Icon={Music} allItems={allMusicas}   selectedIds={assoc.musicas}   onChange={v=>setAssoc(a=>({...a,musicas:v}))}   nameKey="titulo"/>
-      <MultiSelect label="Rotinas"            Icon={ListChecks} allItems={allRotinas} selectedIds={assoc.rotinas} onChange={v=>setAssoc(a=>({...a,rotinas:v}))} nameKey="titulo"/>
+      <MultiSelect label="Orixás / Entidades" Icon={Users}    allItems={allEntidades} selectedIds={assoc.entidades} onChange={v=>setAssoc(a=>({...a,entidades:v}))} nameKey="nome"/>
+      <MultiSelect label="Músicas / Pontos"   Icon={Music}    allItems={allMusicas}   selectedIds={assoc.musicas}   onChange={v=>setAssoc(a=>({...a,musicas:v}))}   nameKey="titulo"/>
+      <MultiSelect label="Banhos"             Icon={Droplets} allItems={allBanhos}    selectedIds={assoc.banhos}    onChange={v=>setAssoc(a=>({...a,banhos:v}))}    nameKey="nome"/>
     </div>
   )
 }
@@ -171,7 +171,7 @@ function GiraCard({ gira, onEdit, onDelete, onStatusChange }) {
         <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
           {gira.entidades?.length>0 && <span style={{ display:'flex', alignItems:'center', gap:4, padding:'3px 10px', borderRadius:20, fontSize:12, backgroundColor:'#f8f5f0', border:'1px solid #e5e0d8', color:'#6b7280' }}><Users size={10}/>{gira.entidades.length} entidade{gira.entidades.length!==1?'s':''}</span>}
           {gira.musicas?.length>0   && <span style={{ display:'flex', alignItems:'center', gap:4, padding:'3px 10px', borderRadius:20, fontSize:12, backgroundColor:'#f8f5f0', border:'1px solid #e5e0d8', color:'#6b7280' }}><Music size={10}/>{gira.musicas.length} música{gira.musicas.length!==1?'s':''}</span>}
-          {gira.rotinas?.length>0   && <span style={{ display:'flex', alignItems:'center', gap:4, padding:'3px 10px', borderRadius:20, fontSize:12, backgroundColor:'#f8f5f0', border:'1px solid #e5e0d8', color:'#6b7280' }}><ListChecks size={10}/>{gira.rotinas.length} rotina{gira.rotinas.length!==1?'s':''}</span>}
+          {gira.banhos?.length>0    && <span style={{ display:'flex', alignItems:'center', gap:4, padding:'3px 10px', borderRadius:20, fontSize:12, backgroundColor:'#f8f5f0', border:'1px solid #e5e0d8', color:'#6b7280' }}><Droplets size={10}/>{gira.banhos.length} banho{gira.banhos.length!==1?'s':''}</span>}
         </div>
 
         {/* Seletor de status — apenas para não concluídas */}
@@ -202,13 +202,13 @@ export default function AdminGiras() {
   const [viewOnly,     setViewOnly]     = useState(false)
   const [editTarget,   setEditTarget]   = useState(null)
   const [form,         setForm]         = useState(emptyForm)
-  const [assoc,        setAssoc]        = useState({ entidades:[], musicas:[], rotinas:[] })
+  const [assoc,        setAssoc]        = useState({ entidades:[], musicas:[], banhos:[] })
   const [saving,       setSaving]       = useState(false)
   const [formError,    setFormError]    = useState('')
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [allEntidades, setAllEntidades] = useState([])
   const [allMusicas,   setAllMusicas]   = useState([])
-  const [allRotinas,   setAllRotinas]   = useState([])
+  const [allBanhos,    setAllBanhos]    = useState([])
 
   const load = async () => {
     setLoading(true)
@@ -221,10 +221,10 @@ export default function AdminGiras() {
   }
 
   const loadRelated = async () => {
-    const [e,m,r] = await Promise.allSettled([api.get('/entidades'),api.get('/musicas'),api.get('/rotinas')])
+    const [e,m,b] = await Promise.allSettled([api.get('/entidades'),api.get('/musicas'),api.get('/banhos')])
     setAllEntidades(e.status==='fulfilled'?(Array.isArray(e.value.data)?e.value.data:[]):[])
     setAllMusicas(m.status==='fulfilled'?(Array.isArray(m.value.data)?m.value.data:[]):[])
-    setAllRotinas(r.status==='fulfilled'?(Array.isArray(r.value.data)?r.value.data:[]):[])
+    setAllBanhos(b.status==='fulfilled'?(Array.isArray(b.value.data)?b.value.data:[]):[])
   }
 
   useEffect(() => { load(); loadRelated() }, [])
@@ -232,21 +232,21 @@ export default function AdminGiras() {
   const openAdd = () => {
     setEditTarget(null); setViewOnly(false)
     setForm(emptyForm)
-    setAssoc({ entidades:[], musicas:[], rotinas: allRotinas.map(r=>r.id) })
+    setAssoc({ entidades:[], musicas:[], banhos:[] })
     setFormError(''); setModalOpen(true)
   }
 
   const openEdit = async (g, readOnly=false) => {
     setEditTarget(g); setViewOnly(readOnly)
     setForm({ titulo:g.titulo||'', data:g.data?g.data.split('T')[0]:'', hora:g.data?fmtHora(g.data):'19:00', descricao:g.descricao||'', instrucoes:g.instrucoes||'' })
-    setAssoc({ entidades:[], musicas:[], rotinas:[] })
+    setAssoc({ entidades:[], musicas:[], banhos:[] })
     setFormError(''); setModalOpen(true)
     try {
       const r = await api.get(`/giras/${g.id}`)
       setAssoc({
         entidades: r.data.entidades?.map(e=>e.entidadeId)||[],
         musicas:   r.data.musicas?.map(m=>m.musicaId)||[],
-        rotinas:   r.data.rotinas?.map(r=>r.rotinaId)||[],
+        banhos:    r.data.banhos?.map(b=>b.banhoId)||[],
       })
     } catch {}
   }
@@ -373,7 +373,7 @@ export default function AdminGiras() {
           form={form} setForm={viewOnly ? ()=>{} : setForm}
           error={formError}
           assoc={assoc} setAssoc={viewOnly ? ()=>{} : setAssoc}
-          allEntidades={allEntidades} allMusicas={allMusicas} allRotinas={allRotinas}
+          allEntidades={allEntidades} allMusicas={allMusicas} allBanhos={allBanhos}
         />
       </Modal>
 

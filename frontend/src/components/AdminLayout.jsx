@@ -3,7 +3,7 @@ import { NavLink, useNavigate, Link } from 'react-router'
 import {
   LayoutDashboard, Music, Leaf, Users, Calendar,
   ListChecks, LogOut, Menu, X, Star, Globe, Layers, Bell, BookOpen,
-  Cloud, AlertCircle, GlassWater,
+  Cloud, AlertCircle, GlassWater, Droplets, Wind,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../api/axios'
@@ -12,11 +12,13 @@ const NAV = [
   { to: '/admin',           label: 'Dashboard',  Icon: LayoutDashboard, exact: true },
   { to: '/admin/musicas',     label: 'Músicas',    Icon: Music },
   { to: '/admin/agregadores', label: 'Agregadores', Icon: Layers },
-  { to: '/admin/ervas',     label: 'Ervas',      Icon: Leaf },
-  { to: '/admin/bebidas',   label: 'Bebidas',    Icon: GlassWater },
+  { to: '/admin/ervas',     label: 'Ervas',              Icon: Leaf },
+  { to: '/admin/bebidas',   label: 'Bebidas',            Icon: GlassWater },
+  { to: '/admin/banhos',    label: 'Banhos',             Icon: Droplets },
+  { to: '/admin/cigarros',  label: 'Cigarros / Charutos', Icon: Wind },
   { to: '/admin/entidades', label: 'Orixás / Entidades', Icon: Users },
-  { to: '/admin/giras',     label: 'Giras',      Icon: Calendar },
-  { to: '/admin/rotinas',   label: 'Rotinas',    Icon: ListChecks },
+  { to: '/admin/giras',     label: 'Giras',              Icon: Calendar },
+  { to: '/admin/rotinas',   label: 'Rotinas',            Icon: ListChecks },
   { to: '/admin/usuarios',      label: 'Usuários',      Icon: Users },
   { to: '/admin/estudos',      label: 'Estudos',        Icon: BookOpen },
   { to: '/admin/notificacoes', label: 'Notificações',  Icon: Bell },

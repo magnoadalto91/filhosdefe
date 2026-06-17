@@ -1,23 +1,27 @@
 import { useEffect, useState } from 'react'
-import { Music, Leaf, Users, Calendar, ListChecks, Plus, GlassWater } from 'lucide-react'
+import { Music, Leaf, Users, Calendar, ListChecks, Plus, GlassWater, Droplets, Wind } from 'lucide-react'
 import { Link } from 'react-router'
 import api from '../../api/axios'
 import { useAuth } from '../../contexts/AuthContext'
 import LoadingSpinner from '../../components/LoadingSpinner'
 
 const STAT_CARDS = [
-  { key:'musicas',   label:'Músicas',   Icon:Music,        color:'#7C3AED', to:'/admin/musicas' },
-  { key:'ervas',     label:'Ervas',     Icon:Leaf,         color:'#059669', to:'/admin/ervas' },
-  { key:'bebidas',   label:'Bebidas',   Icon:GlassWater,   color:'#0891b2', to:'/admin/bebidas' },
-  { key:'entidades', label:'Orixás / Entidades', Icon:Users, color:'#c8972b', to:'/admin/entidades' },
-  { key:'giras',     label:'Giras',     Icon:Calendar,     color:'#dc2626', to:'/admin/giras' },
-  { key:'rotinas',   label:'Rotinas',   Icon:ListChecks,   color:'#0284c7', to:'/admin/rotinas' },
+  { key:'musicas',   label:'Músicas',             Icon:Music,       color:'#7C3AED', to:'/admin/musicas' },
+  { key:'ervas',     label:'Ervas',               Icon:Leaf,        color:'#059669', to:'/admin/ervas' },
+  { key:'bebidas',   label:'Bebidas',             Icon:GlassWater,  color:'#0891b2', to:'/admin/bebidas' },
+  { key:'banhos',    label:'Banhos',              Icon:Droplets,    color:'#0369a1', to:'/admin/banhos' },
+  { key:'cigarros',  label:'Cigarros / Charutos', Icon:Wind,        color:'#6b7280', to:'/admin/cigarros' },
+  { key:'entidades', label:'Orixás / Entidades',  Icon:Users,       color:'#c8972b', to:'/admin/entidades' },
+  { key:'giras',     label:'Giras',               Icon:Calendar,    color:'#dc2626', to:'/admin/giras' },
+  { key:'rotinas',   label:'Rotinas',             Icon:ListChecks,  color:'#0284c7', to:'/admin/rotinas' },
 ]
 
 const QUICK = [
   { label:'Nova Música',   to:'/admin/musicas',   Icon:Music },
   { label:'Nova Erva',     to:'/admin/ervas',     Icon:Leaf },
   { label:'Nova Bebida',   to:'/admin/bebidas',   Icon:GlassWater },
+  { label:'Novo Banho',    to:'/admin/banhos',    Icon:Droplets },
+  { label:'Novo Cigarro',  to:'/admin/cigarros',  Icon:Wind },
   { label:'Nova Entidade', to:'/admin/entidades', Icon:Users },
   { label:'Nova Gira',     to:'/admin/giras',     Icon:Calendar },
 ]
@@ -32,10 +36,11 @@ export default function Dashboard() {
   useEffect(() => {
     Promise.allSettled([
       api.get('/musicas'), api.get('/ervas'), api.get('/bebidas'),
+      api.get('/banhos'), api.get('/cigarros'),
       api.get('/entidades'), api.get('/giras'), api.get('/rotinas'),
-    ]).then(([m, e, b, en, g, r]) => {
+    ]).then(([m, e, b, bh, ci, en, g, r]) => {
       const n = res => res.status === 'rejected' ? 0 : (Array.isArray(res.value.data) ? res.value.data.length : (res.value.data.total || res.value.data.count || 0))
-      setStats({ musicas:n(m), ervas:n(e), bebidas:n(b), entidades:n(en), giras:n(g), rotinas:n(r) })
+      setStats({ musicas:n(m), ervas:n(e), bebidas:n(b), banhos:n(bh), cigarros:n(ci), entidades:n(en), giras:n(g), rotinas:n(r) })
     }).finally(() => setLoading(false))
   }, [])
 
@@ -60,7 +65,7 @@ export default function Dashboard() {
         <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'2px', color:'#c8972b', marginBottom:16 }}>Visão Geral</div>
         {loading ? <LoadingSpinner /> : (
           <div className="dash-stats" style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:16 }}>
-            <style>{`@media(min-width:768px){.dash-stats{grid-template-columns:repeat(3,1fr)!important;}}@media(min-width:1280px){.dash-stats{grid-template-columns:repeat(6,1fr)!important;}}`}</style>
+            <style>{`@media(min-width:768px){.dash-stats{grid-template-columns:repeat(4,1fr)!important;}}@media(min-width:1280px){.dash-stats{grid-template-columns:repeat(8,1fr)!important;}}`}</style>
             {STAT_CARDS.map(({ key, label, Icon, color, to }) => (
               <Link
                 key={key} to={to}

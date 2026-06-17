@@ -8,8 +8,8 @@ const prisma = new PrismaClient();
 
 const giraFullInclude = {
   entidades: { include: { entidade: true } },
-  musicas: { include: { musica: true } },
-  rotinas: { include: { rotina: true } },
+  musicas:   { include: { musica: true } },
+  banhos:    { include: { banho: true } },
 };
 
 // GET /api/giras - upcoming giras (data >= today)
@@ -96,7 +96,7 @@ router.get('/:id', async (req, res) => {
 // POST /api/giras - admin only
 router.post('/', authenticate, requireAdmin, async (req, res) => {
   try {
-    const { data, titulo, descricao, instrucoes, entidades, musicas, rotinas } = req.body;
+    const { data, titulo, descricao, instrucoes, entidades, musicas, banhos } = req.body;
 
     if (!data || !titulo) {
       return res.status(400).json({ error: 'data and titulo are required' });
@@ -123,9 +123,9 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
         skipDuplicates: true,
       });
     }
-    if (Array.isArray(rotinas) && rotinas.length > 0) {
-      await prisma.giraRotina.createMany({
-        data: rotinas.map(rotinaId => ({ giraId: gira.id, rotinaId: parseInt(rotinaId) })),
+    if (Array.isArray(banhos) && banhos.length > 0) {
+      await prisma.giraBanho.createMany({
+        data: banhos.map(banhoId => ({ giraId: gira.id, banhoId: parseInt(banhoId) })),
         skipDuplicates: true,
       });
     }
@@ -175,7 +175,7 @@ router.put('/:id', authenticate, requireAdmin, async (req, res) => {
       return res.status(400).json({ error: 'Giras concluídas não podem ser editadas.' });
     }
 
-    const { data, titulo, descricao, instrucoes, entidades, musicas, rotinas } = req.body;
+    const { data, titulo, descricao, instrucoes, entidades, musicas, banhos } = req.body;
     const updateData = {};
 
     // Detect date change (compare date portion only)
@@ -207,11 +207,11 @@ router.put('/:id', authenticate, requireAdmin, async (req, res) => {
         });
       }
     }
-    if (Array.isArray(rotinas)) {
-      await prisma.giraRotina.deleteMany({ where: { giraId: id } });
-      if (rotinas.length > 0) {
-        await prisma.giraRotina.createMany({
-          data: rotinas.map(rotinaId => ({ giraId: id, rotinaId: parseInt(rotinaId) })),
+    if (Array.isArray(banhos)) {
+      await prisma.giraBanho.deleteMany({ where: { giraId: id } });
+      if (banhos.length > 0) {
+        await prisma.giraBanho.createMany({
+          data: banhos.map(banhoId => ({ giraId: id, banhoId: parseInt(banhoId) })),
           skipDuplicates: true,
         });
       }
@@ -367,8 +367,8 @@ router.delete('/:id/musicas/:musicaId', authenticate, requireAdmin, async (req, 
   }
 });
 
-// POST /api/giras/:id/rotinas - add rotina to gira
-router.post('/:id/rotinas', authenticate, requireAdmin, async (req, res) => {
+// POST /api/giras/:id/banhos - add banho to gira
+router.post('/:id/banhos', authenticate, requireAdmin, async (req, res) => {
   try {
     const giraId = parseInt(req.params.id);
     if (isNaN(giraId)) return res.status(400).json({ error: 'Invalid ID' });
@@ -376,19 +376,15 @@ router.post('/:id/rotinas', authenticate, requireAdmin, async (req, res) => {
     const gira = await prisma.gira.findUnique({ where: { id: giraId } });
     if (!gira) return res.status(404).json({ error: 'Gira not found' });
 
-    const { rotinaIds } = req.body;
-    if (!rotinaIds || !Array.isArray(rotinaIds) || rotinaIds.length === 0) {
-      return res.status(400).json({ error: 'rotinaIds array is required' });
+    const { banhoIds } = req.body;
+    if (!banhoIds || !Array.isArray(banhoIds) || banhoIds.length === 0) {
+      return res.status(400).json({ error: 'banhoIds array is required' });
     }
 
-    const records = rotinaIds.map((rotinaId) => ({ giraId, rotinaId: parseInt(rotinaId) }));
-    await prisma.giraRotina.createMany({ data: records, skipDuplicates: true });
+    const records = banhoIds.map((banhoId) => ({ giraId, banhoId: parseInt(banhoId) }));
+    await prisma.giraBanho.createMany({ data: records, skipDuplicates: true });
 
-    const updated = await prisma.gira.findUnique({
-      where: { id: giraId },
-      include: giraFullInclude,
-    });
-
+    const updated = await prisma.gira.findUnique({ where: { id: giraId }, include: giraFullInclude });
     return res.json(updated);
   } catch (err) {
     console.error(err);
@@ -435,21 +431,21 @@ router.post('/:id/presenca', authenticate, async (req, res) => {
   }
 });
 
-// DELETE /api/giras/:id/rotinas/:rotinaId
-router.delete('/:id/rotinas/:rotinaId', authenticate, requireAdmin, async (req, res) => {
+// DELETE /api/giras/:id/banhos/:banhoId
+router.delete('/:id/banhos/:banhoId', authenticate, requireAdmin, async (req, res) => {
   try {
     const giraId = parseInt(req.params.id);
-    const rotinaId = parseInt(req.params.rotinaId);
+    const banhoId = parseInt(req.params.banhoId);
 
-    if (isNaN(giraId) || isNaN(rotinaId)) {
+    if (isNaN(giraId) || isNaN(banhoId)) {
       return res.status(400).json({ error: 'Invalid ID' });
     }
 
-    await prisma.giraRotina.delete({
-      where: { giraId_rotinaId: { giraId, rotinaId } },
+    await prisma.giraBanho.delete({
+      where: { giraId_banhoId: { giraId, banhoId } },
     });
 
-    return res.json({ message: 'Rotina removed from gira' });
+    return res.json({ message: 'Banho removed from gira' });
   } catch (err) {
     if (err.code === 'P2025') {
       return res.status(404).json({ error: 'Association not found' });

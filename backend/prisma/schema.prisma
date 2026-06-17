@@ -137,13 +137,33 @@ model Entidade {
 }
 
 model Rotina {
-  id        Int          @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   titulo    String
   descricao String
-  ordem     Int          @default(0)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  giras     GiraRotina[]
+  ordem     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Banho {
+  id           Int         @id @default(autoincrement())
+  nome         String
+  descricao    String
+  ingredientes String?
+  fotoUrl      String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  giras        GiraBanho[]
+}
+
+model Cigarro {
+  id          Int      @id @default(autoincrement())
+  nome        String
+  descricao   String
+  observacoes String?
+  fotoUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Gira {
@@ -157,7 +177,7 @@ model Gira {
   updatedAt  DateTime       @updatedAt
   entidades  GiraEntidade[]
   musicas    GiraMusica[]
-  rotinas    GiraRotina[]
+  banhos     GiraBanho[]
   presencas  PresencaGira[]
 }
 
@@ -212,11 +232,11 @@ model GiraMusica {
   @@id([giraId, musicaId])
 }
 
-model GiraRotina {
-  giraId   Int
-  rotinaId Int
-  gira     Gira   @relation(fields: [giraId], references: [id], onDelete: Cascade)
-  rotina   Rotina @relation(fields: [rotinaId], references: [id], onDelete: Cascade)
+model GiraBanho {
+  giraId  Int
+  banhoId Int
+  gira    Gira  @relation(fields: [giraId], references: [id], onDelete: Cascade)
+  banho   Banho @relation(fields: [banhoId], references: [id], onDelete: Cascade)
 
-  @@id([giraId, rotinaId])
+  @@id([giraId, banhoId])
 }

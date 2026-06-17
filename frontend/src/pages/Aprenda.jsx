@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router'
-import { Users, Leaf, Music, Play, ChevronDown, Search, X, Youtube, GlassWater } from 'lucide-react'
+import { Users, Leaf, Music, Play, ChevronDown, Search, X, Youtube, Droplets } from 'lucide-react'
 import api from '../api/axios'
 import LoadingSpinner from '../components/LoadingSpinner'
 import Modal from '../components/Modal'
 
 const TABS = [
   { id: 'entidades', label: 'Orixás / Entidades', Icon: Users },
-  { id: 'ervas',     label: 'Ervas / Bebidas',    Icon: Leaf },
+  { id: 'ervas',     label: 'Ervas / Banhos',     Icon: Leaf },
   { id: 'musicas',   label: 'Musicas',             Icon: Music },
 ]
 
 const ERVA_SUBTABS = [
-  { id: 'ervas',    label: 'Ervas',    Icon: Leaf },
-  { id: 'bebidas',  label: 'Bebidas',  Icon: GlassWater },
+  { id: 'ervas',   label: 'Ervas',  Icon: Leaf },
+  { id: 'banhos',  label: 'Banhos', Icon: Droplets },
 ]
 
 /* ── Entity Card ─────────────────────────────────────────── */
@@ -118,8 +118,8 @@ function HerbCard({ herb, onClick }) {
   )
 }
 
-/* ── Drink Card ──────────────────────────────────────────── */
-function DrinkCard({ drink, onClick }) {
+/* ── Banho Card ──────────────────────────────────────────── */
+function BanhoCard({ banho, onClick }) {
   const [hovered, setHovered] = useState(false)
   return (
     <button
@@ -144,20 +144,20 @@ function DrinkCard({ drink, onClick }) {
       }}
     >
       <div style={{ position: 'relative', aspectRatio: '4/3', backgroundColor: '#f8f5f0', overflow: 'hidden', flexShrink: 0 }}>
-        {drink.fotoUrl ? (
-          <img src={drink.fotoUrl} alt={drink.nome}
+        {banho.fotoUrl ? (
+          <img src={banho.fotoUrl} alt={banho.nome}
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}/>
         ) : (
           <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <GlassWater size={32} style={{ color: '#e5e0d8' }} />
+            <Droplets size={32} style={{ color: '#e5e0d8' }} />
           </div>
         )}
       </div>
       <div style={{ padding: '12px 14px', flex: 1 }}>
-        <div style={{ fontSize: '14px', fontWeight: 700, color: '#2c2c3e' }}>{drink.nome}</div>
-        {drink.descricao && (
+        <div style={{ fontSize: '14px', fontWeight: 700, color: '#2c2c3e' }}>{banho.nome}</div>
+        {banho.descricao && (
           <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-            {drink.descricao}
+            {banho.descricao}
           </div>
         )}
       </div>
@@ -198,32 +198,32 @@ function HerbModal({ herb, onClose }) {
   )
 }
 
-/* ── Drink Detail Modal ──────────────────────────────────── */
-function DrinkModal({ drink, onClose }) {
-  if (!drink) return null
+/* ── Banho Detail Modal ──────────────────────────────────── */
+function BanhoModal({ banho, onClose }) {
+  if (!banho) return null
   const secLabel = txt => (
     <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#c8972b', marginBottom: 6 }}>{txt}</div>
   )
   return (
-    <Modal isOpen={!!drink} onClose={onClose} title={drink.nome}>
-      {drink.fotoUrl && (
-        <img src={drink.fotoUrl} alt={drink.nome}
+    <Modal isOpen={!!banho} onClose={onClose} title={banho.nome}>
+      {banho.fotoUrl && (
+        <img src={banho.fotoUrl} alt={banho.nome}
           style={{ width: '100%', height: 'auto', borderRadius: 6, marginBottom: 20, display: 'block' }}/>
       )}
       <div style={{ marginBottom: 16 }}>
         {secLabel('Nome')}
-        <div style={{ fontSize: 20, fontWeight: 800, color: '#2c2c3e' }}>{drink.nome}</div>
+        <div style={{ fontSize: 20, fontWeight: 800, color: '#2c2c3e' }}>{banho.nome}</div>
       </div>
-      {drink.descricao && (
+      {banho.descricao && (
         <div style={{ marginBottom: 16 }}>
           {secLabel('Descrição')}
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{drink.descricao}</p>
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{banho.descricao}</p>
         </div>
       )}
-      {drink.observacoes && (
+      {banho.ingredientes && (
         <div>
-          {secLabel('Observações')}
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{drink.observacoes}</p>
+          {secLabel('Ingredientes')}
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{banho.ingredientes}</p>
         </div>
       )}
     </Modal>
@@ -441,25 +441,25 @@ export default function Aprenda() {
   })
   const [ervaSubTab, setErvaSubTab] = useState('ervas')
 
-  const [data, setData] = useState({ entidades: [], ervas: [], bebidas: [], musicas: [] })
-  const [loading, setLoading] = useState({ entidades: false, ervas: false, bebidas: false, musicas: false })
-  const [loaded, setLoaded] = useState({ entidades: false, ervas: false, bebidas: false, musicas: false })
+  const [data, setData] = useState({ entidades: [], ervas: [], banhos: [], musicas: [] })
+  const [loading, setLoading] = useState({ entidades: false, ervas: false, banhos: false, musicas: false })
+  const [loaded, setLoaded] = useState({ entidades: false, ervas: false, banhos: false, musicas: false })
 
   // Busca individual por sub-contexto
-  const [searches, setSearches] = useState({ entidades: '', ervas: '', bebidas: '', musicas: '' })
+  const [searches, setSearches] = useState({ entidades: '', ervas: '', banhos: '', musicas: '' })
   const setSearch = (key, val) => setSearches(s => ({ ...s, [key]: val }))
 
   const [playlistUrl, setPlaylistUrl] = useState(null)
   const [selectedEntity, setSelectedEntity] = useState(null)
   const [selectedHerb,   setSelectedHerb]   = useState(null)
-  const [selectedDrink,  setSelectedDrink]  = useState(null)
+  const [selectedBanho,  setSelectedBanho]  = useState(null)
   const [selectedMusic,  setSelectedMusic]  = useState(null)
 
   const fetchKey = async (key) => {
     if (loaded[key]) return
     setLoading(l => ({ ...l, [key]: true }))
     try {
-      const endpoints = { entidades: '/entidades', ervas: '/ervas', bebidas: '/bebidas', musicas: '/musicas' }
+      const endpoints = { entidades: '/entidades', ervas: '/ervas', banhos: '/banhos', musicas: '/musicas' }
       const res = await api.get(endpoints[key])
       const list = Array.isArray(res.data) ? res.data : res.data[key] || []
       setData(d => ({ ...d, [key]: list }))
@@ -474,7 +474,7 @@ export default function Aprenda() {
   useEffect(() => {
     if (tab === 'ervas') {
       fetchKey('ervas')
-      fetchKey('bebidas')
+      fetchKey('banhos')
     } else {
       fetchKey(tab)
     }
@@ -492,7 +492,7 @@ export default function Aprenda() {
 
   // Loading do conteúdo atual
   const isLoadingCurrent = tab === 'ervas'
-    ? (loading.ervas || loading.bebidas)
+    ? (loading.ervas || loading.banhos)
     : loading[tab]
 
   return (
@@ -572,7 +572,7 @@ export default function Aprenda() {
           placeholder={
             tab === 'entidades' ? 'Buscar orixá ou entidade...'
             : tab === 'ervas' && ervaSubTab === 'ervas' ? 'Buscar erva...'
-            : tab === 'ervas' && ervaSubTab === 'bebidas' ? 'Buscar bebida...'
+            : tab === 'ervas' && ervaSubTab === 'banhos' ? 'Buscar banho...'
             : 'Buscar ponto cantado...'
           }
         />
@@ -608,14 +608,14 @@ export default function Aprenda() {
                 )
             })()}
 
-            {tab === 'ervas' && ervaSubTab === 'bebidas' && (() => {
-              const q = searches.bebidas.toLowerCase()
-              const list = q ? data.bebidas.filter(b => b.nome?.toLowerCase().includes(q)) : data.bebidas
+            {tab === 'ervas' && ervaSubTab === 'banhos' && (() => {
+              const q = searches.banhos.toLowerCase()
+              const list = q ? data.banhos.filter(b => b.nome?.toLowerCase().includes(q)) : data.banhos
               return list.length === 0
-                ? <EmptyState icon={GlassWater} message={q ? 'Nenhum resultado encontrado.' : 'Nenhuma bebida cadastrada.'} />
+                ? <EmptyState icon={Droplets} message={q ? 'Nenhum resultado encontrado.' : 'Nenhum banho cadastrado.'} />
                 : (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-                    {list.map(b => <DrinkCard key={b.id} drink={b} onClick={() => setSelectedDrink(b)} />)}
+                    {list.map(b => <BanhoCard key={b.id} banho={b} onClick={() => setSelectedBanho(b)} />)}
                   </div>
                 )
             })()}
@@ -648,7 +648,7 @@ export default function Aprenda() {
 
       <EntityModal entity={selectedEntity} onClose={() => setSelectedEntity(null)} />
       <HerbModal   herb={selectedHerb}     onClose={() => setSelectedHerb(null)} />
-      <DrinkModal  drink={selectedDrink}   onClose={() => setSelectedDrink(null)} />
+      <BanhoModal  banho={selectedBanho}   onClose={() => setSelectedBanho(null)} />
       <MusicModal  music={selectedMusic}   onClose={() => setSelectedMusic(null)} />
     </div>
   )
