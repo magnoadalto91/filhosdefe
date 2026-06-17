@@ -142,7 +142,7 @@ export default function PresencaModal() {
                   onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#059669' }}
                 >
                   <CheckCircle size={19} />
-                  {submitting ? 'Salvando...' : 'Vou estar presente'}
+                  {submitting ? 'Salvando...' : 'Confirmo presença'}
                 </button>
 
                 <button

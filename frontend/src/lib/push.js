@@ -11,9 +11,14 @@ export async function registerPush() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
 
   try {
-    const reg = await navigator.serviceWorker.register('/sw.js')
+    // Garante que o SW está registrado e aguarda ele ficar ativo
+    await navigator.serviceWorker.register('/sw.js')
+    const reg = await navigator.serviceWorker.ready
 
-    const permission = await Notification.requestPermission()
+    if (Notification.permission === 'denied') return
+    const permission = Notification.permission === 'granted'
+      ? 'granted'
+      : await Notification.requestPermission()
     if (permission !== 'granted') return
 
     const { data } = await api.get('/push/vapid-public-key')
