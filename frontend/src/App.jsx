@@ -9,6 +9,9 @@ import Home from './pages/Home'
 import Aprenda from './pages/Aprenda'
 import Calendario from './pages/Calendario'
 import Estudos from './pages/Estudos'
+import Entidades from './pages/Entidades'
+import Ervas from './pages/Ervas'
+import Musicas from './pages/Musicas'
 import Bebidas from './pages/Bebidas'
 import Cigarros from './pages/Cigarros'
 import Login from './pages/Login'
@@ -57,10 +60,13 @@ export default function App() {
           {/* Rotas do site (exigem autenticação) */}
           <Route path="/" element={<PublicPage><Home /></PublicPage>} />
           <Route path="/aprenda" element={<PublicPage><Aprenda /></PublicPage>} />
-          <Route path="/calendario" element={<PublicPage><Calendario /></PublicPage>} />
-          <Route path="/estudos" element={<PublicPage><Estudos /></PublicPage>} />
+          <Route path="/entidades" element={<PublicPage><Entidades /></PublicPage>} />
+          <Route path="/ervas" element={<PublicPage><Ervas /></PublicPage>} />
+          <Route path="/musicas" element={<PublicPage><Musicas /></PublicPage>} />
           <Route path="/bebidas" element={<PublicPage><Bebidas /></PublicPage>} />
           <Route path="/cigarros" element={<PublicPage><Cigarros /></PublicPage>} />
+          <Route path="/calendario" element={<PublicPage><Calendario /></PublicPage>} />
+          <Route path="/estudos" element={<PublicPage><Estudos /></PublicPage>} />
 
           {/* Rotas admin (exigem ADMIN) */}
           <Route path="/admin" element={<AdminPage><Dashboard /></AdminPage>} />

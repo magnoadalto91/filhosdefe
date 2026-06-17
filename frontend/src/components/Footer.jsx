@@ -40,9 +40,10 @@ export default function Footer() {
           <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
             {[
               { to: '/', label: 'Início' },
-              { to: '/aprenda', label: 'Aprenda' },
+              { to: '/entidades', label: 'Orixás / Entidades' },
+              { to: '/ervas', label: 'Ervas / Banhos' },
               { to: '/calendario', label: 'Calendário' },
-              { to: '/login', label: 'Entrar' },
+              { to: '/estudos', label: 'Estudos' },
             ].map(({ to, label }) => (
               <li key={to}>
                 <Link to={to} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, color: '#9ca3af', textDecoration: 'none', transition: 'color 0.2s' }}
