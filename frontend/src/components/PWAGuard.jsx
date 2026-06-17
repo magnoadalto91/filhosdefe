@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Share2, MoreVertical, Smartphone, Download, Home, Monitor } from 'lucide-react'
+import { Link, useLocation } from 'react-router'
 import { useAuth } from '../contexts/AuthContext'
 import { getInstallPrompt, clearInstallPrompt, isPWA } from '../lib/pwaInstall'
 
@@ -157,9 +158,11 @@ function DesktopMessage() {
 /* ── Guard principal ──────────────────────── */
 export default function PWAGuard({ children }) {
   const { isAdmin } = useAuth()
+  const { pathname } = useLocation()
   const [prompted, setPrompted] = useState(false)
 
-  if (import.meta.env.DEV || isAdmin || isPWA()) return children
+  // Admin sempre tem acesso; PWA sempre tem acesso; /login libera para o admin conseguir logar
+  if (import.meta.env.DEV || isAdmin || isPWA() || pathname === '/login') return children
 
   const handleInstall = async () => {
     const prompt = getInstallPrompt()
@@ -200,6 +203,10 @@ export default function PWAGuard({ children }) {
           {IS_IOS     && <IOSSteps/>}
           {IS_ANDROID && <AndroidSteps onInstall={handleInstall} prompted={prompted}/>}
           {!IS_MOBILE && <DesktopMessage/>}
+
+          <Link to="/login" style={{ display: 'block', textAlign: 'center', fontSize: 11, color: '#d1cdc8', marginTop: 4, textDecoration: 'none' }}>
+            Administrador? Acesse aqui
+          </Link>
         </div>
       </div>
     </div>
