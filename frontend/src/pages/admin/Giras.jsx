@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Calendar, Pencil, Trash2, AlertCircle, Users, Music, Droplets, Clock, ChevronDown, ChevronUp, Eye, UserCheck, UserX } from 'lucide-react'
+import { Calendar, Pencil, Trash2, AlertCircle, Users, Music, Droplets, Clock, ChevronDown, ChevronUp, Eye, UserCheck, UserX, HelpCircle } from 'lucide-react'
 import api from '../../api/axios'
 import Modal from '../../components/Modal'
 import ConfirmModal from '../../components/ConfirmModal'
@@ -114,6 +114,7 @@ function GiraForm({ form, setForm, error, assoc, setAssoc, allEntidades, allMusi
 function PresencaSection({ giraId }) {
   const [open,      setOpen]      = useState(false)
   const [presencas, setPresencas] = useState([])
+  const [pendentes, setPendentes] = useState([])
   const [loading,   setLoading]   = useState(false)
   const [loaded,    setLoaded]    = useState(false)
 
@@ -122,7 +123,8 @@ function PresencaSection({ giraId }) {
       setLoading(true)
       try {
         const r = await api.get(`/giras/${giraId}/presencas`)
-        setPresencas(Array.isArray(r.data) ? r.data : [])
+        setPresencas(Array.isArray(r.data.presencas) ? r.data.presencas : [])
+        setPendentes(Array.isArray(r.data.pendentes) ? r.data.pendentes : [])
         setLoaded(true)
       } catch {} finally { setLoading(false) }
     }
@@ -131,6 +133,9 @@ function PresencaSection({ giraId }) {
 
   const confirmados = presencas.filter(p => p.confirmado)
   const ausentes    = presencas.filter(p => !p.confirmado)
+  const total       = confirmados.length + ausentes.length + pendentes.length
+
+  const userName = p => p.user?.nome || p.user?.email || `Usuário #${p.userId}`
 
   return (
     <div style={{ marginTop: 12, borderTop: '1px solid #f0ece5', paddingTop: 10 }}>
@@ -138,7 +143,9 @@ function PresencaSection({ giraId }) {
         style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: "'Poppins',sans-serif" }}>
         <Users size={12} color="#9ca3af"/>
         <span style={{ fontSize: 12, fontWeight: 600, color: '#9ca3af' }}>
-          {loaded ? `Presenças (${confirmados.length} vão · ${ausentes.length} não vão)` : 'Ver presenças'}
+          {loaded
+            ? `Presenças · ${confirmados.length} vão · ${ausentes.length} não vão · ${pendentes.length} pendente${pendentes.length !== 1 ? 's' : ''}`
+            : 'Ver presenças'}
         </span>
         {open ? <ChevronUp size={12} color="#9ca3af"/> : <ChevronDown size={12} color="#9ca3af"/>}
       </button>
@@ -147,23 +154,32 @@ function PresencaSection({ giraId }) {
         <div style={{ marginTop: 10 }}>
           {loading ? (
             <p style={{ margin: 0, fontSize: 12, color: '#9ca3af' }}>Carregando...</p>
-          ) : presencas.length === 0 ? (
-            <p style={{ margin: 0, fontSize: 12, color: '#9ca3af' }}>Nenhuma resposta registrada.</p>
+          ) : total === 0 ? (
+            <p style={{ margin: 0, fontSize: 12, color: '#9ca3af' }}>Nenhum usuário cadastrado.</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {presencas.map(p => (
-                <div key={p.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 12px', borderRadius: 6, backgroundColor: p.confirmado ? 'rgba(22,163,74,0.05)' : 'rgba(220,38,38,0.05)', border: `1px solid ${p.confirmado ? 'rgba(22,163,74,0.2)' : 'rgba(220,38,38,0.15)'}` }}>
-                  {p.confirmado
-                    ? <UserCheck size={14} color="#16a34a" style={{ marginTop: 1, flexShrink: 0 }}/>
-                    : <UserX    size={14} color="#dc2626" style={{ marginTop: 1, flexShrink: 0 }}/>}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+              {confirmados.map(p => (
+                <div key={p.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '7px 12px', borderRadius: 6, backgroundColor: 'rgba(22,163,74,0.05)', border: '1px solid rgba(22,163,74,0.2)' }}>
+                  <UserCheck size={14} color="#16a34a" style={{ marginTop: 1, flexShrink: 0 }}/>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#2c2c3e' }}>{userName(p)}</span>
+                </div>
+              ))}
+              {ausentes.map(p => (
+                <div key={p.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '7px 12px', borderRadius: 6, backgroundColor: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
+                  <UserX size={14} color="#dc2626" style={{ marginTop: 1, flexShrink: 0 }}/>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: '#2c2c3e' }}>
-                      {p.user?.nome || p.user?.email || `Usuário #${p.userId}`}
-                    </span>
-                    {!p.confirmado && p.justificativa && (
+                    <span style={{ fontSize: 13, fontWeight: 600, color: '#2c2c3e' }}>{userName(p)}</span>
+                    {p.justificativa && (
                       <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>"{p.justificativa}"</div>
                     )}
                   </div>
+                </div>
+              ))}
+              {pendentes.map(p => (
+                <div key={p.userId} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 12px', borderRadius: 6, backgroundColor: 'rgba(107,114,128,0.04)', border: '1px solid #f0ece5' }}>
+                  <HelpCircle size={14} color="#d1cdc8" style={{ flexShrink: 0 }}/>
+                  <span style={{ fontSize: 13, color: '#9ca3af' }}>{userName(p)}</span>
+                  <span style={{ fontSize: 11, color: '#d1cdc8', marginLeft: 'auto' }}>pendente</span>
                 </div>
               ))}
             </div>

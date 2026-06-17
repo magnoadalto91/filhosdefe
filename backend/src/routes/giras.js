@@ -436,12 +436,26 @@ router.get('/:id/presencas', authenticate, requireAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
-    const presencas = await prisma.presencaGira.findMany({
-      where: { giraId: id },
-      include: { user: { select: { id: true, nome: true, email: true } } },
-      orderBy: [{ confirmado: 'desc' }, { dataRespondida: 'asc' }],
-    });
-    return res.json(presencas);
+
+    const [presencas, allUsers] = await Promise.all([
+      prisma.presencaGira.findMany({
+        where: { giraId: id },
+        include: { user: { select: { id: true, nome: true, email: true } } },
+        orderBy: [{ confirmado: 'desc' }, { dataRespondida: 'asc' }],
+      }),
+      prisma.user.findMany({
+        where: { role: 'USER' },
+        select: { id: true, nome: true, email: true },
+        orderBy: { nome: 'asc' },
+      }),
+    ]);
+
+    const respondidoIds = new Set(presencas.map(p => p.userId));
+    const pendentes = allUsers
+      .filter(u => !respondidoIds.has(u.id))
+      .map(u => ({ userId: u.id, user: u, confirmado: null, justificativa: null, pendente: true }));
+
+    return res.json({ presencas, pendentes });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Internal server error' });
