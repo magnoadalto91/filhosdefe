@@ -444,7 +444,6 @@ router.get('/:id/presencas', authenticate, requireAdmin, async (req, res) => {
         orderBy: [{ confirmado: 'desc' }, { dataRespondida: 'asc' }],
       }),
       prisma.user.findMany({
-        where: { role: 'USER' },
         select: { id: true, nome: true, email: true },
         orderBy: { nome: 'asc' },
       }),
