@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { GlassWater, Search, X, ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import api from '../api/axios'
@@ -99,7 +99,7 @@ export default function Bebidas() {
       <div style={{ backgroundColor: '#1a1a3a', padding: '14px 20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <GlassWater size={18} color="#c8972b" />
-          <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', color: '#c8972b' }}>
+          <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: '#c8972b' }}>
             Bebidas
           </span>
         </div>
@@ -145,10 +145,10 @@ export default function Bebidas() {
       {/* Fixed back footer */}
       <div
         onClick={() => navigate(-1)}
-        style={{ position: 'fixed', bottom: 0, left: 0, right: 0, padding: '18px 20px 24px', background: 'linear-gradient(to top, rgba(255,255,255,0.97) 60%, transparent)', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10, cursor: 'pointer', zIndex: 30, userSelect: 'none' }}
+        style={{ position: 'fixed', bottom: 0, left: 0, right: 0, padding: '18px 20px 24px', background: 'linear-gradient(to top, rgba(255,255,255,0.97) 60%, transparent)', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10, cursor: 'pointer', zIndex: 30, userSelect: 'none', borderTop: '1px solid #e5e0d8' }}
       >
-        <ArrowLeft size={22} color="#2c2c3e" />
-        <span style={{ fontSize: 18, fontWeight: 800, color: 'transparent', WebkitTextStroke: '1.5px #2c2c3e', fontFamily: "'Poppins', sans-serif", letterSpacing: '2px', textTransform: 'uppercase' }}>
+        <ArrowLeft size={22} color="#b0a89e" />
+        <span style={{ fontSize: 18, fontWeight: 500, color: 'transparent', WebkitTextStroke: '1px #b0a89e', fontFamily: "'Poppins', sans-serif", letterSpacing: '1px', textTransform: 'uppercase' }}>
           Voltar
         </span>
       </div>
@@ -157,3 +157,4 @@ export default function Bebidas() {
     </div>
   )
 }
+
