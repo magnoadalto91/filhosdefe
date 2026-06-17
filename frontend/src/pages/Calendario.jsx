@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, Calendar, Users, Music, ListChecks, FileText, Play, ArrowLeft } from 'lucide-react'
+import { useNavigate } from 'react-router'
 import api from '../api/axios'
 import Modal from '../components/Modal'
 import LoadingSpinner from '../components/LoadingSpinner'
@@ -284,6 +285,7 @@ function GiraListCard({ gira, onClick }) {
 
 /* ── Main Page ───────────────────────────────────────────── */
 export default function Calendario() {
+  const navigate = useNavigate()
   const today = new Date()
   const [year,          setYear]          = useState(today.getFullYear())
   const [month,         setMonth]         = useState(today.getMonth())
@@ -310,7 +312,7 @@ export default function Calendario() {
   const navBtn = { background:'none', border:'none', cursor:'pointer', padding:8, borderRadius:4, color:'#c8972b', display:'flex', alignItems:'center', justifyContent:'center', transition:'background-color 0.15s' }
 
   return (
-    <div style={{ padding:16, backgroundColor:'#fff', minHeight:'100%', ...S }}>
+    <div style={{ padding:16, paddingBottom:80, backgroundColor:'#fff', minHeight:'100%', ...S }}>
 
       <div style={{ textAlign:'center', marginBottom:20 }}>
         <h1 style={{ fontSize:22, fontWeight:700, color:'#2c2c3e', margin:'0 0 4px' }}>Calendário</h1>
@@ -378,6 +380,18 @@ export default function Calendario() {
           </div>
         </div>
       )}
+
+      {/* Fixed back button */}
+      <div style={{ position:'fixed', bottom:0, left:0, right:0, padding:'12px 20px', backgroundColor:'#ffffff', borderTop:'1px solid #e5e0d8', boxShadow:'0 -4px 16px rgba(0,0,0,0.08)', display:'flex', justifyContent:'center', zIndex:30 }}>
+        <button
+          onClick={() => navigate(-1)}
+          style={{ display:'flex', alignItems:'center', gap:8, padding:'13px 32px', borderRadius:8, border:'1px solid #e5e0d8', background:'none', cursor:'pointer', fontSize:15, fontWeight:600, color:'#6b7280', fontFamily:"'Poppins',sans-serif", transition:'all 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor='#c8972b'; e.currentTarget.style.color='#c8972b' }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor='#e5e0d8'; e.currentTarget.style.color='#6b7280' }}
+        >
+          <ArrowLeft size={17}/> Voltar
+        </button>
+      </div>
 
       <GiraDetailModal
         giraId={selectedGiraId}

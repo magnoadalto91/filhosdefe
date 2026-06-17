@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { BookOpen, FileText, Download, ArrowLeft, Calendar } from 'lucide-react'
+import { useNavigate } from 'react-router'
 import api from '../api/axios'
 
 const apiBase = () => api.defaults.baseURL || '/api'
@@ -141,6 +142,7 @@ function DocumentosTab() {
 
 /* ── Página ───────────────────────────────────────────────── */
 export default function Estudos() {
+  const navigate = useNavigate()
   const [tab, setTab] = useState('publicacoes')
 
   return (
@@ -157,9 +159,21 @@ export default function Estudos() {
       </div>
 
       {/* Content */}
-      <div style={{ flex:1, padding:'16px', backgroundColor:'#f8f5f0' }}>
+      <div style={{ flex:1, padding:'16px', paddingBottom:80, backgroundColor:'#f8f5f0' }}>
         {tab === 'publicacoes' && <PublicacoesTab/>}
         {tab === 'documentos'  && <DocumentosTab/>}
+      </div>
+
+      {/* Fixed back button */}
+      <div style={{ position:'fixed', bottom:0, left:0, right:0, padding:'12px 20px', backgroundColor:'#ffffff', borderTop:'1px solid #e5e0d8', boxShadow:'0 -4px 16px rgba(0,0,0,0.08)', display:'flex', justifyContent:'center', zIndex:30 }}>
+        <button
+          onClick={() => navigate(-1)}
+          style={{ display:'flex', alignItems:'center', gap:8, padding:'13px 32px', borderRadius:8, border:'1px solid #e5e0d8', background:'none', cursor:'pointer', fontSize:15, fontWeight:600, color:'#6b7280', fontFamily:"'Poppins',sans-serif", transition:'all 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor='#c8972b'; e.currentTarget.style.color='#c8972b' }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor='#e5e0d8'; e.currentTarget.style.color='#6b7280' }}
+        >
+          <ArrowLeft size={17}/> Voltar
+        </button>
       </div>
     </div>
   )
