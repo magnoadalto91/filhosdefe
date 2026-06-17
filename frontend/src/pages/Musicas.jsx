@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Music, Search, X, ChevronDown, Play, Youtube } from 'lucide-react'
+import { Music, Search, X, ChevronDown, Play, Youtube, ArrowLeft } from 'lucide-react'
+import { useNavigate } from 'react-router'
 import api from '../api/axios'
 import LoadingSpinner from '../components/LoadingSpinner'
 import Modal from '../components/Modal'
@@ -118,6 +119,7 @@ function MusicGroups({ musicas, onSelect, search }) {
 
 /* ── Main Page ────────────────────────────────────────────── */
 export default function Musicas() {
+  const navigate      = useNavigate()
   const [musicas,     setMusicas]     = useState([])
   const [loading,     setLoading]     = useState(true)
   const [search,      setSearch]      = useState('')
@@ -195,6 +197,18 @@ export default function Musicas() {
             <MusicGroups musicas={musicas} onSelect={setSelected} search={search} />
           </>
         )}
+      </div>
+
+      {/* Back button */}
+      <div style={{ padding: '12px 16px', borderTop: '1px solid #e5e0d8', backgroundColor: '#ffffff' }}>
+        <button
+          onClick={() => navigate(-1)}
+          style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', borderRadius: 8, border: '1px solid #e5e0d8', background: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 600, color: '#6b7280', fontFamily: "'Poppins', sans-serif", transition: 'all 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = '#c8972b'; e.currentTarget.style.color = '#c8972b' }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e0d8'; e.currentTarget.style.color = '#6b7280' }}
+        >
+          <ArrowLeft size={16} /> Voltar
+        </button>
       </div>
 
       <MusicModal music={selected} onClose={() => setSelected(null)} />

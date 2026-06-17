@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Leaf, Droplets, Search, X } from 'lucide-react'
+import { Leaf, Droplets, Search, X, ArrowLeft } from 'lucide-react'
+import { useNavigate } from 'react-router'
 import api from '../api/axios'
 import LoadingSpinner from '../components/LoadingSpinner'
 import Modal from '../components/Modal'
@@ -157,6 +158,7 @@ function BanhoModal({ banho, onClose }) {
 
 /* ── Main Page ─────────────────────────────────────────────── */
 export default function Ervas() {
+  const navigate = useNavigate()
   const [subTab, setSubTab] = useState('ervas')
 
   const [ervas,  setErvas]  = useState([])
@@ -293,6 +295,18 @@ export default function Ervas() {
             </div>
           )
         )}
+      </div>
+
+      {/* Back button */}
+      <div style={{ padding: '12px 16px', borderTop: '1px solid #e5e0d8', backgroundColor: '#ffffff' }}>
+        <button
+          onClick={() => navigate(-1)}
+          style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', borderRadius: 8, border: '1px solid #e5e0d8', background: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 600, color: '#6b7280', fontFamily: "'Poppins', sans-serif", transition: 'all 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = '#c8972b'; e.currentTarget.style.color = '#c8972b' }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e0d8'; e.currentTarget.style.color = '#6b7280' }}
+        >
+          <ArrowLeft size={16} /> Voltar
+        </button>
       </div>
 
       <HerbModal  herb={selectedHerb}    onClose={() => setSelectedHerb(null)} />
