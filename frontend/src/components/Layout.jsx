@@ -6,7 +6,7 @@ import PWAGuard from './PWAGuard'
 import PresencaModal from './PresencaModal'
 
 function UserMenu() {
-  const { user, logout } = useAuth()
+  const { user, logout, isAdmin } = useAuth()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
@@ -43,14 +43,15 @@ function UserMenu() {
             <div style={{ fontSize: 13, fontWeight: 600, color: '#2c2c3e', wordBreak: 'break-all' }}>{user?.email}</div>
           </div>
 
-          {/* Área Administrativa — visível para todos, acesso restrito pelo backend */}
-          <Link to="/admin" onClick={() => setOpen(false)}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', fontSize: 13, fontWeight: 500, color: '#c8972b', textDecoration: 'none', transition: 'background 0.15s' }}
-            onMouseEnter={e => e.currentTarget.style.background = '#f8f5f0'}
-            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-          >
-            <LayoutDashboard size={15} /> Área Administrativa
-          </Link>
+          {isAdmin && (
+            <Link to="/admin" onClick={() => setOpen(false)}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', fontSize: 13, fontWeight: 500, color: '#c8972b', textDecoration: 'none', transition: 'background 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.background = '#f8f5f0'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              <LayoutDashboard size={15} /> Área Administrativa
+            </Link>
+          )}
 
           <button onClick={handleLogout}
             style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '10px 16px', fontSize: 13, fontWeight: 500, color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'Poppins', sans-serif", transition: 'background 0.15s', borderTop: '1px solid #f0ece5' }}
