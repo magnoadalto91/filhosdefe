@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Share2, MoreVertical, Smartphone, Download, Home } from 'lucide-react'
+import { Share2, MoreVertical, Smartphone, Download, Home, Monitor } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { getInstallPrompt, clearInstallPrompt, isPWA } from '../lib/pwaInstall'
 
 const ua = navigator.userAgent
 const IS_IOS     = /iPad|iPhone|iPod/.test(ua)
 const IS_ANDROID = /Android/.test(ua)
+const IS_MOBILE  = IS_IOS || IS_ANDROID
 
 /* ── Número do passo ───────────────────────── */
 function StepNum({ n }) {
@@ -35,13 +36,13 @@ function Tag({ children }) {
   )
 }
 
-/* ── Aviso fixo: procure o ícone ──────────── */
+/* ── Aviso: procure o ícone ───────────────── */
 function HomeHint() {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, backgroundColor: 'rgba(200,151,43,0.08)', border: '1px solid rgba(200,151,43,0.25)', borderRadius: 8, padding: '11px 14px', marginBottom: 18 }}>
       <Home size={15} color="#c8972b" style={{ flexShrink: 0 }}/>
       <span style={{ fontSize: 12, color: '#6b7280', lineHeight: 1.5 }}>
-        Após instalar, <strong style={{ color: '#2c2c3e' }}>procure o ícone do app na tela inicial</strong> do seu celular e abra por lá.
+        Após instalar, <strong style={{ color: '#2c2c3e' }}>abra sempre pelo ícone do app</strong> na tela inicial — não pelo navegador.
       </span>
     </div>
   )
@@ -54,20 +55,20 @@ function IOSSteps() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
         <Smartphone size={15} color="#c8972b"/>
         <span style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: '#c8972b' }}>
-          Passos no Safari (iOS)
+          Instalar no iPhone / iPad (Safari)
         </span>
       </div>
       <Step n={1}>
-        Abra esta página no <Tag>Safari</Tag> (não no Chrome)
+        Abra esta página no <Tag>Safari</Tag> — não funciona no Chrome do iOS
       </Step>
       <Step n={2}>
-        Toque no botão <Share2 size={13} style={{ display:'inline', verticalAlign:'middle', color:'#2563eb' }}/> <Tag>Compartilhar</Tag> na barra inferior
+        Toque no ícone <Share2 size={13} style={{ display:'inline', verticalAlign:'middle', color:'#2563eb' }}/> <Tag>Compartilhar</Tag> na barra inferior do Safari
       </Step>
       <Step n={3}>
-        Role para baixo e toque em <Tag>Adicionar à Tela de Início</Tag>
+        Role a lista e toque em <Tag>Adicionar à Tela de Início</Tag>
       </Step>
       <Step n={4}>
-        Confirme tocando em <Tag>Adicionar</Tag> no canto superior direito
+        Toque em <Tag>Adicionar</Tag> no canto superior direito para confirmar
       </Step>
     </div>
   )
@@ -90,17 +91,17 @@ function AndroidSteps({ onInstall, prompted }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
             <Smartphone size={15} color="#c8972b"/>
             <span style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: '#c8972b' }}>
-              Passos no Chrome (Android)
+              Instalar no Android (Chrome)
             </span>
           </div>
           <Step n={1}>
-            Toque no menu <MoreVertical size={13} style={{ display:'inline', verticalAlign:'middle' }}/> no canto superior direito do Chrome
+            Toque no menu <MoreVertical size={13} style={{ display:'inline', verticalAlign:'middle' }}/> nos <Tag>três pontos</Tag> no canto superior direito
           </Step>
           <Step n={2}>
             Selecione <Tag>Adicionar à tela inicial</Tag> ou <Tag>Instalar aplicativo</Tag>
           </Step>
           <Step n={3}>
-            Confirme tocando em <Tag>Instalar</Tag>
+            Toque em <Tag>Instalar</Tag> para confirmar
           </Step>
         </div>
       )}
@@ -111,22 +112,54 @@ function AndroidSteps({ onInstall, prompted }) {
 /* ── Desktop ──────────────────────────────── */
 function DesktopMessage() {
   return (
-    <div style={{ backgroundColor: '#f8f5f0', borderRadius: 10, padding: '20px', marginBottom: 16, textAlign: 'center' }}>
-      <Smartphone size={32} color="#e5e0d8" style={{ marginBottom: 12, display: 'block', margin: '0 auto 12px' }}/>
-      <p style={{ margin: 0, fontSize: 13, color: '#6b7280', lineHeight: 1.6 }}>
-        Este aplicativo é projetado para <strong>dispositivos móveis</strong>.<br/>
-        Acesse pelo <strong>Chrome</strong> (Android) ou <strong>Safari</strong> (iPhone) e instale na tela inicial.
-      </p>
+    <div>
+      {/* Opção 1: instalar no Chrome do computador */}
+      <div style={{ backgroundColor: '#f8f5f0', borderRadius: 10, padding: '16px 18px', marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+          <Monitor size={15} color="#c8972b"/>
+          <span style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: '#c8972b' }}>
+            Opção 1 — Instalar no computador (Chrome)
+          </span>
+        </div>
+        <Step n={1}>
+          Abra esta página no <Tag>Google Chrome</Tag> ou <Tag>Microsoft Edge</Tag>
+        </Step>
+        <Step n={2}>
+          Clique no ícone <Download size={13} style={{ display:'inline', verticalAlign:'middle' }}/> que aparece no <Tag>canto direito da barra de endereço</Tag>
+        </Step>
+        <Step n={3}>
+          Clique em <Tag>Instalar</Tag> e confirme — o app abrirá como janela própria
+        </Step>
+      </div>
+
+      {/* Opção 2: usar no celular */}
+      <div style={{ backgroundColor: '#f8f5f0', borderRadius: 10, padding: '16px 18px', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+          <Smartphone size={15} color="#c8972b"/>
+          <span style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: '#c8972b' }}>
+            Opção 2 — Instalar no celular (recomendado)
+          </span>
+        </div>
+        <Step n={1}>
+          Abra este mesmo link no <Tag>Chrome</Tag> (Android) ou <Tag>Safari</Tag> (iPhone)
+        </Step>
+        <Step n={2}>
+          Siga os passos para <Tag>Adicionar à tela inicial</Tag>
+        </Step>
+        <Step n={3}>
+          Abra o app pelo ícone instalado — não pelo navegador
+        </Step>
+      </div>
     </div>
   )
 }
 
 /* ── Guard principal ──────────────────────── */
 export default function PWAGuard({ children }) {
-  const { user, isAdmin } = useAuth()
+  const { isAdmin } = useAuth()
   const [prompted, setPrompted] = useState(false)
 
-  if (import.meta.env.DEV || !user || isAdmin || isPWA()) return children
+  if (import.meta.env.DEV || isAdmin || isPWA()) return children
 
   const handleInstall = async () => {
     const prompt = getInstallPrompt()
@@ -134,7 +167,7 @@ export default function PWAGuard({ children }) {
     prompt.prompt()
     const { outcome } = await prompt.userChoice
     clearInstallPrompt()
-    if (outcome === 'accepted') window.close()
+    if (outcome === 'accepted') window.location.reload()
     else setPrompted(true)
   }
 
@@ -151,26 +184,22 @@ export default function PWAGuard({ children }) {
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#fff', lineHeight: 1.3 }}>
             Instale o aplicativo
           </h2>
+          <p style={{ margin: '8px 0 0', fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>
+            O acesso é permitido apenas pelo app instalado
+          </p>
         </div>
 
         {/* Corpo */}
         <div style={{ padding: '22px 24px 26px' }}>
           <p style={{ margin: '0 0 16px', fontSize: 13, color: '#6b7280', lineHeight: 1.7, textAlign: 'center' }}>
-            Para receber notificações e usar todas as funcionalidades, instale o app no seu celular.
+            Para usar todas as funcionalidades e receber notificações das Giras, instale o app seguindo os passos abaixo.
           </p>
 
           <HomeHint/>
 
           {IS_IOS     && <IOSSteps/>}
           {IS_ANDROID && <AndroidSteps onInstall={handleInstall} prompted={prompted}/>}
-          {!IS_IOS && !IS_ANDROID && <DesktopMessage/>}
-
-          <button onClick={() => window.close()}
-            style={{ width: '100%', padding: '11px', borderRadius: 8, border: '1px solid #e5e0d8', background: 'transparent', fontSize: 13, fontWeight: 600, color: '#9ca3af', cursor: 'pointer', fontFamily: "'Poppins',sans-serif", transition: 'all 0.15s' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = '#2c2c3e'; e.currentTarget.style.color = '#2c2c3e' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e0d8'; e.currentTarget.style.color = '#9ca3af' }}>
-            Já instalei, fechar aba
-          </button>
+          {!IS_MOBILE && <DesktopMessage/>}
         </div>
       </div>
     </div>

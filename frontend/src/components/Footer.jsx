@@ -1,4 +1,4 @@
-import { Link } from 'react-router'
+﻿import { Link } from 'react-router'
 import { Youtube, Instagram, Facebook, MapPin, Mail, Phone, ArrowRight } from 'lucide-react'
 
 export default function Footer() {
@@ -41,7 +41,7 @@ export default function Footer() {
             {[
               { to: '/', label: 'Início' },
               { to: '/entidades', label: 'Orixás / Entidades' },
-              { to: '/ervas', label: 'Ervas E Banhos' },
+              { to: '/ervas', label: 'Ervas e Banhos' },
               { to: '/calendario', label: 'Calendário' },
               { to: '/estudos', label: 'Estudos' },
             ].map(({ to, label }) => (
@@ -61,7 +61,7 @@ export default function Footer() {
         <div>
           <h3 style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', color: '#ffffff', marginBottom: 20 }}>Conteúdo</h3>
           <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {['Orixás / Entidades', 'Ervas E Banhos', 'Bebidas', 'Cigarros E Charutos', 'Pontos Cantados', 'Próximas Giras'].map(item => (
+            {['Orixás / Entidades', 'Ervas e Banhos', 'Bebidas', 'Cigarros e Charutos', 'Pontos Cantados', 'Próximas Giras'].map(item => (
               <li key={item} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, color: '#9ca3af' }}>
                 <ArrowRight size={13} style={{ color: '#c8972b', flexShrink: 0 }} /> {item}
               </li>
@@ -100,3 +100,4 @@ export default function Footer() {
     </footer>
   )
 }
+

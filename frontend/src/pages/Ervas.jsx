@@ -219,7 +219,7 @@ export default function Ervas() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Leaf size={18} color="#c8972b" />
           <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: '#c8972b' }}>
-            Ervas E Banhos
+            Ervas e Banhos
           </span>
         </div>
       </div>
@@ -313,4 +313,5 @@ export default function Ervas() {
     </div>
   )
 }
+
 
