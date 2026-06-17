@@ -94,14 +94,13 @@ export default function Bebidas() {
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%', backgroundColor: '#ffffff', fontFamily: "'Poppins', sans-serif" }}>
 
       {/* Header */}
-      <div style={{ backgroundColor: '#1a1a3a', padding: '24px 20px 20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+      <div style={{ backgroundColor: '#1a1a3a', padding: '14px 20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <GlassWater size={18} color="#c8972b" />
-          <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', color: '#c8972b' }}>
+          <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', color: '#c8972b' }}>
             Bebidas
           </span>
         </div>
-        <h1 style={{ margin: '4px 0 0', fontSize: 22, fontWeight: 800, color: '#ffffff' }}>Bebidas Sagradas</h1>
       </div>
 
       {/* Search */}

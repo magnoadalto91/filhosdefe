@@ -213,14 +213,13 @@ export default function Ervas() {
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%', backgroundColor: '#ffffff', fontFamily: "'Poppins', sans-serif" }}>
 
       {/* Header */}
-      <div style={{ backgroundColor: '#1a3a2a', padding: '24px 20px 20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+      <div style={{ backgroundColor: '#1a3a2a', padding: '14px 20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Leaf size={18} color="#c8972b" />
-          <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', color: '#c8972b' }}>
+          <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', color: '#c8972b' }}>
             Ervas / Banhos
           </span>
         </div>
-        <h1 style={{ margin: '4px 0 0', fontSize: 22, fontWeight: 800, color: '#ffffff' }}>Ervas e Banhos Sagrados</h1>
       </div>
 
       {/* Sub-tabs */}
