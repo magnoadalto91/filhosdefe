@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Share2, MoreVertical, Smartphone, Download, Home, Monitor } from 'lucide-react'
-import { Link, useLocation } from 'react-router'
+import { useLocation } from 'react-router'
 import { useAuth } from '../contexts/AuthContext'
 import { getInstallPrompt, clearInstallPrompt, isPWA } from '../lib/pwaInstall'
 
@@ -203,10 +203,6 @@ export default function PWAGuard({ children }) {
           {IS_IOS     && <IOSSteps/>}
           {IS_ANDROID && <AndroidSteps onInstall={handleInstall} prompted={prompted}/>}
           {!IS_MOBILE && <DesktopMessage/>}
-
-          <Link to="/login" style={{ display: 'block', textAlign: 'center', fontSize: 11, color: '#d1cdc8', marginTop: 4, textDecoration: 'none' }}>
-            Administrador? Acesse aqui
-          </Link>
         </div>
       </div>
     </div>
