@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Share2, MoreVertical, Smartphone, Download, Home, Monitor } from 'lucide-react'
-import { useLocation } from 'react-router'
+import { Navigate } from 'react-router'
 import { useAuth } from '../contexts/AuthContext'
 import { getInstallPrompt, clearInstallPrompt, isPWA } from '../lib/pwaInstall'
 
@@ -157,12 +157,14 @@ function DesktopMessage() {
 
 /* ── Guard principal ──────────────────────── */
 export default function PWAGuard({ children }) {
-  const { isAdmin } = useAuth()
-  const { pathname } = useLocation()
+  const { user, isAdmin } = useAuth()
   const [prompted, setPrompted] = useState(false)
 
-  // Admin sempre tem acesso; PWA sempre tem acesso; /login libera para o admin conseguir logar
-  if (import.meta.env.DEV || isAdmin || isPWA() || pathname === '/login') return children
+  // Dev, admin e PWA passam direto
+  if (import.meta.env.DEV || isAdmin || isPWA()) return children
+
+  // Não logado → vai para login (sem modal ainda)
+  if (!user) return <Navigate to="/login" replace />
 
   const handleInstall = async () => {
     const prompt = getInstallPrompt()
