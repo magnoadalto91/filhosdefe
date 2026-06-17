@@ -1,14 +1,13 @@
 import { Link } from 'react-router'
-import { ArrowRight } from 'lucide-react'
 
 /* ─── Participate cards ──────────────────────────────────── */
 const CARDS = [
-  { title: 'Orixás / Entidades',  to: '/entidades', bg: '#2c2c3e' },
-  { title: 'Ervas / Banhos',      to: '/ervas',     bg: '#1a3a2a' },
-  { title: 'Bebidas',             to: '/bebidas',   bg: '#0a2233' },
-  { title: 'Cigarros / Charutos', to: '/cigarros',  bg: '#3a1a1a' },
-  { title: 'Pontos Cantados',     to: '/musicas',   bg: '#3a2a1a' },
-  { title: 'Giras',               to: '/calendario',bg: '#1a1a3a' },
+  { title: 'Orixás / Entidades',   to: '/entidades', bg: '#2c2c3e' },
+  { title: 'Ervas E Banhos',       to: '/ervas',     bg: '#1a3a2a' },
+  { title: 'Bebidas',              to: '/bebidas',   bg: '#0a2233' },
+  { title: 'Cigarros E Charutos',  to: '/cigarros',  bg: '#3a1a1a' },
+  { title: 'Pontos Cantados',      to: '/musicas',   bg: '#3a2a1a' },
+  { title: 'Giras',                to: '/calendario',bg: '#1a1a3a' },
 ]
 
 /* ─── Main ───────────────────────────────────────────────── */
@@ -64,10 +63,7 @@ export default function Home() {
             >
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(200,151,43,0.08) 0%, transparent 60%)', pointerEvents: 'none' }} />
               <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: 24 }}>
-                <span style={{ fontSize: 18, fontWeight: 800, color: '#ffffff', lineHeight: 1.3, display: 'block', marginBottom: 12 }}>{title}</span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.4)', padding: '5px 14px', borderRadius: 2 }}>
-                  Ver mais <ArrowRight size={11} />
-                </span>
+                <span style={{ fontSize: 18, fontWeight: 800, color: '#ffffff', lineHeight: 1.3, display: 'block' }}>{title}</span>
               </div>
             </Link>
           ))}
@@ -81,10 +77,7 @@ export default function Home() {
         >
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(200,151,43,0.1) 0%, transparent 60%)', pointerEvents: 'none' }} />
           <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: 24 }}>
-            <span style={{ fontSize: 18, fontWeight: 800, color: '#ffffff', lineHeight: 1.3, display: 'block', marginBottom: 12 }}>Estudos</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.4)', padding: '5px 14px', borderRadius: 2 }}>
-              Publicações e documentos <ArrowRight size={11} />
-            </span>
+            <span style={{ fontSize: 18, fontWeight: 800, color: '#ffffff', lineHeight: 1.3, display: 'block' }}>Estudos</span>
           </div>
         </Link>
       </div>
