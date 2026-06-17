@@ -27,6 +27,7 @@ model User {
   role              Role               @default(USER)
   createdAt         DateTime           @default(now())
   pushSubscriptions PushSubscription[]
+  presencas         PresencaGira[]
 }
 
 model PushSubscription {
@@ -157,6 +158,22 @@ model Gira {
   entidades  GiraEntidade[]
   musicas    GiraMusica[]
   rotinas    GiraRotina[]
+  presencas  PresencaGira[]
+}
+
+model PresencaGira {
+  id             Int      @id @default(autoincrement())
+  giraId         Int
+  userId         Int
+  confirmado     Boolean
+  justificativa  String?
+  dataRespondida DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  gira           Gira     @relation(fields: [giraId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([giraId, userId])
 }
 
 model EntidadeMusica {

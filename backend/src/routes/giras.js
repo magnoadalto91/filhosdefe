@@ -41,6 +41,38 @@ router.get('/all', async (_req, res) => {
   }
 });
 
+// GET /api/giras/presenca-pendente - must be before /:id to avoid route conflict
+router.get('/presenca-pendente', authenticate, async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const giras = await prisma.gira.findMany({
+      where: {
+        data: { gte: today },
+        status: { not: 'CONCLUIDA' },
+      },
+      include: {
+        presencas: { where: { userId: req.user.id } },
+      },
+      orderBy: { data: 'asc' },
+    });
+
+    const pending = giras
+      .filter(g => {
+        const presenca = g.presencas[0];
+        if (!presenca) return true;
+        return presenca.dataRespondida.toISOString().slice(0, 10) !== g.data.toISOString().slice(0, 10);
+      })
+      .map(({ presencas: _p, ...g }) => g);
+
+    return res.json(pending);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // GET /api/giras/:id - with all relations
 router.get('/:id', async (req, res) => {
   try {
@@ -146,6 +178,10 @@ router.put('/:id', authenticate, requireAdmin, async (req, res) => {
     const { data, titulo, descricao, instrucoes, entidades, musicas, rotinas } = req.body;
     const updateData = {};
 
+    // Detect date change (compare date portion only)
+    const dateChanged = data !== undefined &&
+      new Date(data).toISOString().slice(0, 10) !== existing.data.toISOString().slice(0, 10);
+
     if (data !== undefined) updateData.data = new Date(data);
     if (titulo !== undefined) updateData.titulo = titulo;
     if (descricao !== undefined) updateData.descricao = descricao;
@@ -183,9 +219,14 @@ router.put('/:id', authenticate, requireAdmin, async (req, res) => {
 
     const gira = await prisma.gira.findUnique({ where: { id }, include: giraFullInclude });
 
-    if (await isEnabled('novaGira')) {
-      const dataFmt = new Date(gira.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-      sendPushToAll('✏️ Gira atualizada', `"${gira.titulo}" — ${dataFmt} foi atualizada. Confira os detalhes!`, { url: '/calendario' }).catch(() => {})
+    if (dateChanged) {
+      // Date changed: reset all confirmations and always notify
+      await prisma.presencaGira.deleteMany({ where: { giraId: id } });
+      const novaDataFmt = new Date(gira.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      sendPushToAll('📅 Data da Gira alterada!', `"${gira.titulo}" — nova data: ${novaDataFmt}. Confirme sua presença!`, { url: '/calendario' }).catch(() => {});
+    } else if (await isEnabled('novaGira')) {
+      const dataFmt = new Date(gira.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      sendPushToAll('✏️ Gira atualizada', `"${gira.titulo}" — ${dataFmt} foi atualizada. Confira os detalhes!`, { url: '/calendario' }).catch(() => {});
     }
 
     return res.json(gira);
@@ -349,6 +390,45 @@ router.post('/:id/rotinas', authenticate, requireAdmin, async (req, res) => {
     });
 
     return res.json(updated);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /api/giras/:id/presenca - submit attendance response
+router.post('/:id/presenca', authenticate, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
+
+    const gira = await prisma.gira.findUnique({ where: { id } });
+    if (!gira) return res.status(404).json({ error: 'Gira not found' });
+
+    const { confirmado, justificativa } = req.body;
+    const confirmed = confirmado === true || confirmado === 'true';
+
+    if (!confirmed && !justificativa?.trim()) {
+      return res.status(400).json({ error: 'Justificativa é obrigatória ao recusar presença.' });
+    }
+
+    const presenca = await prisma.presencaGira.upsert({
+      where: { giraId_userId: { giraId: id, userId: req.user.id } },
+      create: {
+        giraId: id,
+        userId: req.user.id,
+        confirmado: confirmed,
+        justificativa: confirmed ? null : justificativa.trim(),
+        dataRespondida: gira.data,
+      },
+      update: {
+        confirmado: confirmed,
+        justificativa: confirmed ? null : justificativa.trim(),
+        dataRespondida: gira.data,
+      },
+    });
+
+    return res.json(presenca);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Internal server error' });
