@@ -63,8 +63,7 @@ router.get('/usuarios-push', authenticate, requireAdmin, async (_req, res) => {
   try {
     const [users, subs] = await Promise.all([
       prisma.user.findMany({
-        where: { role: 'USER' },
-        select: { id: true, nome: true, email: true },
+        select: { id: true, nome: true, email: true, role: true },
         orderBy: { nome: 'asc' },
       }),
       prisma.pushSubscription.findMany({ select: { userId: true } }),
