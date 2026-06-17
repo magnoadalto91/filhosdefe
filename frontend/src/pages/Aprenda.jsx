@@ -220,16 +220,10 @@ function DrinkModal({ drink, onClose }) {
           <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{drink.descricao}</p>
         </div>
       )}
-      {drink.ingredientes && (
-        <div style={{ marginBottom: 16 }}>
-          {secLabel('Ingredientes')}
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{drink.ingredientes}</p>
-        </div>
-      )}
-      {drink.preparo && (
+      {drink.observacoes && (
         <div>
-          {secLabel('Modo de preparo')}
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{drink.preparo}</p>
+          {secLabel('Observações')}
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{drink.observacoes}</p>
         </div>
       )}
     </Modal>

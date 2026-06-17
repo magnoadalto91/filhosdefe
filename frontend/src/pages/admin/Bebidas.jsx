@@ -14,7 +14,7 @@ const S = {
   error:       { display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderRadius:6, backgroundColor:'#fef2f2', border:'1px solid #fecaca', fontSize:13, color:'#dc2626', marginBottom:16 },
 }
 
-const emptyForm = { nome:'', descricao:'', ingredientes:'', preparo:'' }
+const emptyForm = { nome:'', descricao:'', observacoes:'' }
 
 function BebidaFormWrapper({ form, setForm, error, preview, setPreview, fileRef }) {
   const inputRef = useRef()
@@ -52,12 +52,8 @@ function BebidaFormWrapper({ form, setForm, error, preview, setPreview, fileRef 
         <textarea style={{...S.input,resize:'vertical',minHeight:80}} value={form.descricao} onChange={e=>setForm(f=>({...f,descricao:e.target.value}))} placeholder="Para qual entidade, ocasião, significado..." onFocus={focus} onBlur={blur}/>
       </div>
       <div style={{ marginBottom:16 }}>
-        <label style={S.label}>Ingredientes</label>
-        <textarea style={{...S.input,resize:'vertical',minHeight:100}} value={form.ingredientes} onChange={e=>setForm(f=>({...f,ingredientes:e.target.value}))} placeholder="Liste os ingredientes..." onFocus={focus} onBlur={blur}/>
-      </div>
-      <div style={{ marginBottom:16 }}>
-        <label style={S.label}>Modo de preparo</label>
-        <textarea style={{...S.input,resize:'vertical',minHeight:100}} value={form.preparo} onChange={e=>setForm(f=>({...f,preparo:e.target.value}))} placeholder="Como preparar (opcional)..." onFocus={focus} onBlur={blur}/>
+        <label style={S.label}>Observações</label>
+        <textarea style={{...S.input,resize:'vertical',minHeight:120}} value={form.observacoes} onChange={e=>setForm(f=>({...f,observacoes:e.target.value}))} placeholder="Informações adicionais..." onFocus={focus} onBlur={blur}/>
       </div>
     </div>
   )
@@ -88,7 +84,7 @@ export default function AdminBebidas() {
   }
   const openEdit = b => {
     setEditTarget(b)
-    setForm({ nome:b.nome||'', descricao:b.descricao||'', ingredientes:b.ingredientes||'', preparo:b.preparo||'' })
+    setForm({ nome:b.nome||'', descricao:b.descricao||'', observacoes:b.observacoes||'' })
     setPreview(b.fotoUrl||''); fileRef.current=null; setFormError(''); setModalOpen(true)
   }
 
@@ -99,8 +95,7 @@ export default function AdminBebidas() {
       const fd = new FormData()
       fd.append('nome', form.nome.trim())
       fd.append('descricao', form.descricao.trim())
-      fd.append('ingredientes', form.ingredientes.trim())
-      fd.append('preparo', form.preparo.trim())
+      fd.append('observacoes', form.observacoes.trim())
       if (fileRef.current) fd.append('foto', fileRef.current)
 
       if (editTarget) {

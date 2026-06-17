@@ -113,8 +113,7 @@ model Bebida {
   id           Int      @id @default(autoincrement())
   nome         String
   descricao    String
-  ingredientes String
-  preparo      String?
+  observacoes  String?
   fotoUrl      String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
