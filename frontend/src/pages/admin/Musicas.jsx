@@ -68,6 +68,8 @@ export default function AdminMusicas() {
   const [saving,      setSaving]      = useState(false)
   const [formError,   setFormError]   = useState('')
   const [deleteTarget,setDeleteTarget]= useState(null)
+  const [selectedIds,    setSelectedIds]    = useState(new Set())
+  const [showBulkConfirm,setShowBulkConfirm]= useState(false)
 
   const load = async () => {
     setLoading(true)
@@ -115,6 +117,12 @@ export default function AdminMusicas() {
     try { await api.delete(`/musicas/${deleteTarget.id}`); load() } catch {}
   }
 
+  const toggleSelect = id => setSelectedIds(prev => { const n = new Set(prev); n.has(id)?n.delete(id):n.add(id); return n })
+  const toggleAll    = () => setSelectedIds(prev => prev.size === filtered.length ? new Set() : new Set(filtered.map(m=>m.id)))
+  const handleBulkDelete = async () => {
+    try { await Promise.all([...selectedIds].map(id => api.delete(`/musicas/${id}`))); setSelectedIds(new Set()); load() } catch{}
+  }
+
   const filtered = musicas.filter(m => m.titulo?.toLowerCase().includes(search.toLowerCase()))
 
   return (
@@ -160,13 +168,21 @@ export default function AdminMusicas() {
       </div>
 
       {/* Search */}
-      <div style={{ position:'relative', marginBottom:20 }}>
+      <div style={{ position:'relative', marginBottom:16 }}>
         <Search size={15} style={{ position:'absolute', left:14, top:'50%', transform:'translateY(-50%)', color:'#9ca3af', pointerEvents:'none' }}/>
         <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar música..."
           style={{...S.input, paddingLeft:42}}
           onFocus={e=>e.currentTarget.style.borderColor='#c8972b'}
           onBlur={e=>e.currentTarget.style.borderColor='#e5e0d8'}/>
       </div>
+
+      {selectedIds.size > 0 && (
+        <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', backgroundColor:'#fef3cd', borderRadius:8, marginBottom:16, border:'1px solid #f9d971' }}>
+          <span style={{ fontSize:13, fontWeight:600, color:'#2c2c3e', flex:1 }}>{selectedIds.size} selecionada(s)</span>
+          <button onClick={toggleAll} style={{ fontSize:12, color:'#6b7280', background:'none', border:'none', cursor:'pointer', fontFamily:"'Poppins',sans-serif" }}>{selectedIds.size===filtered.length?'Desmarcar todos':'Selecionar todos'}</button>
+          <button onClick={()=>setShowBulkConfirm(true)} style={{ padding:'6px 14px', borderRadius:6, backgroundColor:'#dc2626', color:'#fff', fontSize:12, fontWeight:700, border:'none', cursor:'pointer', fontFamily:"'Poppins',sans-serif" }}>Excluir {selectedIds.size}</button>
+        </div>
+      )}
 
       {/* List */}
       {loading ? <LoadingSpinner/> : filtered.length===0 ? (
@@ -177,7 +193,8 @@ export default function AdminMusicas() {
       ) : (
         <div>
           {filtered.map(m => (
-            <div key={m.id} style={S.card}>
+            <div key={m.id} style={{ ...S.card, border: selectedIds.has(m.id)?'1px solid #c8972b':'1px solid #e5e0d8', backgroundColor: selectedIds.has(m.id)?'#fef9f0':'#fff' }}>
+              <input type="checkbox" checked={selectedIds.has(m.id)} onChange={()=>toggleSelect(m.id)} style={{ width:16, height:16, cursor:'pointer', accentColor:'#c8972b', flexShrink:0 }}/>
               <div style={{ width:42, height:42, borderRadius:8, backgroundColor:'rgba(200,151,43,0.1)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                 <Music size={18} color="#c8972b"/>
               </div>
@@ -230,6 +247,8 @@ export default function AdminMusicas() {
 
       <ConfirmModal isOpen={!!deleteTarget} onClose={()=>setDeleteTarget(null)} onConfirm={handleDelete}
         title="Excluir Música" message={`Excluir "${deleteTarget?.titulo}"? Esta ação não pode ser desfeita.`}/>
+      <ConfirmModal isOpen={showBulkConfirm} onClose={()=>setShowBulkConfirm(false)} onConfirm={handleBulkDelete}
+        title="Excluir Músicas" message={`Excluir ${selectedIds.size} música(s) selecionada(s)? Esta ação não pode ser desfeita.`}/>
     </div>
   )
 }

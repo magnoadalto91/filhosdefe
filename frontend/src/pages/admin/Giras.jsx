@@ -191,7 +191,7 @@ function PresencaSection({ giraId }) {
 }
 
 /* ── GiraCard ─────────────────────────────────── */
-function GiraCard({ gira, onEdit, onDelete, onStatusChange }) {
+function GiraCard({ gira, onEdit, onDelete, onStatusChange, selected, onToggleSelect }) {
   const meta    = STATUS_META[gira.status] || STATUS_META.AGUARDANDO
   const concluida = gira.status === 'CONCLUIDA'
   // parseDate sem fuso: evita que meia-noite UTC vire dia anterior no Brasil
@@ -201,9 +201,11 @@ function GiraCard({ gira, onEdit, onDelete, onStatusChange }) {
   const timeStr = fmtHora(gira.data)
 
   return (
-    <div style={{ backgroundColor:'#fff', borderRadius:10, border:'1px solid #e5e0d8', padding:'18px 20px', marginBottom:10, boxShadow:'0 2px 8px rgba(0,0,0,0.05)', opacity: concluida ? 0.8 : 1 }}>
+    <div style={{ backgroundColor:'#fff', borderRadius:10, border: selected ? '2px solid #c8972b' : '1px solid #e5e0d8', padding:'18px 20px', marginBottom:10, boxShadow:'0 2px 8px rgba(0,0,0,0.05)', opacity: concluida ? 0.8 : 1, backgroundColor: selected ? '#fef9f0' : '#fff' }}>
       <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:12, marginBottom:10 }}>
-        <div style={{ flex:1, minWidth:0 }}>
+        <div style={{ display:'flex', alignItems:'flex-start', gap:10, flex:1, minWidth:0 }}>
+          <input type="checkbox" checked={!!selected} onChange={()=>onToggleSelect?.(gira.id)} style={{ cursor:'pointer', accentColor:'#c8972b', marginTop:4, flexShrink:0, width:16, height:16 }}/>
+          <div style={{ flex:1, minWidth:0 }}>
           <div style={{ fontSize:16, fontWeight:700, color:'#2c2c3e', marginBottom:6 }}>{gira.titulo}</div>
           <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
             <span style={{ display:'flex', alignItems:'center', gap:4, fontSize:12, color:'#9ca3af' }}>
@@ -213,6 +215,7 @@ function GiraCard({ gira, onEdit, onDelete, onStatusChange }) {
             <span style={{ fontSize:11, fontWeight:700, padding:'2px 10px', borderRadius:20, backgroundColor:meta.bg, color:meta.color, border:`1px solid ${meta.border}` }}>
               {meta.label}
             </span>
+          </div>
           </div>
         </div>
 
@@ -287,7 +290,9 @@ export default function AdminGiras() {
   const [assoc,        setAssoc]        = useState({ entidades:[], musicas:[], banhos:[] })
   const [saving,       setSaving]       = useState(false)
   const [formError,    setFormError]    = useState('')
-  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [deleteTarget,   setDeleteTarget]   = useState(null)
+  const [selectedIds,    setSelectedIds]    = useState(new Set())
+  const [showBulkConfirm,setShowBulkConfirm]= useState(false)
   const [allEntidades, setAllEntidades] = useState([])
   const [allMusicas,   setAllMusicas]   = useState([])
   const [allBanhos,    setAllBanhos]    = useState([])
@@ -351,6 +356,12 @@ export default function AdminGiras() {
     try { await api.delete(`/giras/${deleteTarget.id}`); load() } catch {}
   }
 
+  const toggleSelect = id => setSelectedIds(prev => { const n = new Set(prev); n.has(id)?n.delete(id):n.add(id); return n })
+  const toggleAll    = () => setSelectedIds(prev => prev.size === girasVisiveis.length ? new Set() : new Set(girasVisiveis.map(g=>g.id)))
+  const handleBulkDelete = async () => {
+    try { await Promise.all([...selectedIds].map(id => api.delete(`/giras/${id}`))); setSelectedIds(new Set()); load() } catch{}
+  }
+
   const handleStatusChange = async (id, status) => {
     try {
       await api.patch(`/giras/${id}/status`, { status })
@@ -403,31 +414,39 @@ export default function AdminGiras() {
         ))}
       </div>
 
+      {selectedIds.size > 0 && (
+        <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', backgroundColor:'#fef3cd', borderRadius:8, marginBottom:16, border:'1px solid #f9d971' }}>
+          <span style={{ fontSize:13, fontWeight:600, color:'#2c2c3e', flex:1 }}>{selectedIds.size} selecionada(s)</span>
+          <button onClick={toggleAll} style={{ fontSize:12, color:'#6b7280', background:'none', border:'none', cursor:'pointer', fontFamily:"'Poppins',sans-serif" }}>{selectedIds.size===girasVisiveis.length?'Desmarcar todos':'Selecionar todos'}</button>
+          <button onClick={()=>setShowBulkConfirm(true)} style={{ padding:'6px 14px', borderRadius:6, backgroundColor:'#dc2626', color:'#fff', fontSize:12, fontWeight:700, border:'none', cursor:'pointer', fontFamily:"'Poppins',sans-serif" }}>Excluir {selectedIds.size}</button>
+        </div>
+      )}
+
       {loading ? <LoadingSpinner/> : girasVisiveis.length===0 ? (
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', padding:'64px 0', gap:12 }}>
           <Calendar size={44} color="#e5e0d8"/>
           <p style={{ margin:0, fontSize:14, color:'#9ca3af' }}>{giras.length===0 ? 'Nenhuma gira cadastrada.' : 'Nenhuma gira neste filtro.'}</p>
         </div>
       ) : filtro !== 'TODOS' ? (
-        <div>{girasVisiveis.map(g=><GiraCard key={g.id} gira={g} onEdit={openEdit} onDelete={setDeleteTarget} onStatusChange={handleStatusChange}/>)}</div>
+        <div>{girasVisiveis.map(g=><GiraCard key={g.id} gira={g} onEdit={openEdit} onDelete={setDeleteTarget} onStatusChange={handleStatusChange} selected={selectedIds.has(g.id)} onToggleSelect={toggleSelect}/>)}</div>
       ) : (
         <>
           {emAndamento.length>0 && (
             <section style={{ marginBottom:28 }}>
               {sectionLabel('Em andamento', '#2563eb')}
-              {emAndamento.map(g=><GiraCard key={g.id} gira={g} onEdit={openEdit} onDelete={setDeleteTarget} onStatusChange={handleStatusChange}/>)}
+              {emAndamento.map(g=><GiraCard key={g.id} gira={g} onEdit={openEdit} onDelete={setDeleteTarget} onStatusChange={handleStatusChange} selected={selectedIds.has(g.id)} onToggleSelect={toggleSelect}/>)}
             </section>
           )}
           {aguardando.length>0 && (
             <section style={{ marginBottom:28 }}>
               {sectionLabel('Aguardando', '#c8972b')}
-              {aguardando.map(g=><GiraCard key={g.id} gira={g} onEdit={openEdit} onDelete={setDeleteTarget} onStatusChange={handleStatusChange}/>)}
+              {aguardando.map(g=><GiraCard key={g.id} gira={g} onEdit={openEdit} onDelete={setDeleteTarget} onStatusChange={handleStatusChange} selected={selectedIds.has(g.id)} onToggleSelect={toggleSelect}/>)}
             </section>
           )}
           {concluidas.length>0 && (
             <section>
               {sectionLabel('Concluídas', '#9ca3af')}
-              {concluidas.map(g=><GiraCard key={g.id} gira={g} onEdit={openEdit} onDelete={setDeleteTarget} onStatusChange={handleStatusChange}/>)}
+              {concluidas.map(g=><GiraCard key={g.id} gira={g} onEdit={openEdit} onDelete={setDeleteTarget} onStatusChange={handleStatusChange} selected={selectedIds.has(g.id)} onToggleSelect={toggleSelect}/>)}
             </section>
           )}
         </>
@@ -461,6 +480,8 @@ export default function AdminGiras() {
 
       <ConfirmModal isOpen={!!deleteTarget} onClose={()=>setDeleteTarget(null)} onConfirm={handleDelete}
         title="Excluir Gira" message={`Excluir "${deleteTarget?.titulo}"? Esta ação não pode ser desfeita.`}/>
+      <ConfirmModal isOpen={showBulkConfirm} onClose={()=>setShowBulkConfirm(false)} onConfirm={handleBulkDelete}
+        title="Excluir Giras" message={`Excluir ${selectedIds.size} gira(s) selecionada(s)? Esta ação não pode ser desfeita.`}/>
     </div>
   )
 }

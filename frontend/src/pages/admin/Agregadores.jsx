@@ -26,6 +26,8 @@ export default function AdminAgregadores() {
   const [saving,      setSaving]      = useState(false)
   const [formError,   setFormError]   = useState('')
   const [deleteTarget,setDeleteTarget]= useState(null)
+  const [selectedIds,    setSelectedIds]    = useState(new Set())
+  const [showBulkConfirm,setShowBulkConfirm]= useState(false)
 
   const focus = e => e.currentTarget.style.borderColor = '#c8972b'
   const blur  = e => e.currentTarget.style.borderColor = '#e5e0d8'
@@ -59,6 +61,13 @@ export default function AdminAgregadores() {
     try { await api.delete(`/agregadores/${deleteTarget.id}`); load() } catch {}
   }
 
+  const filtered = list
+  const toggleSelect = id => setSelectedIds(prev => { const n = new Set(prev); n.has(id)?n.delete(id):n.add(id); return n })
+  const toggleAll    = () => setSelectedIds(prev => prev.size === filtered.length ? new Set() : new Set(filtered.map(a=>a.id)))
+  const handleBulkDelete = async () => {
+    try { await Promise.all([...selectedIds].map(id => api.delete(`/agregadores/${id}`))); setSelectedIds(new Set()); load() } catch{}
+  }
+
   return (
     <div style={S.page}>
 
@@ -75,6 +84,14 @@ export default function AdminAgregadores() {
         </button>
       </div>
 
+      {selectedIds.size > 0 && (
+        <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', backgroundColor:'#fef3cd', borderRadius:8, marginBottom:16, border:'1px solid #f9d971' }}>
+          <span style={{ fontSize:13, fontWeight:600, color:'#2c2c3e', flex:1 }}>{selectedIds.size} selecionado(s)</span>
+          <button onClick={toggleAll} style={{ fontSize:12, color:'#6b7280', background:'none', border:'none', cursor:'pointer', fontFamily:"'Poppins',sans-serif" }}>{selectedIds.size===filtered.length?'Desmarcar todos':'Selecionar todos'}</button>
+          <button onClick={()=>setShowBulkConfirm(true)} style={{ padding:'6px 14px', borderRadius:6, backgroundColor:'#dc2626', color:'#fff', fontSize:12, fontWeight:700, border:'none', cursor:'pointer', fontFamily:"'Poppins',sans-serif" }}>Excluir {selectedIds.size}</button>
+        </div>
+      )}
+
       {/* List */}
       {loading ? <LoadingSpinner /> : list.length === 0 ? (
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', padding:'64px 0', gap:12 }}>
@@ -84,7 +101,8 @@ export default function AdminAgregadores() {
       ) : (
         <div>
           {list.map(a => (
-            <div key={a.id} style={S.card}>
+            <div key={a.id} style={{ ...S.card, border: selectedIds.has(a.id)?'1px solid #c8972b':'1px solid #e5e0d8', backgroundColor: selectedIds.has(a.id)?'#fef9f0':'#fff' }}>
+              <input type="checkbox" checked={selectedIds.has(a.id)} onChange={()=>toggleSelect(a.id)} style={{ width:16, height:16, cursor:'pointer', accentColor:'#c8972b', flexShrink:0 }}/>
               <div style={{ width:42, height:42, borderRadius:8, backgroundColor:'rgba(200,151,43,0.1)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                 <Layers size={18} color="#c8972b"/>
               </div>
@@ -152,6 +170,8 @@ export default function AdminAgregadores() {
       <ConfirmModal isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete}
         title="Excluir Agregador"
         message={`Excluir "${deleteTarget?.nome}"? As músicas vinculadas perderão o agregador, mas não serão apagadas.`}/>
+      <ConfirmModal isOpen={showBulkConfirm} onClose={()=>setShowBulkConfirm(false)} onConfirm={handleBulkDelete}
+        title="Excluir Agregadores" message={`Excluir ${selectedIds.size} agregador(es) selecionado(s)? As músicas vinculadas perderão o agregador.`}/>
     </div>
   )
 }

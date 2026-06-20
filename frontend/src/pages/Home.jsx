@@ -77,7 +77,7 @@ export default function Home() {
         >
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(200,151,43,0.1) 0%, transparent 60%)', pointerEvents: 'none' }} />
           <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: 24 }}>
-            <span style={{ fontSize: 18, fontWeight: 800, color: '#ffffff', lineHeight: 1.3, display: 'block' }}>Estudos</span>
+            <span style={{ fontSize: 18, fontWeight: 800, color: '#ffffff', lineHeight: 1.3, display: 'block' }}>Publicações e Estudos</span>
           </div>
         </Link>
       </div>

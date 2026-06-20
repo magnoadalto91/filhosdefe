@@ -126,7 +126,9 @@ function PublicacoesTab() {
   const [removeCapa,  setRemoveCapa]  = useState(false)
   const [saving,      setSaving]      = useState(false)
   const [formError,   setFormError]   = useState('')
-  const [deleteTarget,setDeleteTarget]= useState(null)
+  const [deleteTarget,   setDeleteTarget]   = useState(null)
+  const [selectedIds,    setSelectedIds]    = useState(new Set())
+  const [showBulkConfirm,setShowBulkConfirm]= useState(false)
   const [uploading,   setUploading]   = useState(false)
   const fileRef  = useRef(null)
   const imgInput = useRef(null)
@@ -187,6 +189,12 @@ function PublicacoesTab() {
     try { await api.delete(`/publicacoes/${deleteTarget.id}`); load() } catch {}
   }
 
+  const toggleSelect = id => setSelectedIds(prev => { const n = new Set(prev); n.has(id)?n.delete(id):n.add(id); return n })
+  const toggleAll    = () => setSelectedIds(prev => prev.size === list.length ? new Set() : new Set(list.map(i=>i.id)))
+  const handleBulkDelete = async () => {
+    try { await Promise.all([...selectedIds].map(id => api.delete(`/publicacoes/${id}`))); setSelectedIds(new Set()); load() } catch{}
+  }
+
   const fmt = iso => new Date(iso).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' })
 
   return (
@@ -199,14 +207,23 @@ function PublicacoesTab() {
         </button>
       </div>
 
+      {selectedIds.size > 0 && (
+        <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', backgroundColor:'#fef3cd', borderRadius:8, marginBottom:16, border:'1px solid #f9d971' }}>
+          <span style={{ fontSize:13, fontWeight:600, color:'#2c2c3e', flex:1 }}>{selectedIds.size} selecionada(s)</span>
+          <button onClick={toggleAll} style={{ fontSize:12, color:'#6b7280', background:'none', border:'none', cursor:'pointer', fontFamily:"'Poppins',sans-serif" }}>{selectedIds.size===list.length?'Desmarcar todos':'Selecionar todos'}</button>
+          <button onClick={()=>setShowBulkConfirm(true)} style={{ padding:'6px 14px', borderRadius:6, backgroundColor:'#dc2626', color:'#fff', fontSize:12, fontWeight:700, border:'none', cursor:'pointer', fontFamily:"'Poppins',sans-serif" }}>Excluir {selectedIds.size}</button>
+        </div>
+      )}
+
       {loading ? <LoadingSpinner/> : list.length===0 ? (
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', padding:'48px 0', gap:10 }}>
           <BookOpen size={40} color="#e5e0d8"/>
           <p style={{ margin:0, fontSize:14, color:'#9ca3af' }}>Nenhuma publicação criada.</p>
         </div>
       ) : list.map(item => (
-        <div key={item.id} style={S.card}>
+        <div key={item.id} style={{ ...S.card, border: selectedIds.has(item.id)?'1px solid #c8972b':'1px solid #e5e0d8' }}>
           <div style={{ display:'flex', alignItems:'center', gap:14, padding:'14px 16px' }}>
+            <input type="checkbox" checked={selectedIds.has(item.id)} onChange={()=>toggleSelect(item.id)} style={{ cursor:'pointer', accentColor:'#c8972b', flexShrink:0, width:16, height:16 }}/>
             {item.capaUrl
               ? <img src={item.capaUrl} alt="" style={{ width:56, height:56, borderRadius:6, objectFit:'cover', flexShrink:0 }}/>
               : <div style={{ width:56, height:56, borderRadius:6, backgroundColor:'#f8f5f0', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}><BookOpen size={22} color="#e5e0d8"/></div>}
@@ -248,6 +265,8 @@ function PublicacoesTab() {
 
       <ConfirmModal isOpen={!!deleteTarget} onClose={()=>setDeleteTarget(null)} onConfirm={handleDelete}
         title="Excluir Publicação" message={`Excluir "${deleteTarget?.titulo}"?`}/>
+      <ConfirmModal isOpen={showBulkConfirm} onClose={()=>setShowBulkConfirm(false)} onConfirm={handleBulkDelete}
+        title="Excluir Publicações" message={`Excluir ${selectedIds.size} publicação(ões) selecionada(s)? Esta ação não pode ser desfeita.`}/>
     </>
   )
 }
@@ -257,11 +276,13 @@ const EXT_ICON = { pdf:'📄', doc:'📝', docx:'📝', xls:'📊', xlsx:'📊',
 const fmtSize  = b => b >= 1048576 ? `${(b/1048576).toFixed(1)} MB` : `${(b/1024).toFixed(0)} KB`
 
 function DocumentosTab() {
-  const [list,        setList]        = useState([])
-  const [loading,     setLoading]     = useState(true)
-  const [uploading,   setUploading]   = useState(false)
-  const [formError,   setFormError]   = useState('')
-  const [deleteTarget,setDeleteTarget]= useState(null)
+  const [list,           setList]           = useState([])
+  const [loading,        setLoading]        = useState(true)
+  const [uploading,      setUploading]      = useState(false)
+  const [formError,      setFormError]      = useState('')
+  const [deleteTarget,   setDeleteTarget]   = useState(null)
+  const [selectedIds,    setSelectedIds]    = useState(new Set())
+  const [showBulkConfirm,setShowBulkConfirm]= useState(false)
   const [nome,        setNome]        = useState('')
   const [descricao,   setDescricao]   = useState('')
   const [file,        setFile]        = useState(null)
@@ -293,6 +314,12 @@ function DocumentosTab() {
   const handleDelete = async () => {
     if (!deleteTarget) return
     try { await api.delete(`/documentos/${deleteTarget.id}`); load() } catch {}
+  }
+
+  const toggleSelect = id => setSelectedIds(prev => { const n = new Set(prev); n.has(id)?n.delete(id):n.add(id); return n })
+  const toggleAll    = () => setSelectedIds(prev => prev.size === list.length ? new Set() : new Set(list.map(d=>d.id)))
+  const handleBulkDelete = async () => {
+    try { await Promise.all([...selectedIds].map(id => api.delete(`/documentos/${id}`))); setSelectedIds(new Set()); load() } catch{}
   }
 
   const fmt = iso => new Date(iso).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' })
@@ -337,6 +364,14 @@ function DocumentosTab() {
         </div>
       </div>
 
+      {selectedIds.size > 0 && (
+        <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', backgroundColor:'#fef3cd', borderRadius:8, marginBottom:16, border:'1px solid #f9d971' }}>
+          <span style={{ fontSize:13, fontWeight:600, color:'#2c2c3e', flex:1 }}>{selectedIds.size} selecionado(s)</span>
+          <button onClick={toggleAll} style={{ fontSize:12, color:'#6b7280', background:'none', border:'none', cursor:'pointer', fontFamily:"'Poppins',sans-serif" }}>{selectedIds.size===list.length?'Desmarcar todos':'Selecionar todos'}</button>
+          <button onClick={()=>setShowBulkConfirm(true)} style={{ padding:'6px 14px', borderRadius:6, backgroundColor:'#dc2626', color:'#fff', fontSize:12, fontWeight:700, border:'none', cursor:'pointer', fontFamily:"'Poppins',sans-serif" }}>Excluir {selectedIds.size}</button>
+        </div>
+      )}
+
       {/* Lista */}
       {loading ? <LoadingSpinner/> : list.length===0 ? (
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', padding:'48px 0', gap:10 }}>
@@ -344,8 +379,9 @@ function DocumentosTab() {
           <p style={{ margin:0, fontSize:14, color:'#9ca3af' }}>Nenhum documento enviado.</p>
         </div>
       ) : list.map(doc => (
-        <div key={doc.id} style={S.card}>
+        <div key={doc.id} style={{ ...S.card, border: selectedIds.has(doc.id)?'1px solid #c8972b':'1px solid #e5e0d8' }}>
           <div style={{ display:'flex', alignItems:'center', gap:14, padding:'14px 16px' }}>
+            <input type="checkbox" checked={selectedIds.has(doc.id)} onChange={()=>toggleSelect(doc.id)} style={{ cursor:'pointer', accentColor:'#c8972b', flexShrink:0, width:16, height:16 }}/>
             <div style={{ fontSize:28, flexShrink:0 }}>{EXT_ICON[doc.fileType] || '📁'}</div>
             <div style={{ flex:1, minWidth:0 }}>
               <div style={{ fontSize:14, fontWeight:600, color:'#2c2c3e', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{doc.nome}</div>
@@ -369,6 +405,8 @@ function DocumentosTab() {
 
       <ConfirmModal isOpen={!!deleteTarget} onClose={()=>setDeleteTarget(null)} onConfirm={handleDelete}
         title="Excluir Documento" message={`Excluir "${deleteTarget?.nome}"?`}/>
+      <ConfirmModal isOpen={showBulkConfirm} onClose={()=>setShowBulkConfirm(false)} onConfirm={handleBulkDelete}
+        title="Excluir Documentos" message={`Excluir ${selectedIds.size} documento(s) selecionado(s)? Esta ação não pode ser desfeita.`}/>
     </>
   )
 }

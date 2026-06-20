@@ -126,7 +126,7 @@ function ItemModal({ item, onClose, onSaved }) {
   )
 }
 
-function ItemCard({ item, onEdit, onDelete, onToggleLista }) {
+function ItemCard({ item, onEdit, onDelete, onToggleLista, selected, onToggleSelect }) {
   const [loadingLista, setLoadingLista] = useState(false)
   const [qtd, setQtd] = useState(item.quantidade)
   const [savingQtd, setSavingQtd] = useState(false)
@@ -150,7 +150,8 @@ function ItemCard({ item, onEdit, onDelete, onToggleLista }) {
   }
 
   return (
-    <div style={S.card}>
+    <div style={{ ...S.card, border: selected ? '2px solid #c8972b' : '1px solid #e5e0d8', backgroundColor: selected ? '#fef9f0' : '#fff' }}>
+      <input type="checkbox" checked={!!selected} onChange={()=>onToggleSelect?.(item.id)} style={{ cursor:'pointer', accentColor:'#c8972b', flexShrink:0, width:16, height:16 }}/>
       {/* Foto */}
       {item.fotoUrl
         ? <img src={item.fotoUrl} alt={item.nome} style={{ width: 56, height: 56, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />
@@ -207,10 +208,12 @@ function ItemCard({ item, onEdit, onDelete, onToggleLista }) {
 }
 
 export default function AdminEstoque() {
-  const [items,   setItems]   = useState([])
-  const [loading, setLoading] = useState(true)
-  const [modal,   setModal]   = useState(null)   // null | 'new' | item object
-  const [confirm, setConfirm] = useState(null)   // null | item object
+  const [items,          setItems]          = useState([])
+  const [loading,        setLoading]        = useState(true)
+  const [modal,          setModal]          = useState(null)
+  const [confirm,        setConfirm]        = useState(null)
+  const [selectedIds,    setSelectedIds]    = useState(new Set())
+  const [bulkConfirm,    setBulkConfirm]    = useState(false)
 
   useEffect(() => {
     api.get('/estoque').then(r => setItems(r.data)).catch(() => {}).finally(() => setLoading(false))
@@ -230,6 +233,17 @@ export default function AdminEstoque() {
       setItems(prev => prev.filter(i => i.id !== confirm.id))
     } catch {}
     setConfirm(null)
+  }
+
+  const toggleSelect = id => setSelectedIds(prev => { const n = new Set(prev); n.has(id)?n.delete(id):n.add(id); return n })
+  const toggleAll    = () => setSelectedIds(prev => prev.size === items.length ? new Set() : new Set(items.map(i=>i.id)))
+  const handleBulkDelete = async () => {
+    try {
+      await Promise.all([...selectedIds].map(id => api.delete(`/estoque/${id}`)))
+      setItems(prev => prev.filter(i => !selectedIds.has(i.id)))
+      setSelectedIds(new Set())
+    } catch {}
+    setBulkConfirm(false)
   }
 
   const handleToggleLista = async (id, precisaRepor) => {
@@ -275,6 +289,14 @@ export default function AdminEstoque() {
       </div>
       <p style={{ margin: '2px 0 12px', fontSize: 12, color: '#9ca3af' }}>Itens disponíveis no terreiro</p>
 
+      {selectedIds.size > 0 && (
+        <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', backgroundColor:'#fef3cd', borderRadius:8, marginBottom:16, border:'1px solid #f9d971' }}>
+          <span style={{ fontSize:13, fontWeight:600, color:'#2c2c3e', flex:1, fontFamily:"'Poppins',sans-serif" }}>{selectedIds.size} selecionado(s)</span>
+          <button onClick={toggleAll} style={{ fontSize:12, color:'#6b7280', background:'none', border:'none', cursor:'pointer', fontFamily:"'Poppins',sans-serif" }}>{selectedIds.size===items.length?'Desmarcar todos':'Selecionar todos'}</button>
+          <button onClick={()=>setBulkConfirm(true)} style={{ padding:'6px 14px', borderRadius:6, backgroundColor:'#dc2626', color:'#fff', fontSize:12, fontWeight:700, border:'none', cursor:'pointer', fontFamily:"'Poppins',sans-serif" }}>Excluir {selectedIds.size}</button>
+        </div>
+      )}
+
       {emEstoque.length === 0
         ? <div style={{ padding: '24px', textAlign: 'center', color: '#9ca3af', fontSize: 13, border: '1px dashed #e5e0d8', borderRadius: 10 }}>Nenhum item em estoque.</div>
         : <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -283,6 +305,8 @@ export default function AdminEstoque() {
                 onEdit={setModal}
                 onDelete={setConfirm}
                 onToggleLista={handleToggleLista}
+                selected={selectedIds.has(item.id)}
+                onToggleSelect={toggleSelect}
               />
             ))}
           </div>
@@ -302,6 +326,8 @@ export default function AdminEstoque() {
                 onEdit={setModal}
                 onDelete={setConfirm}
                 onToggleLista={handleToggleLista}
+                selected={selectedIds.has(item.id)}
+                onToggleSelect={toggleSelect}
               />
             ))}
           </div>
@@ -320,6 +346,13 @@ export default function AdminEstoque() {
           msg={`Excluir "${confirm.nome}" do estoque?`}
           onConfirm={handleDelete}
           onCancel={() => setConfirm(null)}
+        />
+      )}
+      {bulkConfirm && (
+        <ConfirmModal
+          msg={`Excluir ${selectedIds.size} item(s) selecionado(s) do estoque?`}
+          onConfirm={handleBulkDelete}
+          onCancel={() => setBulkConfirm(false)}
         />
       )}
     </div>

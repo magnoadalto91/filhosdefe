@@ -93,6 +93,8 @@ export default function AdminUsuarios() {
   const [form,        setForm]        = useState(emptyCreate)
   const [saving,      setSaving]      = useState(false)
   const [formError,   setFormError]   = useState('')
+  const [selectedIds,    setSelectedIds]    = useState(new Set())
+  const [showBulkConfirm,setShowBulkConfirm]= useState(false)
 
   const load = async () => {
     setLoading(true)
@@ -146,6 +148,17 @@ export default function AdminUsuarios() {
       flash(`Usuário ${delTarget.email} removido.`)
     } catch (err) { flash(err.response?.data?.error || 'Erro ao remover.', false) }
     finally { setDelTarget(null) }
+  }
+
+  const toggleSelect = id => setSelectedIds(prev => { const n = new Set(prev); n.has(id)?n.delete(id):n.add(id); return n })
+  const toggleAll    = () => setSelectedIds(prev => prev.size === users.length ? new Set() : new Set(users.map(u=>u.id)))
+  const handleBulkDelete = async () => {
+    try {
+      await Promise.all([...selectedIds].map(id => api.delete(`/usuarios/${id}`)))
+      setUsers(prev => prev.filter(u => !selectedIds.has(u.id)))
+      setSelectedIds(new Set())
+      flash(`${selectedIds.size} usuário(s) removido(s).`)
+    } catch (err) { flash('Erro ao remover usuários.', false) }
   }
 
   const fmt = iso => new Date(iso).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' })
@@ -209,6 +222,14 @@ export default function AdminUsuarios() {
         </div>
       )}
 
+      {selectedIds.size > 0 && (
+        <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', backgroundColor:'#fef3cd', borderRadius:8, marginBottom:16, border:'1px solid #f9d971' }}>
+          <span style={{ fontSize:13, fontWeight:600, color:'#2c2c3e', flex:1 }}>{selectedIds.size} selecionado(s)</span>
+          <button onClick={toggleAll} style={{ fontSize:12, color:'#6b7280', background:'none', border:'none', cursor:'pointer', fontFamily:"'Poppins',sans-serif" }}>{selectedIds.size===users.length?'Desmarcar todos':'Selecionar todos'}</button>
+          <button onClick={()=>setShowBulkConfirm(true)} style={{ padding:'6px 14px', borderRadius:6, backgroundColor:'#dc2626', color:'#fff', fontSize:12, fontWeight:700, border:'none', cursor:'pointer', fontFamily:"'Poppins',sans-serif" }}>Excluir {selectedIds.size}</button>
+        </div>
+      )}
+
       {loading ? <LoadingSpinner/> : users.length === 0 ? (
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', padding:'64px 0', gap:12 }}>
           <User size={44} color="#e5e0d8"/>
@@ -222,6 +243,7 @@ export default function AdminUsuarios() {
             <table style={{ width:'100%', borderCollapse:'collapse', backgroundColor:'#fff' }}>
               <thead>
                 <tr style={{ backgroundColor:'#f8f5f0', borderBottom:'1px solid #e5e0d8' }}>
+                  <th style={S.th}><input type="checkbox" checked={selectedIds.size===users.length&&users.length>0} onChange={toggleAll} style={{ cursor:'pointer', accentColor:'#c8972b' }}/></th>
                   {['Nome','E-mail','Role','Desde',''].map(h => (
                     <th key={h} style={S.th}>{h}</th>
                   ))}
@@ -229,7 +251,8 @@ export default function AdminUsuarios() {
               </thead>
               <tbody>
                 {users.map((u, i) => (
-                  <tr key={u.id} style={{ backgroundColor: i%2===0?'#fff':'#fafaf9' }}>
+                  <tr key={u.id} style={{ backgroundColor: selectedIds.has(u.id)?'#fef9f0': i%2===0?'#fff':'#fafaf9' }}>
+                    <td style={S.td}><input type="checkbox" checked={selectedIds.has(u.id)} onChange={()=>toggleSelect(u.id)} style={{ cursor:'pointer', accentColor:'#c8972b' }}/></td>
                     <td style={S.td}>
                       <div style={{ display:'flex', alignItems:'center', gap:10 }}>
                         <div style={{ width:32, height:32, borderRadius:'50%', backgroundColor:'#f8f5f0', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
@@ -257,8 +280,9 @@ export default function AdminUsuarios() {
           <div className="users-cards" style={{ display:'flex', flexDirection:'column', gap:10 }}>
             <style>{`@media(min-width:640px){.users-cards{display:none!important;}}`}</style>
             {users.map(u => (
-              <div key={u.id} style={{ backgroundColor:'#fff', borderRadius:10, border:'1px solid #e5e0d8', padding:'16px', boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }}>
+              <div key={u.id} style={{ backgroundColor: selectedIds.has(u.id)?'#fef9f0':'#fff', borderRadius:10, border: selectedIds.has(u.id)?'1px solid #c8972b':'1px solid #e5e0d8', padding:'16px', boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }}>
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12 }}>
+                  <input type="checkbox" checked={selectedIds.has(u.id)} onChange={()=>toggleSelect(u.id)} style={{ cursor:'pointer', accentColor:'#c8972b', marginRight:8, marginTop:2 }}/>
                   <div style={{ minWidth:0 }}>
                     <div style={{ fontSize:14, fontWeight:700, color:'#2c2c3e' }}>{u.nome || <span style={{ color:'#9ca3af', fontStyle:'italic' }}>Sem nome</span>}</div>
                     <div style={{ fontSize:13, color:'#6b7280', wordBreak:'break-all' }}>{u.email}</div>
@@ -300,6 +324,8 @@ export default function AdminUsuarios() {
 
       <ConfirmModal isOpen={!!delTarget} onClose={() => setDelTarget(null)} onConfirm={handleDelete}
         title="Remover usuário" message={`Remover "${delTarget?.email}"? Esta ação não pode ser desfeita.`}/>
+      <ConfirmModal isOpen={showBulkConfirm} onClose={()=>setShowBulkConfirm(false)} onConfirm={handleBulkDelete}
+        title="Remover Usuários" message={`Remover ${selectedIds.size} usuário(s) selecionado(s)? Esta ação não pode ser desfeita.`}/>
     </div>
   )
 }

@@ -70,6 +70,8 @@ export default function AdminCigarros() {
   const [saving,      setSaving]      = useState(false)
   const [formError,   setFormError]   = useState('')
   const [deleteTarget,setDeleteTarget]= useState(null)
+  const [selectedIds,    setSelectedIds]    = useState(new Set())
+  const [showBulkConfirm,setShowBulkConfirm]= useState(false)
   const fileRef = useRef(null)
 
   const load = async () => {
@@ -113,6 +115,12 @@ export default function AdminCigarros() {
     try { await api.delete(`/cigarros/${deleteTarget.id}`); load() } catch{}
   }
 
+  const toggleSelect = id => setSelectedIds(prev => { const n = new Set(prev); n.has(id)?n.delete(id):n.add(id); return n })
+  const toggleAll    = () => setSelectedIds(prev => prev.size === filtered.length ? new Set() : new Set(filtered.map(c=>c.id)))
+  const handleBulkDelete = async () => {
+    try { await Promise.all([...selectedIds].map(id => api.delete(`/cigarros/${id}`))); setSelectedIds(new Set()); load() } catch{}
+  }
+
   const filtered = cigarros.filter(c => c.nome?.toLowerCase().includes(search.toLowerCase()))
 
   return (
@@ -130,13 +138,21 @@ export default function AdminCigarros() {
         </button>
       </div>
 
-      <div style={{ position:'relative', marginBottom:20 }}>
+      <div style={{ position:'relative', marginBottom:16 }}>
         <Search size={15} style={{ position:'absolute', left:14, top:'50%', transform:'translateY(-50%)', color:'#9ca3af', pointerEvents:'none' }}/>
         <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar cigarro ou charuto..."
           style={{...S.input,paddingLeft:42}}
           onFocus={e=>e.currentTarget.style.borderColor='#c8972b'}
           onBlur={e=>e.currentTarget.style.borderColor='#e5e0d8'}/>
       </div>
+
+      {selectedIds.size > 0 && (
+        <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', backgroundColor:'#fef3cd', borderRadius:8, marginBottom:16, border:'1px solid #f9d971' }}>
+          <span style={{ fontSize:13, fontWeight:600, color:'#2c2c3e', flex:1 }}>{selectedIds.size} selecionado(s)</span>
+          <button onClick={toggleAll} style={{ fontSize:12, color:'#6b7280', background:'none', border:'none', cursor:'pointer', fontFamily:"'Poppins',sans-serif" }}>{selectedIds.size===filtered.length?'Desmarcar todos':'Selecionar todos'}</button>
+          <button onClick={()=>setShowBulkConfirm(true)} style={{ padding:'6px 14px', borderRadius:6, backgroundColor:'#dc2626', color:'#fff', fontSize:12, fontWeight:700, border:'none', cursor:'pointer', fontFamily:"'Poppins',sans-serif" }}>Excluir {selectedIds.size}</button>
+        </div>
+      )}
 
       {loading ? <LoadingSpinner/> : filtered.length===0 ? (
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', padding:'64px 0', gap:12 }}>
@@ -147,7 +163,8 @@ export default function AdminCigarros() {
         <div className="cigarros-grid" style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:16 }}>
           <style>{`@media(min-width:640px){.cigarros-grid{grid-template-columns:repeat(3,1fr)!important;}}@media(min-width:1024px){.cigarros-grid{grid-template-columns:repeat(4,1fr)!important;}}`}</style>
           {filtered.map(c => (
-            <div key={c.id} style={{ backgroundColor:'#fff', borderRadius:10, border:'1px solid #e5e0d8', overflow:'hidden', boxShadow:'0 2px 8px rgba(0,0,0,0.05)' }}>
+            <div key={c.id} style={{ backgroundColor:'#fff', borderRadius:10, border: selectedIds.has(c.id)?'2px solid #c8972b':'1px solid #e5e0d8', overflow:'hidden', boxShadow:'0 2px 8px rgba(0,0,0,0.05)', position:'relative' }}>
+              <input type="checkbox" checked={selectedIds.has(c.id)} onChange={()=>toggleSelect(c.id)} style={{ position:'absolute', top:8, left:8, zIndex:10, width:18, height:18, cursor:'pointer', accentColor:'#c8972b' }}/>
               <div style={{ aspectRatio:'4/3', backgroundColor:'#f8f5f0', position:'relative', overflow:'hidden' }}>
                 {c.fotoUrl
                   ? <img src={c.fotoUrl} alt={c.nome} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}/>
@@ -194,6 +211,8 @@ export default function AdminCigarros() {
 
       <ConfirmModal isOpen={!!deleteTarget} onClose={()=>setDeleteTarget(null)} onConfirm={handleDelete}
         title="Excluir Item" message={`Excluir "${deleteTarget?.nome}"? Esta ação não pode ser desfeita.`}/>
+      <ConfirmModal isOpen={showBulkConfirm} onClose={()=>setShowBulkConfirm(false)} onConfirm={handleBulkDelete}
+        title="Excluir Itens" message={`Excluir ${selectedIds.size} item(s) selecionado(s)? Esta ação não pode ser desfeita.`}/>
     </div>
   )
 }

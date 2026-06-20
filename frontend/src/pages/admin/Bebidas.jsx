@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { GlassWater, Search, Pencil, Trash2, AlertCircle, ImageIcon } from 'lucide-react'
+import { GlassWater, Search, Pencil, Trash2, AlertCircle, ImageIcon, Package, PackageX } from 'lucide-react'
 import api from '../../api/axios'
 import Modal from '../../components/Modal'
 import ConfirmModal from '../../components/ConfirmModal'
@@ -12,9 +12,21 @@ const S = {
   btnPrimary:  { padding:'10px 22px', borderRadius:6, fontSize:13, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.5px', backgroundColor:'#c8972b', color:'#fff', border:'none', cursor:'pointer', fontFamily:"'Poppins',sans-serif", transition:'background 0.15s' },
   btnSecondary:{ padding:'10px 22px', borderRadius:6, fontSize:13, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.5px', backgroundColor:'transparent', color:'#6b7280', border:'1px solid #e5e0d8', cursor:'pointer', fontFamily:"'Poppins',sans-serif", transition:'all 0.15s' },
   error:       { display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderRadius:6, backgroundColor:'#fef2f2', border:'1px solid #fecaca', fontSize:13, color:'#dc2626', marginBottom:16 },
+  toggle:      { display:'flex', alignItems:'center', gap:10, padding:'12px 14px', borderRadius:8, backgroundColor:'#f8f5f0', border:'1px solid #e5e0d8', cursor:'pointer', userSelect:'none' },
 }
 
-const emptyForm = { nome:'', descricao:'', observacoes:'' }
+const emptyForm = { nome:'', descricao:'', observacoes:'', emEstoque:false, emFalta:false }
+
+function ToggleSwitch({ checked, onChange, label, color='#c8972b' }) {
+  return (
+    <div style={S.toggle} onClick={() => onChange(!checked)}>
+      <div style={{ position:'relative', width:42, height:24, backgroundColor: checked ? color : '#e5e0d8', borderRadius:12, transition:'background 0.2s', flexShrink:0 }}>
+        <div style={{ position:'absolute', top:3, left: checked ? 21 : 3, width:18, height:18, borderRadius:'50%', backgroundColor:'#fff', transition:'left 0.2s', boxShadow:'0 1px 3px rgba(0,0,0,0.2)' }}/>
+      </div>
+      <span style={{ fontSize:13, fontWeight:600, color:'#2c2c3e' }}>{label}</span>
+    </div>
+  )
+}
 
 function BebidaFormWrapper({ form, setForm, error, preview, setPreview, fileRef }) {
   const inputRef = useRef()
@@ -53,23 +65,30 @@ function BebidaFormWrapper({ form, setForm, error, preview, setPreview, fileRef 
       </div>
       <div style={{ marginBottom:16 }}>
         <label style={S.label}>Observações</label>
-        <textarea style={{...S.input,resize:'vertical',minHeight:120}} value={form.observacoes} onChange={e=>setForm(f=>({...f,observacoes:e.target.value}))} placeholder="Informações adicionais..." onFocus={focus} onBlur={blur}/>
+        <textarea style={{...S.input,resize:'vertical',minHeight:80}} value={form.observacoes} onChange={e=>setForm(f=>({...f,observacoes:e.target.value}))} placeholder="Informações adicionais..." onFocus={focus} onBlur={blur}/>
+      </div>
+      <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+        <ToggleSwitch checked={form.emEstoque} onChange={v=>setForm(f=>({...f,emEstoque:v}))} label="Em estoque no terreiro" color="#16a34a"/>
+        <ToggleSwitch checked={form.emFalta} onChange={v=>setForm(f=>({...f,emFalta:v}))} label="Em falta" color="#dc2626"/>
       </div>
     </div>
   )
 }
 
 export default function AdminBebidas() {
-  const [bebidas,     setBebidas]     = useState([])
-  const [loading,     setLoading]     = useState(true)
-  const [search,      setSearch]      = useState('')
-  const [modalOpen,   setModalOpen]   = useState(false)
-  const [editTarget,  setEditTarget]  = useState(null)
-  const [form,        setForm]        = useState(emptyForm)
-  const [preview,     setPreview]     = useState('')
-  const [saving,      setSaving]      = useState(false)
-  const [formError,   setFormError]   = useState('')
-  const [deleteTarget,setDeleteTarget]= useState(null)
+  const [bebidas,        setBebidas]        = useState([])
+  const [loading,        setLoading]        = useState(true)
+  const [search,         setSearch]         = useState('')
+  const [modalOpen,      setModalOpen]      = useState(false)
+  const [editTarget,     setEditTarget]     = useState(null)
+  const [form,           setForm]           = useState(emptyForm)
+  const [preview,        setPreview]        = useState('')
+  const [saving,         setSaving]         = useState(false)
+  const [formError,      setFormError]      = useState('')
+  const [deleteTarget,   setDeleteTarget]   = useState(null)
+  const [selectedIds,    setSelectedIds]    = useState(new Set())
+  const [showBulkConfirm,setShowBulkConfirm]= useState(false)
+  const [bulkDeleting,   setBulkDeleting]   = useState(false)
   const fileRef = useRef(null)
 
   const load = async () => {
@@ -84,7 +103,7 @@ export default function AdminBebidas() {
   }
   const openEdit = b => {
     setEditTarget(b)
-    setForm({ nome:b.nome||'', descricao:b.descricao||'', observacoes:b.observacoes||'' })
+    setForm({ nome:b.nome||'', descricao:b.descricao||'', observacoes:b.observacoes||'', emEstoque:b.emEstoque||false, emFalta:b.emFalta||false })
     setPreview(b.fotoUrl||''); fileRef.current=null; setFormError(''); setModalOpen(true)
   }
 
@@ -96,6 +115,8 @@ export default function AdminBebidas() {
       fd.append('nome', form.nome.trim())
       fd.append('descricao', form.descricao.trim())
       fd.append('observacoes', form.observacoes.trim())
+      fd.append('emEstoque', String(form.emEstoque))
+      fd.append('emFalta', String(form.emFalta))
       if (fileRef.current) fd.append('foto', fileRef.current)
 
       if (editTarget) {
@@ -111,6 +132,15 @@ export default function AdminBebidas() {
   const handleDelete = async () => {
     if (!deleteTarget) return
     try { await api.delete(`/bebidas/${deleteTarget.id}`); load() } catch{}
+  }
+
+  const toggleSelect = id => setSelectedIds(prev => { const n = new Set(prev); n.has(id)?n.delete(id):n.add(id); return n })
+  const toggleAll    = () => setSelectedIds(prev => prev.size === filtered.length ? new Set() : new Set(filtered.map(b=>b.id)))
+
+  const handleBulkDelete = async () => {
+    setBulkDeleting(true)
+    try { await Promise.all([...selectedIds].map(id => api.delete(`/bebidas/${id}`))); setSelectedIds(new Set()); load() } catch{}
+    finally { setBulkDeleting(false) }
   }
 
   const filtered = bebidas.filter(b => b.nome?.toLowerCase().includes(search.toLowerCase()))
@@ -130,13 +160,25 @@ export default function AdminBebidas() {
         </button>
       </div>
 
-      <div style={{ position:'relative', marginBottom:20 }}>
+      <div style={{ position:'relative', marginBottom:16 }}>
         <Search size={15} style={{ position:'absolute', left:14, top:'50%', transform:'translateY(-50%)', color:'#9ca3af', pointerEvents:'none' }}/>
         <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar bebida..."
           style={{...S.input,paddingLeft:42}}
           onFocus={e=>e.currentTarget.style.borderColor='#c8972b'}
           onBlur={e=>e.currentTarget.style.borderColor='#e5e0d8'}/>
       </div>
+
+      {selectedIds.size > 0 && (
+        <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', backgroundColor:'#fef3cd', borderRadius:8, marginBottom:16, border:'1px solid #f9d971' }}>
+          <span style={{ fontSize:13, fontWeight:600, color:'#2c2c3e', flex:1 }}>{selectedIds.size} selecionada(s)</span>
+          <button onClick={toggleAll} style={{ fontSize:12, color:'#6b7280', background:'none', border:'none', cursor:'pointer', fontFamily:"'Poppins',sans-serif" }}>
+            {selectedIds.size === filtered.length ? 'Desmarcar todos' : 'Selecionar todos'}
+          </button>
+          <button onClick={()=>setShowBulkConfirm(true)} style={{ padding:'6px 14px', borderRadius:6, backgroundColor:'#dc2626', color:'#fff', fontSize:12, fontWeight:700, border:'none', cursor:'pointer', fontFamily:"'Poppins',sans-serif" }}>
+            Excluir {selectedIds.size}
+          </button>
+        </div>
+      )}
 
       {loading ? <LoadingSpinner/> : filtered.length===0 ? (
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', padding:'64px 0', gap:12 }}>
@@ -147,11 +189,19 @@ export default function AdminBebidas() {
         <div className="bebidas-grid" style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:16 }}>
           <style>{`@media(min-width:640px){.bebidas-grid{grid-template-columns:repeat(3,1fr)!important;}}@media(min-width:1024px){.bebidas-grid{grid-template-columns:repeat(4,1fr)!important;}}`}</style>
           {filtered.map(b => (
-            <div key={b.id} style={{ backgroundColor:'#fff', borderRadius:10, border:'1px solid #e5e0d8', overflow:'hidden', boxShadow:'0 2px 8px rgba(0,0,0,0.05)' }}>
+            <div key={b.id} style={{ backgroundColor:'#fff', borderRadius:10, border: selectedIds.has(b.id) ? '2px solid #c8972b' : '1px solid #e5e0d8', overflow:'hidden', boxShadow:'0 2px 8px rgba(0,0,0,0.05)', position:'relative' }}>
+              <input type="checkbox" checked={selectedIds.has(b.id)} onChange={()=>toggleSelect(b.id)}
+                style={{ position:'absolute', top:8, left:8, zIndex:10, width:18, height:18, cursor:'pointer', accentColor:'#c8972b' }}/>
               <div style={{ aspectRatio:'4/3', backgroundColor:'#f8f5f0', position:'relative', overflow:'hidden' }}>
                 {b.fotoUrl
-                  ? <img src={b.fotoUrl} alt={b.nome} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}/>
+                  ? <img src={b.fotoUrl} alt={b.nome} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block', filter: b.emFalta ? 'grayscale(100%)' : 'none' }}/>
                   : <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center' }}><GlassWater size={32} color="#e5e0d8"/></div>}
+                {b.emEstoque && !b.emFalta && (
+                  <span style={{ position:'absolute', top:8, right:8, padding:'3px 8px', borderRadius:20, fontSize:10, fontWeight:700, backgroundColor:'#16a34a', color:'#fff', display:'flex', alignItems:'center', gap:3 }}><Package size={10}/>Estoque</span>
+                )}
+                {b.emFalta && (
+                  <span style={{ position:'absolute', top:8, right:8, padding:'3px 8px', borderRadius:20, fontSize:10, fontWeight:700, backgroundColor:'#dc2626', color:'#fff', display:'flex', alignItems:'center', gap:3 }}><PackageX size={10}/>Em falta</span>
+                )}
               </div>
               <div style={{ padding:'12px 14px' }}>
                 <div style={{ fontSize:14, fontWeight:700, color:'#2c2c3e', marginBottom:4, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{b.nome}</div>
@@ -194,6 +244,9 @@ export default function AdminBebidas() {
 
       <ConfirmModal isOpen={!!deleteTarget} onClose={()=>setDeleteTarget(null)} onConfirm={handleDelete}
         title="Excluir Bebida" message={`Excluir "${deleteTarget?.nome}"? Esta ação não pode ser desfeita.`}/>
+
+      <ConfirmModal isOpen={showBulkConfirm} onClose={()=>setShowBulkConfirm(false)} onConfirm={handleBulkDelete}
+        title="Excluir Bebidas" message={`Excluir ${selectedIds.size} bebida(s) selecionada(s)? Esta ação não pode ser desfeita.`}/>
     </div>
   )
 }

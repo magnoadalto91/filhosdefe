@@ -38,7 +38,7 @@ router.get('/:id', async (req, res) => {
 // POST /api/bebidas - admin only
 router.post('/', authenticate, requireAdmin, uploadMiddleware, async (req, res) => {
   try {
-    const { nome, descricao, observacoes } = req.body;
+    const { nome, descricao, observacoes, emEstoque, emFalta } = req.body;
 
     if (!nome) return res.status(400).json({ error: 'nome is required' });
 
@@ -53,6 +53,8 @@ router.post('/', authenticate, requireAdmin, uploadMiddleware, async (req, res) 
         descricao: descricao || '',
         observacoes: observacoes || null,
         fotoUrl,
+        emEstoque: emEstoque === 'true' || emEstoque === true,
+        emFalta: emFalta === 'true' || emFalta === true,
       },
     });
 
@@ -75,12 +77,14 @@ router.put('/:id', authenticate, requireAdmin, uploadMiddleware, async (req, res
     const existing = await prisma.bebida.findUnique({ where: { id } });
     if (!existing) return res.status(404).json({ error: 'Bebida not found' });
 
-    const { nome, descricao, observacoes } = req.body;
+    const { nome, descricao, observacoes, emEstoque, emFalta } = req.body;
     const data = {};
 
     if (nome !== undefined) data.nome = nome;
     if (descricao !== undefined) data.descricao = descricao;
     if (observacoes !== undefined) data.observacoes = observacoes || null;
+    if (emEstoque !== undefined) data.emEstoque = emEstoque === 'true' || emEstoque === true;
+    if (emFalta !== undefined) data.emFalta = emFalta === 'true' || emFalta === true;
 
     if (req.file) {
       data.fotoUrl = await uploadToCloudinary(req.file.buffer, 'filhosdefe/bebidas');
