@@ -106,6 +106,8 @@ model Erva {
   usos       String
   fotoUrl    String?
   noQuintal  Boolean       @default(false)
+  emEstoque  Boolean       @default(false)
+  emFalta    Boolean       @default(false)
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
   entidades  EntidadeErva[]

@@ -30,13 +30,17 @@ function HerbCard({ herb, onClick }) {
       <div style={{ position: 'relative', aspectRatio: '4/3', backgroundColor: '#f8f5f0', overflow: 'hidden', flexShrink: 0 }}>
         {herb.fotoUrl ? (
           <img src={herb.fotoUrl} alt={herb.nome}
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}/>
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: herb.emFalta ? 'grayscale(100%)' : 'none' }}/>
         ) : (
           <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Leaf size={32} style={{ color: '#e5e0d8' }} />
           </div>
         )}
-        {herb.noQuintal && (
+        {herb.emFalta ? (
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.35)' }}>
+            <span style={{ fontSize: 11, fontWeight: 800, color: '#fff', textTransform: 'uppercase', letterSpacing: '1px', backgroundColor: 'rgba(220,38,38,0.9)', padding: '4px 10px', borderRadius: 20 }}>Em falta</span>
+          </div>
+        ) : herb.noQuintal && (
           <span style={{ position: 'absolute', top: 8, right: 8, padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 700, backgroundColor: '#c8972b', color: '#fff' }}>
             No quintal
           </span>

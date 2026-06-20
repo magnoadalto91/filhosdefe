@@ -52,7 +52,7 @@ router.get('/:id', async (req, res) => {
 // POST /api/ervas - admin only
 router.post('/', authenticate, requireAdmin, uploadMiddleware, async (req, res) => {
   try {
-    const { nome, descricao, usos, noQuintal } = req.body;
+    const { nome, descricao, usos, noQuintal, emEstoque, emFalta } = req.body;
 
     if (!nome) {
       return res.status(400).json({ error: 'nome is required' });
@@ -70,6 +70,8 @@ router.post('/', authenticate, requireAdmin, uploadMiddleware, async (req, res) 
         usos: usos || '',
         fotoUrl,
         noQuintal: noQuintal === 'true' || noQuintal === true,
+        emEstoque: emEstoque === 'true' || emEstoque === true,
+        emFalta: emFalta === 'true' || emFalta === true,
       },
     });
 
@@ -92,13 +94,15 @@ router.put('/:id', authenticate, requireAdmin, uploadMiddleware, async (req, res
     const existing = await prisma.erva.findUnique({ where: { id } });
     if (!existing) return res.status(404).json({ error: 'Erva not found' });
 
-    const { nome, descricao, usos, noQuintal } = req.body;
+    const { nome, descricao, usos, noQuintal, emEstoque, emFalta } = req.body;
     const data = {};
 
     if (nome !== undefined) data.nome = nome;
     if (descricao !== undefined) data.descricao = descricao;
     if (usos !== undefined) data.usos = usos;
     if (noQuintal !== undefined) data.noQuintal = noQuintal === 'true' || noQuintal === true;
+    if (emEstoque !== undefined) data.emEstoque = emEstoque === 'true' || emEstoque === true;
+    if (emFalta !== undefined) data.emFalta = emFalta === 'true' || emFalta === true;
 
     if (req.file) {
       data.fotoUrl = await uploadToCloudinary(req.file.buffer, 'filhosdefe/ervas');

@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { Leaf, Plus, Search, Pencil, Trash2, AlertCircle, ImageIcon } from 'lucide-react'
+import { Leaf, Plus, Search, Pencil, Trash2, AlertCircle, ImageIcon, Package, PackageX } from 'lucide-react'
 import api from '../../api/axios'
 import Modal from '../../components/Modal'
 import ConfirmModal from '../../components/ConfirmModal'
@@ -14,7 +14,7 @@ const S = {
   error:       { display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderRadius:6, backgroundColor:'#fef2f2', border:'1px solid #fecaca', fontSize:13, color:'#dc2626', marginBottom:16 },
 }
 
-const emptyForm = { nome:'', usos:'', noQuintal:false }
+const emptyForm = { nome:'', usos:'', noQuintal:false, emEstoque:false, emFalta:false }
 
 function HerbForm({ form, setForm, error, preview, fileRef }) {
   const inputRef = useRef()
@@ -64,13 +64,29 @@ function HerbForm({ form, setForm, error, preview, fileRef }) {
         <textarea style={{...S.input,resize:'vertical',minHeight:80}} value={form.usos} onChange={e=>setForm(f=>({...f,usos:e.target.value}))} placeholder="Usos e propriedades..." onFocus={focus} onBlur={blur}/>
       </div>
 
-      <label style={{ display:'flex', alignItems:'center', gap:12, cursor:'pointer' }}>
-        <div style={{ position:'relative', width:44, height:24, borderRadius:12, backgroundColor:form.noQuintal?'#c8972b':'#e5e0d8', transition:'background 0.2s', flexShrink:0 }}
-          onClick={()=>setForm(f=>({...f,noQuintal:!f.noQuintal}))}>
-          <div style={{ position:'absolute', top:3, left:form.noQuintal?'calc(100% - 21px)':3, width:18, height:18, borderRadius:'50%', backgroundColor:'#fff', transition:'left 0.2s', boxShadow:'0 1px 3px rgba(0,0,0,0.2)' }}/>
-        </div>
-        <span style={{ fontSize:14, color:'#2c2c3e' }}>Temos no quintal</span>
-      </label>
+      <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+        <label style={{ display:'flex', alignItems:'center', gap:12, cursor:'pointer', padding:'10px 14px', borderRadius:8, backgroundColor:'#f8f5f0', border:'1px solid #e5e0d8' }}>
+          <div style={{ position:'relative', width:42, height:24, borderRadius:12, backgroundColor:form.noQuintal?'#c8972b':'#e5e0d8', transition:'background 0.2s', flexShrink:0 }}
+            onClick={()=>setForm(f=>({...f,noQuintal:!f.noQuintal}))}>
+            <div style={{ position:'absolute', top:3, left:form.noQuintal?21:3, width:18, height:18, borderRadius:'50%', backgroundColor:'#fff', transition:'left 0.2s', boxShadow:'0 1px 3px rgba(0,0,0,0.2)' }}/>
+          </div>
+          <span style={{ fontSize:13, fontWeight:600, color:'#2c2c3e' }}>Temos no quintal</span>
+        </label>
+        <label style={{ display:'flex', alignItems:'center', gap:12, cursor:'pointer', padding:'10px 14px', borderRadius:8, backgroundColor:'#f8f5f0', border:'1px solid #e5e0d8' }}
+          onClick={()=>setForm(f=>({...f,emEstoque:!f.emEstoque}))}>
+          <div style={{ position:'relative', width:42, height:24, borderRadius:12, backgroundColor:form.emEstoque?'#16a34a':'#e5e0d8', transition:'background 0.2s', flexShrink:0 }}>
+            <div style={{ position:'absolute', top:3, left:form.emEstoque?21:3, width:18, height:18, borderRadius:'50%', backgroundColor:'#fff', transition:'left 0.2s', boxShadow:'0 1px 3px rgba(0,0,0,0.2)' }}/>
+          </div>
+          <span style={{ fontSize:13, fontWeight:600, color:'#2c2c3e' }}>Em estoque</span>
+        </label>
+        <label style={{ display:'flex', alignItems:'center', gap:12, cursor:'pointer', padding:'10px 14px', borderRadius:8, backgroundColor:'#f8f5f0', border:'1px solid #e5e0d8' }}
+          onClick={()=>setForm(f=>({...f,emFalta:!f.emFalta}))}>
+          <div style={{ position:'relative', width:42, height:24, borderRadius:12, backgroundColor:form.emFalta?'#dc2626':'#e5e0d8', transition:'background 0.2s', flexShrink:0 }}>
+            <div style={{ position:'absolute', top:3, left:form.emFalta?21:3, width:18, height:18, borderRadius:'50%', backgroundColor:'#fff', transition:'left 0.2s', boxShadow:'0 1px 3px rgba(0,0,0,0.2)' }}/>
+          </div>
+          <span style={{ fontSize:13, fontWeight:600, color:'#2c2c3e' }}>Em falta</span>
+        </label>
+      </div>
     </div>
   )
 }
@@ -101,7 +117,7 @@ export default function AdminErvas() {
     setEditTarget(null); setForm(emptyForm); setPreview(''); fileRef.current=null; setFormError(''); setModalOpen(true)
   }
   const openEdit = e => {
-    setEditTarget(e); setForm({nome:e.nome||'',usos:e.usos||'',noQuintal:e.noQuintal||false})
+    setEditTarget(e); setForm({nome:e.nome||'',usos:e.usos||'',noQuintal:e.noQuintal||false,emEstoque:e.emEstoque||false,emFalta:e.emFalta||false})
     setPreview(e.fotoUrl||''); fileRef.current=null; setFormError(''); setModalOpen(true)
   }
 
@@ -113,6 +129,8 @@ export default function AdminErvas() {
       fd.append('nome', form.nome.trim())
       fd.append('usos', form.usos.trim())
       fd.append('noQuintal', String(form.noQuintal))
+      fd.append('emEstoque', String(form.emEstoque))
+      fd.append('emFalta', String(form.emFalta))
       if (fileRef.current) fd.append('foto', fileRef.current)
 
       if (editTarget) {
@@ -185,11 +203,13 @@ export default function AdminErvas() {
               <input type="checkbox" checked={selectedIds.has(e.id)} onChange={()=>toggleSelect(e.id)} style={{ position:'absolute', top:8, left:8, zIndex:10, width:18, height:18, cursor:'pointer', accentColor:'#c8972b' }}/>
               <div style={{ aspectRatio:'4/3', backgroundColor:'#f8f5f0', position:'relative', overflow:'hidden' }}>
                 {e.fotoUrl
-                  ? <img src={e.fotoUrl} alt={e.nome} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}/>
+                  ? <img src={e.fotoUrl} alt={e.nome} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block', filter: e.emFalta ? 'grayscale(100%)' : 'none' }}/>
                   : <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center' }}><Leaf size={32} color="#e5e0d8"/></div>}
-                {e.noQuintal && (
-                  <span style={{ position:'absolute', top:8, right:8, padding:'3px 10px', borderRadius:20, fontSize:11, fontWeight:700, backgroundColor:'#c8972b', color:'#fff' }}>Quintal</span>
-                )}
+                <div style={{ position:'absolute', top:8, right:8, display:'flex', flexDirection:'column', gap:4, alignItems:'flex-end' }}>
+                  {e.noQuintal && <span style={{ padding:'3px 8px', borderRadius:20, fontSize:10, fontWeight:700, backgroundColor:'#c8972b', color:'#fff' }}>Quintal</span>}
+                  {e.emEstoque && !e.emFalta && <span style={{ padding:'3px 8px', borderRadius:20, fontSize:10, fontWeight:700, backgroundColor:'#16a34a', color:'#fff', display:'flex', alignItems:'center', gap:3 }}><Package size={10}/>Estoque</span>}
+                  {e.emFalta && <span style={{ padding:'3px 8px', borderRadius:20, fontSize:10, fontWeight:700, backgroundColor:'#dc2626', color:'#fff', display:'flex', alignItems:'center', gap:3 }}><PackageX size={10}/>Em falta</span>}
+                </div>
               </div>
               <div style={{ padding:'12px 14px' }}>
                 <div style={{ fontSize:14, fontWeight:700, color:'#2c2c3e', marginBottom:4, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{e.nome}</div>
