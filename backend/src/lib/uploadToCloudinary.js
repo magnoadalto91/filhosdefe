@@ -3,6 +3,7 @@ import cloudinary from './cloudinary.js';
 
 async function toWebp(buffer) {
   return sharp(buffer)
+    .rotate()
     .webp({ quality: 82 })
     .toBuffer();
 }
