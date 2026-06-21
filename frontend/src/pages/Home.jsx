@@ -4,8 +4,6 @@
 const CARDS = [
   { title: 'Orixás / Entidades',   to: '/entidades', bg: '#2c2c3e' },
   { title: 'Ervas e Banhos',       to: '/ervas',     bg: '#1a3a2a' },
-  { title: 'Bebidas',              to: '/bebidas',   bg: '#0a2233' },
-  { title: 'Cigarros e Charutos',  to: '/cigarros',  bg: '#3a1a1a' },
   { title: 'Pontos Cantados',      to: '/musicas',   bg: '#3a2a1a' },
   { title: 'Giras',                to: '/calendario',bg: '#1a1a3a' },
 ]

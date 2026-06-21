@@ -66,7 +66,6 @@ model NotificacaoConfig {
   id           Int      @id @default(1)
   novaEntidade Boolean  @default(true)
   novaErva     Boolean  @default(true)
-  novaBebida   Boolean  @default(true)
   novaMusica   Boolean  @default(true)
   novaGira       Boolean  @default(true)
   novaPublicacao Boolean  @default(true)
@@ -113,18 +112,6 @@ model Erva {
   entidades  EntidadeErva[]
 }
 
-model Bebida {
-  id           Int      @id @default(autoincrement())
-  nome         String
-  descricao    String
-  observacoes  String?
-  fotoUrl      String?
-  emEstoque    Boolean  @default(false)
-  emFalta      Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-}
-
 model Entidade {
   id         Int              @id @default(autoincrement())
   nome       String
@@ -159,16 +146,6 @@ model Banho {
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
   giras        GiraBanho[]
-}
-
-model Cigarro {
-  id          Int      @id @default(autoincrement())
-  nome        String
-  descricao   String
-  observacoes String?
-  fotoUrl     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 }
 
 model Gira {

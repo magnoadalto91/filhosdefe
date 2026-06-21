@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Music, Leaf, Users, Calendar, Plus, GlassWater, Droplets, Wind } from 'lucide-react'
+import { Music, Leaf, Users, Calendar, Plus, Droplets } from 'lucide-react'
 import { Link } from 'react-router'
 import api from '../../api/axios'
 import { useAuth } from '../../contexts/AuthContext'
@@ -8,9 +8,7 @@ import LoadingSpinner from '../../components/LoadingSpinner'
 const STAT_CARDS = [
   { key:'musicas',   label:'Músicas',             Icon:Music,       color:'#7C3AED', to:'/admin/musicas' },
   { key:'ervas',     label:'Ervas',               Icon:Leaf,        color:'#059669', to:'/admin/ervas' },
-  { key:'bebidas',   label:'Bebidas',             Icon:GlassWater,  color:'#0891b2', to:'/admin/bebidas' },
   { key:'banhos',    label:'Banhos',              Icon:Droplets,    color:'#0369a1', to:'/admin/banhos' },
-  { key:'cigarros',  label:'Cigarros / Charutos', Icon:Wind,        color:'#6b7280', to:'/admin/cigarros' },
   { key:'entidades', label:'Orixás / Entidades',  Icon:Users,       color:'#c8972b', to:'/admin/entidades' },
   { key:'giras',     label:'Giras',               Icon:Calendar,    color:'#dc2626', to:'/admin/giras' },
 ]
@@ -18,9 +16,7 @@ const STAT_CARDS = [
 const QUICK = [
   { label:'Nova Música',   to:'/admin/musicas',   Icon:Music },
   { label:'Nova Erva',     to:'/admin/ervas',     Icon:Leaf },
-  { label:'Nova Bebida',   to:'/admin/bebidas',   Icon:GlassWater },
   { label:'Novo Banho',    to:'/admin/banhos',    Icon:Droplets },
-  { label:'Novo Cigarro',  to:'/admin/cigarros',  Icon:Wind },
   { label:'Nova Entidade', to:'/admin/entidades', Icon:Users },
   { label:'Nova Gira',     to:'/admin/giras',     Icon:Calendar },
 ]
@@ -34,12 +30,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     Promise.allSettled([
-      api.get('/musicas'), api.get('/ervas'), api.get('/bebidas'),
-      api.get('/banhos'), api.get('/cigarros'),
-      api.get('/entidades'), api.get('/giras'),
-    ]).then(([m, e, b, bh, ci, en, g]) => {
+      api.get('/musicas'), api.get('/ervas'),
+      api.get('/banhos'), api.get('/entidades'), api.get('/giras'),
+    ]).then(([m, e, bh, en, g]) => {
       const n = res => res.status === 'rejected' ? 0 : (Array.isArray(res.value.data) ? res.value.data.length : (res.value.data.total || res.value.data.count || 0))
-      setStats({ musicas:n(m), ervas:n(e), bebidas:n(b), banhos:n(bh), cigarros:n(ci), entidades:n(en), giras:n(g) })
+      setStats({ musicas:n(m), ervas:n(e), banhos:n(bh), entidades:n(en), giras:n(g) })
     }).finally(() => setLoading(false))
   }, [])
 

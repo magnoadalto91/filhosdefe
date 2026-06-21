@@ -12,16 +12,12 @@ import Estudos from './pages/Estudos'
 import Entidades from './pages/Entidades'
 import Ervas from './pages/Ervas'
 import Musicas from './pages/Musicas'
-import Bebidas from './pages/Bebidas'
-import Cigarros from './pages/Cigarros'
 import Login from './pages/Login'
 
 import Dashboard from './pages/admin/Dashboard'
 import AdminMusicas from './pages/admin/Musicas'
 import AdminErvas from './pages/admin/Ervas'
-import AdminBebidas from './pages/admin/Bebidas'
 import AdminBanhos from './pages/admin/Banhos'
-import AdminCigarros from './pages/admin/Cigarros'
 import AdminEntidades from './pages/admin/Entidades'
 import AdminGiras from './pages/admin/Giras'
 import AdminUsuarios from './pages/admin/Usuarios'
@@ -63,8 +59,6 @@ export default function App() {
           <Route path="/entidades" element={<PublicPage><Entidades /></PublicPage>} />
           <Route path="/ervas" element={<PublicPage><Ervas /></PublicPage>} />
           <Route path="/musicas" element={<PublicPage><Musicas /></PublicPage>} />
-          <Route path="/bebidas" element={<PublicPage><Bebidas /></PublicPage>} />
-          <Route path="/cigarros" element={<PublicPage><Cigarros /></PublicPage>} />
           <Route path="/calendario" element={<PublicPage><Calendario /></PublicPage>} />
           <Route path="/estudos" element={<PublicPage><Estudos /></PublicPage>} />
 
@@ -72,9 +66,7 @@ export default function App() {
           <Route path="/admin" element={<AdminPage><Dashboard /></AdminPage>} />
           <Route path="/admin/musicas" element={<AdminPage><AdminMusicas /></AdminPage>} />
           <Route path="/admin/ervas" element={<AdminPage><AdminErvas /></AdminPage>} />
-          <Route path="/admin/bebidas" element={<AdminPage><AdminBebidas /></AdminPage>} />
           <Route path="/admin/banhos" element={<AdminPage><AdminBanhos /></AdminPage>} />
-          <Route path="/admin/cigarros" element={<AdminPage><AdminCigarros /></AdminPage>} />
           <Route path="/admin/entidades" element={<AdminPage><AdminEntidades /></AdminPage>} />
           <Route path="/admin/giras" element={<AdminPage><AdminGiras /></AdminPage>} />
           <Route path="/admin/usuarios"    element={<AdminPage><AdminUsuarios /></AdminPage>} />
