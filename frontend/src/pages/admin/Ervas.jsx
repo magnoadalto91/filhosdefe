@@ -293,13 +293,29 @@ function HerbFormWrapper({ form, setForm, error, preview, setPreview, fileRef })
         <label style={S.label}>Usos e propriedades</label>
         <textarea style={{...S.input,resize:'vertical',minHeight:120}} value={form.usos} onChange={e=>setForm(f=>({...f,usos:e.target.value}))} placeholder="Usos, propriedades e indicações..." onFocus={focus} onBlur={blur}/>
       </div>
-      <label style={{ display:'flex', alignItems:'center', gap:12, cursor:'pointer' }}>
-        <div style={{ position:'relative', width:44, height:24, borderRadius:12, backgroundColor:form.noQuintal?'#c8972b':'#e5e0d8', transition:'background 0.2s', flexShrink:0 }}
-          onClick={()=>setForm(f=>({...f,noQuintal:!f.noQuintal}))}>
-          <div style={{ position:'absolute', top:3, left:form.noQuintal?'calc(100% - 21px)':3, width:18, height:18, borderRadius:'50%', backgroundColor:'#fff', transition:'left 0.2s', boxShadow:'0 1px 3px rgba(0,0,0,0.2)' }}/>
-        </div>
-        <span style={{ fontSize:14, color:'#2c2c3e' }}>Temos no quintal</span>
-      </label>
+      <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+        <label style={{ display:'flex', alignItems:'center', gap:12, cursor:'pointer', padding:'10px 14px', borderRadius:8, backgroundColor:'#f8f5f0', border:'1px solid #e5e0d8' }}>
+          <div style={{ position:'relative', width:44, height:24, borderRadius:12, backgroundColor:form.noQuintal?'#c8972b':'#e5e0d8', transition:'background 0.2s', flexShrink:0 }}
+            onClick={()=>setForm(f=>({...f,noQuintal:!f.noQuintal}))}>
+            <div style={{ position:'absolute', top:3, left:form.noQuintal?'calc(100% - 21px)':3, width:18, height:18, borderRadius:'50%', backgroundColor:'#fff', transition:'left 0.2s', boxShadow:'0 1px 3px rgba(0,0,0,0.2)' }}/>
+          </div>
+          <span style={{ fontSize:13, fontWeight:600, color:'#2c2c3e' }}>Temos no quintal</span>
+        </label>
+        <label style={{ display:'flex', alignItems:'center', gap:12, cursor:'pointer', padding:'10px 14px', borderRadius:8, backgroundColor:'#f8f5f0', border:'1px solid #e5e0d8' }}
+          onClick={()=>setForm(f=>({...f,emEstoque:!f.emEstoque}))}>
+          <div style={{ position:'relative', width:44, height:24, borderRadius:12, backgroundColor:form.emEstoque?'#16a34a':'#e5e0d8', transition:'background 0.2s', flexShrink:0 }}>
+            <div style={{ position:'absolute', top:3, left:form.emEstoque?'calc(100% - 21px)':3, width:18, height:18, borderRadius:'50%', backgroundColor:'#fff', transition:'left 0.2s', boxShadow:'0 1px 3px rgba(0,0,0,0.2)' }}/>
+          </div>
+          <span style={{ fontSize:13, fontWeight:600, color:'#2c2c3e' }}>Em estoque</span>
+        </label>
+        <label style={{ display:'flex', alignItems:'center', gap:12, cursor:'pointer', padding:'10px 14px', borderRadius:8, backgroundColor:'#f8f5f0', border:'1px solid #e5e0d8' }}
+          onClick={()=>setForm(f=>({...f,emFalta:!f.emFalta}))}>
+          <div style={{ position:'relative', width:44, height:24, borderRadius:12, backgroundColor:form.emFalta?'#dc2626':'#e5e0d8', transition:'background 0.2s', flexShrink:0 }}>
+            <div style={{ position:'absolute', top:3, left:form.emFalta?'calc(100% - 21px)':3, width:18, height:18, borderRadius:'50%', backgroundColor:'#fff', transition:'left 0.2s', boxShadow:'0 1px 3px rgba(0,0,0,0.2)' }}/>
+          </div>
+          <span style={{ fontSize:13, fontWeight:600, color:'#2c2c3e' }}>Em falta</span>
+        </label>
+      </div>
     </div>
   )
 }
