@@ -1,9 +1,14 @@
-﻿import { useEffect, useState } from 'react'
-import { BookOpen, FileText, ArrowLeft, Calendar, X, CheckCircle } from 'lucide-react'
+import { useEffect, useState, useCallback } from 'react'
+import { BookOpen, FileText, ArrowLeft, Calendar, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useNavigate } from 'react-router'
+import { Document, Page, pdfjs } from 'react-pdf'
+import 'react-pdf/dist/Page/AnnotationLayer.css'
+import 'react-pdf/dist/Page/TextLayer.css'
 import api from '../api/axios'
 import LoadingSpinner from '../components/LoadingSpinner'
 import Modal from '../components/Modal'
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
 
 const TABS = [
   { id:'publicacoes', label:'Publicações', Icon: BookOpen },
@@ -21,10 +26,7 @@ function PubModal({ pub, onClose }) {
     <Modal isOpen={!!pub} onClose={onClose} title={pub.titulo}>
       {pub.capaUrl && <img src={pub.capaUrl} alt="" style={{ width:'100%', borderRadius:8, marginBottom:16, objectFit:'cover', maxHeight:220, display:'block' }}/>}
       <p style={{ margin:'0 0 16px', fontSize:12, color:'#9ca3af' }}>{fmtDate(pub.createdAt)}</p>
-      <div
-        style={{ fontSize:14, lineHeight:1.8, color:'#2c2c3e' }}
-        dangerouslySetInnerHTML={{ __html: pub.conteudo }}
-      />
+      <div style={{ fontSize:14, lineHeight:1.8, color:'#2c2c3e' }} dangerouslySetInnerHTML={{ __html: pub.conteudo }}/>
       <style>{`
         .pub-content h2 { font-size:20px; font-weight:700; margin:16px 0 8px; }
         .pub-content h3 { font-size:17px; font-weight:700; margin:14px 0 6px; }
@@ -38,9 +40,9 @@ function PubModal({ pub, onClose }) {
 
 /* ── Publicações tab ──────────────────────────────────────── */
 function PublicacoesTab() {
-  const [list,    setList]    = useState([])
-  const [loading, setLoading] = useState(true)
-  const [selected,setSelected]= useState(null)
+  const [list,       setList]       = useState([])
+  const [loading,    setLoading]    = useState(true)
+  const [selected,   setSelected]   = useState(null)
   const [loadingPub, setLoadingPub] = useState(false)
 
   useEffect(() => {
@@ -52,11 +54,8 @@ function PublicacoesTab() {
 
   const open = async (item) => {
     setLoadingPub(true)
-    try {
-      const r = await api.get(`/publicacoes/${item.id}`)
-      setSelected(r.data)
-    } catch {}
-    finally { setLoadingPub(false) }
+    try { const r = await api.get(`/publicacoes/${item.id}`); setSelected(r.data) }
+    catch {} finally { setLoadingPub(false) }
   }
 
   if (loading || loadingPub) return <LoadingSpinner/>
@@ -101,11 +100,41 @@ function PublicacoesTab() {
   )
 }
 
-/* ── PDF Viewer Modal ─────────────────────────────────────── */
-function DocViewerModal({ doc, onClose }) {
-  if (!doc) return null
+/* ── PDF Viewer ───────────────────────────────────────────── */
+function PdfViewer({ doc, onClose, onConcluded }) {
+  const [numPages,     setNumPages]     = useState(null)
+  const [currentPage,  setCurrentPage]  = useState(1)
+  const [pageWidth,    setPageWidth]    = useState(window.innerWidth)
+  const [concluded,    setConcluded]    = useState(false)
+
+  useEffect(() => {
+    const onResize = () => setPageWidth(window.innerWidth)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
+  const onLoadSuccess = useCallback(({ numPages }) => {
+    setNumPages(numPages)
+    if (numPages === 1 && !concluded) {
+      setConcluded(true)
+      onConcluded()
+    }
+  }, [concluded, onConcluded])
+
+  const goNext = () => {
+    const next = Math.min(currentPage + 1, numPages)
+    setCurrentPage(next)
+    if (next === numPages && !concluded) {
+      setConcluded(true)
+      onConcluded()
+    }
+  }
+
+  const goPrev = () => setCurrentPage(p => Math.max(p - 1, 1))
+
   return (
     <div style={{ position:'fixed', inset:0, zIndex:200, display:'flex', flexDirection:'column', backgroundColor:'#1c1c2e' }}>
+      {/* Header */}
       <div style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 16px', backgroundColor:'#2c2c3e', flexShrink:0 }}>
         <button onClick={onClose}
           style={{ display:'flex', alignItems:'center', justifyContent:'center', width:36, height:36, borderRadius:8, background:'rgba(255,255,255,0.08)', border:'none', cursor:'pointer', color:'#fff', flexShrink:0 }}>
@@ -114,12 +143,38 @@ function DocViewerModal({ doc, onClose }) {
         <span style={{ fontSize:14, fontWeight:600, color:'#fff', flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontFamily:"'Poppins',sans-serif" }}>
           {doc.nome}
         </span>
+        {numPages && (
+          <span style={{ fontSize:12, color:'rgba(255,255,255,0.5)', flexShrink:0, fontFamily:"'Poppins',sans-serif" }}>
+            {currentPage}/{numPages}
+          </span>
+        )}
       </div>
-      <iframe
-        src={doc.fileUrl}
-        title={doc.nome}
-        style={{ flex:1, width:'100%', border:'none', backgroundColor:'#fff' }}
-      />
+
+      {/* PDF content */}
+      <div style={{ flex:1, overflow:'auto', display:'flex', justifyContent:'center', backgroundColor:'#404040' }}>
+        <Document
+          file={doc.fileUrl}
+          onLoadSuccess={onLoadSuccess}
+          loading={<div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:200, color:'#fff', fontFamily:"'Poppins',sans-serif", fontSize:14 }}>Carregando...</div>}
+          error={<div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:200, color:'#f87171', fontFamily:"'Poppins',sans-serif", fontSize:14 }}>Erro ao carregar documento.</div>}
+        >
+          <Page pageNumber={currentPage} width={Math.min(pageWidth, 900)} renderTextLayer={true} renderAnnotationLayer={true}/>
+        </Document>
+      </div>
+
+      {/* Navigation */}
+      {numPages && numPages > 1 && (
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:16, padding:'12px 16px', backgroundColor:'#2c2c3e', flexShrink:0 }}>
+          <button onClick={goPrev} disabled={currentPage <= 1}
+            style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 16px', borderRadius:8, border:'none', cursor: currentPage <= 1 ? 'not-allowed' : 'pointer', backgroundColor: currentPage <= 1 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.12)', color: currentPage <= 1 ? 'rgba(255,255,255,0.3)' : '#fff', fontFamily:"'Poppins',sans-serif", fontSize:13, fontWeight:600, transition:'background 0.15s' }}>
+            <ChevronLeft size={16}/> Anterior
+          </button>
+          <button onClick={goNext} disabled={currentPage >= numPages}
+            style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 16px', borderRadius:8, border:'none', cursor: currentPage >= numPages ? 'not-allowed' : 'pointer', backgroundColor: currentPage >= numPages ? 'rgba(255,255,255,0.05)' : '#c8972b', color: currentPage >= numPages ? 'rgba(255,255,255,0.3)' : '#fff', fontFamily:"'Poppins',sans-serif", fontSize:13, fontWeight:600, transition:'background 0.15s' }}>
+            Próxima <ChevronRight size={16}/>
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -130,24 +185,26 @@ function DocumentosTab() {
   const [loading, setLoading] = useState(true)
   const [viewing, setViewing] = useState(null)
 
-  const load = () => {
+  useEffect(() => {
     api.get('/documentos')
       .then(r => setList(Array.isArray(r.data) ? r.data : []))
       .catch(() => {})
       .finally(() => setLoading(false))
-  }
-
-  useEffect(() => { load() }, [])
+  }, [])
 
   const openDoc = async (doc) => {
     setViewing(doc)
-    if (!doc.lido) {
-      try {
-        await api.post(`/documentos/${doc.id}/leitura`)
-        setList(prev => prev.map(d => d.id === doc.id ? { ...d, lido: true } : d))
-      } catch {}
+    if (!doc.aberto) {
+      try { await api.post(`/documentos/${doc.id}/leitura`) } catch {}
+      setList(prev => prev.map(d => d.id === doc.id ? { ...d, aberto: true } : d))
     }
   }
+
+  const onConcluded = useCallback(() => {
+    if (!viewing) return
+    api.post(`/documentos/${viewing.id}/conclusao`).catch(() => {})
+    setList(prev => prev.map(d => d.id === viewing.id ? { ...d, concluido: true } : d))
+  }, [viewing])
 
   if (loading) return <LoadingSpinner/>
   if (list.length === 0) return (
@@ -162,7 +219,7 @@ function DocumentosTab() {
       <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
         {list.map(doc => (
           <button key={doc.id} onClick={() => openDoc(doc)}
-            style={{ display:'flex', alignItems:'center', gap:14, width:'100%', textAlign:'left', backgroundColor:'#fff', borderRadius:10, border:`1px solid ${doc.lido ? '#d1fae5' : '#e5e0d8'}`, padding:'14px 16px', cursor:'pointer', boxShadow:'0 2px 8px rgba(0,0,0,0.04)', transition:'box-shadow 0.2s', fontFamily:"'Poppins',sans-serif" }}
+            style={{ display:'flex', alignItems:'center', gap:14, width:'100%', textAlign:'left', backgroundColor:'#fff', borderRadius:10, border:'1px solid #e5e0d8', padding:'14px 16px', cursor:'pointer', boxShadow:'0 2px 8px rgba(0,0,0,0.04)', transition:'box-shadow 0.2s', fontFamily:"'Poppins',sans-serif" }}
             onMouseEnter={e=>e.currentTarget.style.boxShadow='0 6px 20px rgba(0,0,0,0.1)'}
             onMouseLeave={e=>e.currentTarget.style.boxShadow='0 2px 8px rgba(0,0,0,0.04)'}>
             <div style={{ fontSize:32, flexShrink:0 }}>{EXT_ICON[doc.fileType] || '📁'}</div>
@@ -173,16 +230,12 @@ function DocumentosTab() {
                 {doc.fileType.toUpperCase()}{doc.tamanho ? ` · ${fmtSize(doc.tamanho)}` : ''} · {fmtDate(doc.createdAt)}
               </div>
             </div>
-            {doc.lido && (
-              <div style={{ display:'flex', alignItems:'center', gap:4, flexShrink:0, color:'#16a34a', fontSize:11, fontWeight:600 }}>
-                <CheckCircle size={15}/>
-                <span>Lido</span>
-              </div>
-            )}
           </button>
         ))}
       </div>
-      <DocViewerModal doc={viewing} onClose={() => setViewing(null)}/>
+      {viewing && (
+        <PdfViewer doc={viewing} onClose={() => setViewing(null)} onConcluded={onConcluded}/>
+      )}
     </>
   )
 }
@@ -224,4 +277,3 @@ export default function Estudos() {
     </div>
   )
 }
-

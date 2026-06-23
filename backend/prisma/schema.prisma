@@ -65,12 +65,13 @@ model Documento {
 }
 
 model LeituraDocumento {
-  id          Int       @id @default(autoincrement())
-  userId      Int
-  documentoId Int
-  lidoEm      DateTime  @default(now())
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  documento   Documento @relation(fields: [documentoId], references: [id], onDelete: Cascade)
+  id           Int       @id @default(autoincrement())
+  userId       Int
+  documentoId  Int
+  aberturaEm   DateTime  @default(now())
+  concluidoEm  DateTime?
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documento    Documento @relation(fields: [documentoId], references: [id], onDelete: Cascade)
 
   @@unique([userId, documentoId])
 }

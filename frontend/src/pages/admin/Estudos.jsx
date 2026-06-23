@@ -278,10 +278,11 @@ const fmtSize  = b => b >= 1048576 ? `${(b/1048576).toFixed(1)} MB` : `${(b/1024
 function LeiturasModal({ doc, onClose }) {
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
-  const fmt = iso => new Date(iso).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })
+  const fmt = iso => iso ? new Date(iso).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—'
 
   useEffect(() => {
     if (!doc) return
+    setLoading(true)
     api.get(`/documentos/${doc.id}/leituras`)
       .then(r => setList(Array.isArray(r.data) ? r.data : []))
       .catch(() => {})
@@ -290,18 +291,27 @@ function LeiturasModal({ doc, onClose }) {
 
   if (!doc) return null
   return (
-    <Modal isOpen={!!doc} onClose={onClose} title={`Leituras — ${doc.nome}`}>
+    <Modal isOpen={!!doc} onClose={onClose} title={`Acessos — ${doc.nome}`}>
       {loading ? <LoadingSpinner/> : list.length === 0 ? (
-        <p style={{ textAlign:'center', color:'#9ca3af', fontSize:14, padding:'24px 0' }}>Nenhum usuário leu ainda.</p>
+        <p style={{ textAlign:'center', color:'#9ca3af', fontSize:14, padding:'24px 0' }}>Nenhum usuário acessou ainda.</p>
       ) : (
         <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+          {/* Legenda */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8, padding:'8px 14px', borderRadius:8, backgroundColor:'#f8f5f0', marginBottom:4 }}>
+            <span style={{ fontSize:10, fontWeight:700, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'0.5px' }}>Usuário</span>
+            <span style={{ fontSize:10, fontWeight:700, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'0.5px', textAlign:'center' }}>Abriu</span>
+            <span style={{ fontSize:10, fontWeight:700, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'0.5px', textAlign:'center' }}>Última página</span>
+          </div>
           {list.map(l => (
-            <div key={l.id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', borderRadius:8, backgroundColor:'#f8f5f0', border:'1px solid #e5e0d8' }}>
-              <div>
-                <div style={{ fontSize:13, fontWeight:600, color:'#2c2c3e' }}>{l.user.nome || l.user.email}</div>
-                {l.user.nome && <div style={{ fontSize:11, color:'#9ca3af' }}>{l.user.email}</div>}
+            <div key={l.id} style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8, alignItems:'center', padding:'10px 14px', borderRadius:8, backgroundColor:'#fff', border:'1px solid #e5e0d8' }}>
+              <div style={{ minWidth:0 }}>
+                <div style={{ fontSize:12, fontWeight:700, color:'#2c2c3e', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{l.user.nome || l.user.email}</div>
+                <div style={{ fontSize:11, color:'#9ca3af', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{l.user.email}</div>
               </div>
-              <div style={{ fontSize:11, color:'#9ca3af', textAlign:'right' }}>{fmt(l.lidoEm)}</div>
+              <div style={{ fontSize:11, color:'#6b7280', textAlign:'center' }}>{fmt(l.aberturaEm)}</div>
+              <div style={{ fontSize:11, textAlign:'center', color: l.concluidoEm ? '#16a34a' : '#9ca3af', fontWeight: l.concluidoEm ? 600 : 400 }}>
+                {l.concluidoEm ? fmt(l.concluidoEm) : 'Não concluiu'}
+              </div>
             </div>
           ))}
         </div>
@@ -428,10 +438,10 @@ function DocumentosTab() {
             </div>
             <div style={{ display:'flex', alignItems:'center', gap:4, flexShrink:0 }}>
               <button onClick={()=>setLeiturasDoc(doc)}
-                style={{ display:'flex', alignItems:'center', gap:4, padding:'4px 8px', borderRadius:6, background:'none', border:'1px solid #e5e0d8', cursor:'pointer', color:'#6b7280', fontSize:11, fontWeight:600, fontFamily:"'Poppins',sans-serif", transition:'all 0.15s' }}
+                style={{ display:'flex', alignItems:'center', gap:4, padding:'4px 8px', borderRadius:6, background:'none', border:'1px solid #e5e0d8', cursor:'pointer', color:'#6b7280', fontSize:11, fontWeight:600, fontFamily:"'Poppins',sans-serif", transition:'all 0.15s', whiteSpace:'nowrap' }}
                 onMouseEnter={e=>{e.currentTarget.style.borderColor='#c8972b';e.currentTarget.style.color='#c8972b'}}
                 onMouseLeave={e=>{e.currentTarget.style.borderColor='#e5e0d8';e.currentTarget.style.color='#6b7280'}}>
-                <Users size={12}/>{doc.totalLeituras ?? 0}
+                <Users size={12}/>{doc.totalLeituras ?? 0} acesso(s)
               </button>
               <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer"
                 style={{ display:'flex', padding:8, borderRadius:6, color:'#9ca3af', transition:'color 0.15s' }}

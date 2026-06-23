@@ -8,7 +8,7 @@ import { sendPushToAll, isEnabled } from '../lib/sendPush.js'
 const router = Router()
 const prisma  = new PrismaClient()
 
-// GET / — requer auth; retorna lista com lido + totalLeituras
+// GET / — requer auth; retorna lista com abertura + conclusão do usuário
 router.get('/', authenticate, async (req, res) => {
   try {
     const userId = req.user.id
@@ -16,18 +16,20 @@ router.get('/', authenticate, async (req, res) => {
       orderBy: { createdAt: 'desc' },
       include: {
         _count: { select: { leituras: true } },
-        leituras: { where: { userId }, select: { id: true } },
+        leituras: { where: { userId }, select: { aberturaEm: true, concluidoEm: true } },
       },
     })
     return res.json(list.map(({ leituras, _count, ...d }) => ({
       ...d,
-      lido: leituras.length > 0,
-      totalLeituras: _count.leituras,
+      totalAberturas: _count.leituras,
+      totalConclusoes: 0, // calculado no endpoint de leituras; não necessário aqui
+      aberto: leituras.length > 0,
+      concluido: leituras[0]?.concluidoEm != null,
     })))
   } catch (err) { return res.status(500).json({ error: err.message }) }
 })
 
-// POST /:id/leitura — registra leitura do usuário autenticado
+// POST /:id/leitura — registra abertura
 router.post('/:id/leitura', authenticate, async (req, res) => {
   try {
     const documentoId = Number(req.params.id)
@@ -42,7 +44,22 @@ router.post('/:id/leitura', authenticate, async (req, res) => {
   } catch (err) { return res.status(500).json({ error: err.message }) }
 })
 
-// GET /:id/leituras — admin: quem leu e quando
+// POST /:id/conclusao — registra que o usuário chegou à última página
+router.post('/:id/conclusao', authenticate, async (req, res) => {
+  try {
+    const documentoId = Number(req.params.id)
+    if (isNaN(documentoId)) return res.status(400).json({ error: 'ID inválido' })
+    const userId = req.user.id
+    await prisma.leituraDocumento.upsert({
+      where: { userId_documentoId: { userId, documentoId } },
+      create: { userId, documentoId, concluidoEm: new Date() },
+      update: { concluidoEm: new Date() },
+    })
+    return res.json({ ok: true })
+  } catch (err) { return res.status(500).json({ error: err.message }) }
+})
+
+// GET /:id/leituras — admin: lista com dois status por usuário
 router.get('/:id/leituras', authenticate, requireAdmin, async (req, res) => {
   try {
     const documentoId = Number(req.params.id)
@@ -50,7 +67,7 @@ router.get('/:id/leituras', authenticate, requireAdmin, async (req, res) => {
     const leituras = await prisma.leituraDocumento.findMany({
       where: { documentoId },
       include: { user: { select: { id: true, nome: true, email: true } } },
-      orderBy: { lidoEm: 'desc' },
+      orderBy: { aberturaEm: 'desc' },
     })
     return res.json(leituras)
   } catch (err) { return res.status(500).json({ error: err.message }) }
