@@ -29,6 +29,7 @@ model User {
   createdAt         DateTime           @default(now())
   pushSubscriptions PushSubscription[]
   presencas         PresencaGira[]
+  leituras          LeituraDocumento[]
 }
 
 model PushSubscription {
@@ -52,14 +53,26 @@ model Publicacao {
 }
 
 model Documento {
-  id        Int      @id @default(autoincrement())
+  id        Int                @id @default(autoincrement())
   nome      String
   descricao String?
   fileUrl   String
   fileType  String
   tamanho   Int?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  leituras  LeituraDocumento[]
+}
+
+model LeituraDocumento {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  documentoId Int
+  lidoEm      DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documento   Documento @relation(fields: [documentoId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, documentoId])
 }
 
 model NotificacaoConfig {

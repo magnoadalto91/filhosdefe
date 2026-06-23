@@ -6,7 +6,7 @@ import Placeholder from '@tiptap/extension-placeholder'
 import {
   BookOpen, FileText, Trash2, AlertCircle, ImageIcon,
   Bold, Italic, List, ListOrdered, Heading2, Heading3,
-  FileUp, Download, Pencil, X,
+  FileUp, Download, Pencil, X, Users,
 } from 'lucide-react'
 import api from '../../api/axios'
 import Modal from '../../components/Modal'
@@ -275,6 +275,41 @@ function PublicacoesTab() {
 const EXT_ICON = { pdf:'📄', doc:'📝', docx:'📝', xls:'📊', xlsx:'📊', ppt:'📋', pptx:'📋', txt:'📃' }
 const fmtSize  = b => b >= 1048576 ? `${(b/1048576).toFixed(1)} MB` : `${(b/1024).toFixed(0)} KB`
 
+function LeiturasModal({ doc, onClose }) {
+  const [list, setList] = useState([])
+  const [loading, setLoading] = useState(true)
+  const fmt = iso => new Date(iso).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })
+
+  useEffect(() => {
+    if (!doc) return
+    api.get(`/documentos/${doc.id}/leituras`)
+      .then(r => setList(Array.isArray(r.data) ? r.data : []))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [doc])
+
+  if (!doc) return null
+  return (
+    <Modal isOpen={!!doc} onClose={onClose} title={`Leituras — ${doc.nome}`}>
+      {loading ? <LoadingSpinner/> : list.length === 0 ? (
+        <p style={{ textAlign:'center', color:'#9ca3af', fontSize:14, padding:'24px 0' }}>Nenhum usuário leu ainda.</p>
+      ) : (
+        <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+          {list.map(l => (
+            <div key={l.id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', borderRadius:8, backgroundColor:'#f8f5f0', border:'1px solid #e5e0d8' }}>
+              <div>
+                <div style={{ fontSize:13, fontWeight:600, color:'#2c2c3e' }}>{l.user.nome || l.user.email}</div>
+                {l.user.nome && <div style={{ fontSize:11, color:'#9ca3af' }}>{l.user.email}</div>}
+              </div>
+              <div style={{ fontSize:11, color:'#9ca3af', textAlign:'right' }}>{fmt(l.lidoEm)}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </Modal>
+  )
+}
+
 function DocumentosTab() {
   const [list,           setList]           = useState([])
   const [loading,        setLoading]        = useState(true)
@@ -283,6 +318,7 @@ function DocumentosTab() {
   const [deleteTarget,   setDeleteTarget]   = useState(null)
   const [selectedIds,    setSelectedIds]    = useState(new Set())
   const [showBulkConfirm,setShowBulkConfirm]= useState(false)
+  const [leiturasDoc,    setLeiturasDoc]    = useState(null)
   const [nome,        setNome]        = useState('')
   const [descricao,   setDescricao]   = useState('')
   const [file,        setFile]        = useState(null)
@@ -390,7 +426,13 @@ function DocumentosTab() {
                 {doc.fileType.toUpperCase()} · {doc.tamanho ? fmtSize(doc.tamanho) : '—'} · {fmt(doc.createdAt)}
               </div>
             </div>
-            <div style={{ display:'flex', gap:4, flexShrink:0 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:4, flexShrink:0 }}>
+              <button onClick={()=>setLeiturasDoc(doc)}
+                style={{ display:'flex', alignItems:'center', gap:4, padding:'4px 8px', borderRadius:6, background:'none', border:'1px solid #e5e0d8', cursor:'pointer', color:'#6b7280', fontSize:11, fontWeight:600, fontFamily:"'Poppins',sans-serif", transition:'all 0.15s' }}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor='#c8972b';e.currentTarget.style.color='#c8972b'}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor='#e5e0d8';e.currentTarget.style.color='#6b7280'}}>
+                <Users size={12}/>{doc.totalLeituras ?? 0}
+              </button>
               <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer"
                 style={{ display:'flex', padding:8, borderRadius:6, color:'#9ca3af', transition:'color 0.15s' }}
                 onMouseEnter={e=>e.currentTarget.style.color='#2563eb'} onMouseLeave={e=>e.currentTarget.style.color='#9ca3af'}>
@@ -407,6 +449,7 @@ function DocumentosTab() {
         title="Excluir Documento" message={`Excluir "${deleteTarget?.nome}"?`}/>
       <ConfirmModal isOpen={showBulkConfirm} onClose={()=>setShowBulkConfirm(false)} onConfirm={handleBulkDelete}
         title="Excluir Documentos" message={`Excluir ${selectedIds.size} documento(s) selecionado(s)? Esta ação não pode ser desfeita.`}/>
+      <LeiturasModal doc={leiturasDoc} onClose={()=>setLeiturasDoc(null)}/>
     </>
   )
 }

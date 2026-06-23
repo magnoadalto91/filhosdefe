@@ -1,9 +1,7 @@
 ﻿import { useEffect, useState } from 'react'
-import { BookOpen, FileText, Download, ArrowLeft, Calendar } from 'lucide-react'
+import { BookOpen, FileText, ArrowLeft, Calendar, X, CheckCircle } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import api from '../api/axios'
-
-const apiBase = () => api.defaults.baseURL || '/api'
 import LoadingSpinner from '../components/LoadingSpinner'
 import Modal from '../components/Modal'
 
@@ -103,17 +101,53 @@ function PublicacoesTab() {
   )
 }
 
+/* ── PDF Viewer Modal ─────────────────────────────────────── */
+function DocViewerModal({ doc, onClose }) {
+  if (!doc) return null
+  return (
+    <div style={{ position:'fixed', inset:0, zIndex:200, display:'flex', flexDirection:'column', backgroundColor:'#1c1c2e' }}>
+      <div style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 16px', backgroundColor:'#2c2c3e', flexShrink:0 }}>
+        <button onClick={onClose}
+          style={{ display:'flex', alignItems:'center', justifyContent:'center', width:36, height:36, borderRadius:8, background:'rgba(255,255,255,0.08)', border:'none', cursor:'pointer', color:'#fff', flexShrink:0 }}>
+          <X size={18}/>
+        </button>
+        <span style={{ fontSize:14, fontWeight:600, color:'#fff', flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontFamily:"'Poppins',sans-serif" }}>
+          {doc.nome}
+        </span>
+      </div>
+      <iframe
+        src={doc.fileUrl}
+        title={doc.nome}
+        style={{ flex:1, width:'100%', border:'none', backgroundColor:'#fff' }}
+      />
+    </div>
+  )
+}
+
 /* ── Documentos tab ───────────────────────────────────────── */
 function DocumentosTab() {
   const [list,    setList]    = useState([])
   const [loading, setLoading] = useState(true)
+  const [viewing, setViewing] = useState(null)
 
-  useEffect(() => {
+  const load = () => {
     api.get('/documentos')
       .then(r => setList(Array.isArray(r.data) ? r.data : []))
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [])
+  }
+
+  useEffect(() => { load() }, [])
+
+  const openDoc = async (doc) => {
+    setViewing(doc)
+    if (!doc.lido) {
+      try {
+        await api.post(`/documentos/${doc.id}/leitura`)
+        setList(prev => prev.map(d => d.id === doc.id ? { ...d, lido: true } : d))
+      } catch {}
+    }
+  }
 
   if (loading) return <LoadingSpinner/>
   if (list.length === 0) return (
@@ -124,24 +158,32 @@ function DocumentosTab() {
   )
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-      {list.map(doc => (
-        <a key={doc.id} href={`${apiBase()}/documentos/${doc.id}/download`} target="_blank" rel="noopener noreferrer"
-          style={{ display:'flex', alignItems:'center', gap:14, backgroundColor:'#fff', borderRadius:10, border:'1px solid #e5e0d8', padding:'14px 16px', textDecoration:'none', boxShadow:'0 2px 8px rgba(0,0,0,0.04)', transition:'box-shadow 0.2s', cursor:'pointer' }}
-          onMouseEnter={e=>e.currentTarget.style.boxShadow='0 6px 20px rgba(0,0,0,0.1)'}
-          onMouseLeave={e=>e.currentTarget.style.boxShadow='0 2px 8px rgba(0,0,0,0.04)'}>
-          <div style={{ fontSize:32, flexShrink:0 }}>{EXT_ICON[doc.fileType] || '📁'}</div>
-          <div style={{ flex:1, minWidth:0 }}>
-            <div style={{ fontSize:14, fontWeight:700, color:'#2c2c3e', fontFamily:"'Poppins',sans-serif", overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{doc.nome}</div>
-            {doc.descricao && <div style={{ fontSize:12, color:'#6b7280', marginTop:2, fontFamily:"'Poppins',sans-serif" }}>{doc.descricao}</div>}
-            <div style={{ fontSize:11, color:'#9ca3af', marginTop:4, fontFamily:"'Poppins',sans-serif" }}>
-              {doc.fileType.toUpperCase()}{doc.tamanho ? ` · ${fmtSize(doc.tamanho)}` : ''} · {fmtDate(doc.createdAt)}
+    <>
+      <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+        {list.map(doc => (
+          <button key={doc.id} onClick={() => openDoc(doc)}
+            style={{ display:'flex', alignItems:'center', gap:14, width:'100%', textAlign:'left', backgroundColor:'#fff', borderRadius:10, border:`1px solid ${doc.lido ? '#d1fae5' : '#e5e0d8'}`, padding:'14px 16px', cursor:'pointer', boxShadow:'0 2px 8px rgba(0,0,0,0.04)', transition:'box-shadow 0.2s', fontFamily:"'Poppins',sans-serif" }}
+            onMouseEnter={e=>e.currentTarget.style.boxShadow='0 6px 20px rgba(0,0,0,0.1)'}
+            onMouseLeave={e=>e.currentTarget.style.boxShadow='0 2px 8px rgba(0,0,0,0.04)'}>
+            <div style={{ fontSize:32, flexShrink:0 }}>{EXT_ICON[doc.fileType] || '📁'}</div>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontSize:14, fontWeight:700, color:'#2c2c3e', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{doc.nome}</div>
+              {doc.descricao && <div style={{ fontSize:12, color:'#6b7280', marginTop:2 }}>{doc.descricao}</div>}
+              <div style={{ fontSize:11, color:'#9ca3af', marginTop:4 }}>
+                {doc.fileType.toUpperCase()}{doc.tamanho ? ` · ${fmtSize(doc.tamanho)}` : ''} · {fmtDate(doc.createdAt)}
+              </div>
             </div>
-          </div>
-          <Download size={18} style={{ color:'#c8972b', flexShrink:0 }}/>
-        </a>
-      ))}
-    </div>
+            {doc.lido && (
+              <div style={{ display:'flex', alignItems:'center', gap:4, flexShrink:0, color:'#16a34a', fontSize:11, fontWeight:600 }}>
+                <CheckCircle size={15}/>
+                <span>Lido</span>
+              </div>
+            )}
+          </button>
+        ))}
+      </div>
+      <DocViewerModal doc={viewing} onClose={() => setViewing(null)}/>
+    </>
   )
 }
 

@@ -8,11 +8,51 @@ import { sendPushToAll, isEnabled } from '../lib/sendPush.js'
 const router = Router()
 const prisma  = new PrismaClient()
 
-// GET / — público
-router.get('/', async (_req, res) => {
+// GET / — requer auth; retorna lista com lido + totalLeituras
+router.get('/', authenticate, async (req, res) => {
   try {
-    const list = await prisma.documento.findMany({ orderBy: { createdAt: 'desc' } })
-    return res.json(list)
+    const userId = req.user.id
+    const list = await prisma.documento.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        _count: { select: { leituras: true } },
+        leituras: { where: { userId }, select: { id: true } },
+      },
+    })
+    return res.json(list.map(({ leituras, _count, ...d }) => ({
+      ...d,
+      lido: leituras.length > 0,
+      totalLeituras: _count.leituras,
+    })))
+  } catch (err) { return res.status(500).json({ error: err.message }) }
+})
+
+// POST /:id/leitura — registra leitura do usuário autenticado
+router.post('/:id/leitura', authenticate, async (req, res) => {
+  try {
+    const documentoId = Number(req.params.id)
+    if (isNaN(documentoId)) return res.status(400).json({ error: 'ID inválido' })
+    const userId = req.user.id
+    await prisma.leituraDocumento.upsert({
+      where: { userId_documentoId: { userId, documentoId } },
+      create: { userId, documentoId },
+      update: {},
+    })
+    return res.json({ ok: true })
+  } catch (err) { return res.status(500).json({ error: err.message }) }
+})
+
+// GET /:id/leituras — admin: quem leu e quando
+router.get('/:id/leituras', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const documentoId = Number(req.params.id)
+    if (isNaN(documentoId)) return res.status(400).json({ error: 'ID inválido' })
+    const leituras = await prisma.leituraDocumento.findMany({
+      where: { documentoId },
+      include: { user: { select: { id: true, nome: true, email: true } } },
+      orderBy: { lidoEm: 'desc' },
+    })
+    return res.json(leituras)
   } catch (err) { return res.status(500).json({ error: err.message }) }
 })
 
@@ -39,8 +79,8 @@ router.post('/', authenticate, requireAdmin, uploadDocMiddleware, async (req, re
   } catch (err) { return res.status(500).json({ error: err.message }) }
 })
 
-// GET /:id/download — proxy com nome correto
-router.get('/:id/download', async (req, res) => {
+// GET /:id/download — somente admin
+router.get('/:id/download', authenticate, requireAdmin, async (req, res) => {
   try {
     const id = Number(req.params.id)
     if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' })
