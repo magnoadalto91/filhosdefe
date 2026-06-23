@@ -441,7 +441,7 @@ function DocumentosTab() {
                 style={{ display:'flex', alignItems:'center', gap:4, padding:'4px 8px', borderRadius:6, background:'none', border:'1px solid #e5e0d8', cursor:'pointer', color:'#6b7280', fontSize:11, fontWeight:600, fontFamily:"'Poppins',sans-serif", transition:'all 0.15s', whiteSpace:'nowrap' }}
                 onMouseEnter={e=>{e.currentTarget.style.borderColor='#c8972b';e.currentTarget.style.color='#c8972b'}}
                 onMouseLeave={e=>{e.currentTarget.style.borderColor='#e5e0d8';e.currentTarget.style.color='#6b7280'}}>
-                <Users size={12}/>{doc.totalLeituras ?? 0} acesso(s)
+                <Users size={12}/>{doc.totalAberturas ?? 0} acesso(s)
               </button>
               <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer"
                 style={{ display:'flex', padding:8, borderRadius:6, color:'#9ca3af', transition:'color 0.15s' }}
