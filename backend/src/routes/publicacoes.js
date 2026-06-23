@@ -14,7 +14,7 @@ router.get('/', async (_req, res) => {
     const list = await prisma.publicacao.findMany({
       where: { publicado: true },
       orderBy: { createdAt: 'desc' },
-      select: { id: true, titulo: true, capaUrl: true, createdAt: true },
+      select: { id: true, titulo: true, conteudo: true, capaUrl: true, createdAt: true },
     })
     return res.json(list)
   } catch (err) { return res.status(500).json({ error: err.message }) }
