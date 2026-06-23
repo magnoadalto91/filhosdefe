@@ -84,7 +84,12 @@ function PublicacoesTab() {
                 </div>
               )}
               <div style={{ flex:1, padding:'14px 16px' }}>
-                <div style={{ fontSize:15, fontWeight:700, color:'#2c2c3e', marginBottom:6 }}>{item.titulo}</div>
+                <div style={{ fontSize:15, fontWeight:700, color:'#2c2c3e', marginBottom:4 }}>{item.titulo}</div>
+                {item.conteudo && (
+                  <div style={{ fontSize:12, color:'#6b7280', marginBottom:6, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden', lineHeight:1.5 }}>
+                    {item.conteudo.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()}
+                  </div>
+                )}
                 <div style={{ display:'flex', alignItems:'center', gap:5, fontSize:12, color:'#9ca3af' }}>
                   <Calendar size={11}/>{fmtDate(item.createdAt)}
                 </div>
