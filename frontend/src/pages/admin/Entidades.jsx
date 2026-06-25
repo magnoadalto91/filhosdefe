@@ -101,11 +101,15 @@ function DetailModal({ entity, onClose }) {
     <Modal isOpen={!!entity} onClose={onClose} title={entity.nome}>
       {entity.fotoUrl && <img src={entity.fotoUrl} alt={entity.nome} style={{ width:'100%', borderRadius:8, marginBottom:16, objectFit:'cover', maxHeight:200, display:'block' }}/>}
       {entity.saudacao        && <p style={{ margin:'0 0 12px', padding:'10px 14px', borderRadius:6, backgroundColor:'rgba(200,151,43,0.08)', border:'1px solid rgba(200,151,43,0.2)', fontSize:14, fontStyle:'italic', color:'#c8972b' }}>"{entity.saudacao}"</p>}
-      {entity.diaSemana       && <p style={{ margin:'0 0 12px', fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Dia da semana: </span>{entity.diaSemana}</p>}
-      {entity.coresVelas      && <p style={{ margin:'0 0 12px', fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Velas: </span>{entity.coresVelas}</p>}
-      {entity.trono           && <p style={{ margin:'0 0 12px', fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Trono: </span>{entity.trono}</p>}
-      {entity.par             && <p style={{ margin:'0 0 12px', fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Par: </span>{entity.par}</p>}
-      {entity.elementoTrabalho && <p style={{ margin:'0 0 12px', fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Elemento de trabalho: </span>{entity.elementoTrabalho}</p>}
+      {(entity.coresVelas || entity.diaSemana || entity.trono || entity.par || entity.elementoTrabalho) && (
+        <div style={{ border:'1px solid #e5e0d8', borderRadius:8, padding:'12px 14px', marginBottom:12, display:'flex', flexDirection:'column', gap:8 }}>
+          {entity.coresVelas       && <p style={{ margin:0, fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Velas: </span>{entity.coresVelas}</p>}
+          {entity.diaSemana        && <p style={{ margin:0, fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Dia da semana: </span>{entity.diaSemana}</p>}
+          {entity.trono            && <p style={{ margin:0, fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Trono: </span>{entity.trono}</p>}
+          {entity.par              && <p style={{ margin:0, fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Par: </span>{entity.par}</p>}
+          {entity.elementoTrabalho && <p style={{ margin:0, fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Elemento de trabalho: </span>{entity.elementoTrabalho}</p>}
+        </div>
+      )}
       {entity.oferendas       && <div style={{ padding:'12px 14px', borderRadius:8, border:'1px solid rgba(200,151,43,0.45)', backgroundColor:'rgba(200,151,43,0.04)', marginBottom:12 }}>
         <p style={{ margin:'0 0 4px', fontSize:12, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.5px', color:'#6b7280' }}>Oferendas</p>
         <p style={{ margin:0, fontSize:14, color:'#2c2c3e', lineHeight:1.7, whiteSpace:'pre-wrap' }}>{entity.oferendas}</p>

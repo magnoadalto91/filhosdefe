@@ -71,34 +71,38 @@ function EntityModal({ entity, onClose }) {
           </div>
         </div>
       )}
-      {entity.diaSemana && (
-        <div style={{ marginBottom: 16 }}>
-          {secLabel('Dia da Semana')}
-          <div style={{ fontSize: 14, color: '#2c2c3e' }}>{entity.diaSemana}</div>
-        </div>
-      )}
-      {entity.coresVelas && (
-        <div style={{ marginBottom: 16 }}>
-          {secLabel('Cores das Velas')}
-          <div style={{ fontSize: 14, color: '#2c2c3e' }}>{entity.coresVelas}</div>
-        </div>
-      )}
-      {entity.trono && (
-        <div style={{ marginBottom: 16 }}>
-          {secLabel('Trono')}
-          <div style={{ fontSize: 14, color: '#2c2c3e' }}>{entity.trono}</div>
-        </div>
-      )}
-      {entity.par && (
-        <div style={{ marginBottom: 16 }}>
-          {secLabel('Quem é o par')}
-          <div style={{ fontSize: 14, color: '#2c2c3e' }}>{entity.par}</div>
-        </div>
-      )}
-      {entity.elementoTrabalho && (
-        <div style={{ marginBottom: 16 }}>
-          {secLabel('Elemento de Trabalho')}
-          <div style={{ fontSize: 14, color: '#2c2c3e' }}>{entity.elementoTrabalho}</div>
+      {(entity.coresVelas || entity.diaSemana || entity.trono || entity.par || entity.elementoTrabalho) && (
+        <div style={{ marginBottom: 16, padding: '14px 16px', borderRadius: 8, border: '1px solid #e5e0d8', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {entity.coresVelas && (
+            <div>
+              {secLabel('Cores das Velas')}
+              <div style={{ fontSize: 14, color: '#2c2c3e' }}>{entity.coresVelas}</div>
+            </div>
+          )}
+          {entity.diaSemana && (
+            <div>
+              {secLabel('Dia da Semana')}
+              <div style={{ fontSize: 14, color: '#2c2c3e' }}>{entity.diaSemana}</div>
+            </div>
+          )}
+          {entity.trono && (
+            <div>
+              {secLabel('Trono')}
+              <div style={{ fontSize: 14, color: '#2c2c3e' }}>{entity.trono}</div>
+            </div>
+          )}
+          {entity.par && (
+            <div>
+              {secLabel('Quem é o par')}
+              <div style={{ fontSize: 14, color: '#2c2c3e' }}>{entity.par}</div>
+            </div>
+          )}
+          {entity.elementoTrabalho && (
+            <div>
+              {secLabel('Elemento de Trabalho')}
+              <div style={{ fontSize: 14, color: '#2c2c3e' }}>{entity.elementoTrabalho}</div>
+            </div>
+          )}
         </div>
       )}
       {entity.oferendas && (
