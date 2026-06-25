@@ -57,7 +57,7 @@ function EntityForm({ form, setForm, error, preview, setPreview, fileRef }) {
       </div>
       <div style={{ marginBottom:16 }}>
         <label style={S.label}>Trono</label>
-        <input style={S.input} value={form.trono} onChange={e=>setForm(f=>({...f,trono:e.target.value}))} placeholder="Ex: Oxalá" onFocus={focus} onBlur={blur}/>
+        <input style={S.input} value={form.trono} onChange={e=>setForm(f=>({...f,trono:e.target.value}))} placeholder="Ex: Conhecimento" onFocus={focus} onBlur={blur}/>
       </div>
       <div style={{ marginBottom:16 }}>
         <label style={S.label}>Quem é o par</label>
@@ -65,7 +65,7 @@ function EntityForm({ form, setForm, error, preview, setPreview, fileRef }) {
       </div>
       <div style={{ marginBottom:16 }}>
         <label style={S.label}>Tipo de elemento de trabalho</label>
-        <input style={S.input} value={form.elementoTrabalho} onChange={e=>setForm(f=>({...f,elementoTrabalho:e.target.value}))} placeholder="Ex: Ferro, fogo, água..." onFocus={focus} onBlur={blur}/>
+        <input style={S.input} value={form.elementoTrabalho} onChange={e=>setForm(f=>({...f,elementoTrabalho:e.target.value}))} placeholder="Ex.: Mineral" onFocus={focus} onBlur={blur}/>
       </div>
       <div style={{ marginBottom:16 }}>
         <label style={S.label}>Oferendas</label>
