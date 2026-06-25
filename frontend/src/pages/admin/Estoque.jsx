@@ -271,19 +271,18 @@ export default function AdminEstoque() {
     <div style={S.page}>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <Link to="/admin" style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '8px 14px', borderRadius: 8, border: '1px solid #e5e0d8', backgroundColor: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600, color: '#6b7280', transition: 'all 0.15s' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = '#c8972b'; e.currentTarget.style.color = '#c8972b' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e0d8'; e.currentTarget.style.color = '#6b7280' }}
-          >
-            <ArrowLeft size={15} /> Painel principal
-          </Link>
-          <div>
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#2c2c3e' }}>Controle de Estoque</h1>
-            <p style={{ margin: 0, fontSize: 12, color: '#9ca3af' }}>{items.length} {items.length === 1 ? 'item cadastrado' : 'itens cadastrados'}</p>
+      <div style={{ marginBottom: 28 }}>
+        <Link to="/admin" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '8px 14px', borderRadius: 8, border: '1px solid #e5e0d8', backgroundColor: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600, color: '#6b7280', transition: 'all 0.15s', whiteSpace: 'nowrap', marginBottom: 16 }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = '#c8972b'; e.currentTarget.style.color = '#c8972b' }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e0d8'; e.currentTarget.style.color = '#6b7280' }}
+        >
+          <ArrowLeft size={15} /> Painel principal
+        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#2c2c3e', whiteSpace: 'nowrap' }}>Controle de Estoque</h1>
+            <span style={{ fontSize: 12, color: '#9ca3af', whiteSpace: 'nowrap' }}>{items.length} {items.length === 1 ? 'item' : 'itens'}</span>
           </div>
-        </div>
         <button
           onClick={() => setModal('new')}
           style={S.btnGold}
@@ -292,6 +291,7 @@ export default function AdminEstoque() {
         >
           <Plus size={15} /> Adicionar item
         </button>
+        </div>
       </div>
 
       {/* Em estoque */}
