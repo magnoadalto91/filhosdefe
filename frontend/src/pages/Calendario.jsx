@@ -126,7 +126,7 @@ function EntityDetailModal({ entity, onClose }) {
           )}
 
           {entity.historia && (
-            <div style={{ padding:'14px 16px', borderRadius:8, border:'1px solid rgba(200,151,43,0.45)', backgroundColor:'rgba(200,151,43,0.04)' }}>
+            <div>
               <SecLabel text="História"/>
               <p style={{ margin:0, fontSize:14, lineHeight:1.75, color:'#2c2c3e', whiteSpace:'pre-wrap' }}>{entity.historia}</p>
             </div>
