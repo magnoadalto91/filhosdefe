@@ -1,6 +1,6 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
-import { sendPushToAll } from '../lib/sendPush.js';
+import { sendPushToUser } from '../lib/sendPush.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -39,20 +39,50 @@ router.post('/giras-reminder', async (req, res) => {
       },
     });
 
+    // Usuários com push ativo
+    const subs = await prisma.pushSubscription.findMany({
+      select: { userId: true },
+      distinct: ['userId'],
+    });
+    const userIds = subs.map(s => s.userId);
+
     let sent = 0;
     for (const gira of giras) {
       const dataGira = new Date(gira.data);
+      const giraDate = gira.data.toISOString().slice(0, 10);
+
+      let title = null, baseBody = null;
 
       if (cfg.gira1Semana && sameDay(dataGira, em7)) {
-        await sendPushToAll('Gira em 1 semana!', `"${gira.titulo}" acontece em 7 dias. Prepare-se!`, { url: '/calendario' });
-        sent++;
+        title    = 'Gira em 1 semana!';
+        baseBody = `"${gira.titulo}" acontece em 7 dias. Prepare-se!`;
+      } else if (cfg.gira1Dia && sameDay(dataGira, em1)) {
+        title    = 'Gira amanhã!';
+        baseBody = `"${gira.titulo}" é amanhã. Não esqueça!`;
+      } else if (cfg.giraNoDia && sameDay(dataGira, hoje)) {
+        title    = 'Gira hoje!';
+        baseBody = `"${gira.titulo}" acontece hoje. Axé!`;
       }
-      if (cfg.gira1Dia && sameDay(dataGira, em1)) {
-        await sendPushToAll('Gira amanhã!', `"${gira.titulo}" é amanhã. Não esqueça!`, { url: '/calendario' });
-        sent++;
-      }
-      if (cfg.giraNoDia && sameDay(dataGira, hoje)) {
-        await sendPushToAll('Gira hoje!', `"${gira.titulo}" acontece hoje. Axé!`, { url: '/calendario' });
+
+      if (!title || !userIds.length) continue;
+
+      // Verifica quais usuários já responderam para esta gira
+      const presencas = await prisma.presencaGira.findMany({
+        where: { giraId: gira.id, userId: { in: userIds } },
+        select: { userId: true, dataRespondida: true },
+      });
+      const respondidoIds = new Set(
+        presencas
+          .filter(p => p.dataRespondida?.toISOString().slice(0, 10) === giraDate)
+          .map(p => p.userId)
+      );
+
+      for (const userId of userIds) {
+        const jaRespondeu = respondidoIds.has(userId);
+        const body = jaRespondeu
+          ? baseBody
+          : `${baseBody} Confirme sua presença no app!`;
+        await sendPushToUser(userId, title, body, { url: '/calendario' });
         sent++;
       }
     }

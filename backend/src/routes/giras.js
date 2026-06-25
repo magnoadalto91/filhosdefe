@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import { authenticate, requireAdmin } from '../middleware/auth.js';
 import { sendPushToAll, isEnabled } from '../lib/sendPush.js';
@@ -73,7 +74,7 @@ router.get('/presenca-pendente', authenticate, async (req, res) => {
   }
 });
 
-// GET /api/giras/:id - with all relations
+// GET /api/giras/:id - with all relations + minhaPresenca if authenticated
 router.get('/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id);
@@ -86,7 +87,18 @@ router.get('/:id', async (req, res) => {
 
     if (!gira) return res.status(404).json({ error: 'Gira not found' });
 
-    return res.json(gira);
+    let minhaPresenca = null;
+    const authHeader = req.headers.authorization;
+    if (authHeader?.startsWith('Bearer ')) {
+      try {
+        const payload = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET);
+        minhaPresenca = await prisma.presencaGira.findUnique({
+          where: { giraId_userId: { giraId: id, userId: payload.id } },
+        });
+      } catch {}
+    }
+
+    return res.json({ ...gira, minhaPresenca });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Internal server error' });

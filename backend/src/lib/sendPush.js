@@ -41,6 +41,36 @@ export async function sendPushToAll(title, body, data = {}) {
 }
 
 /**
+ * Envia push para um único usuário (por userId).
+ */
+export async function sendPushToUser(userId, title, body, data = {}) {
+  if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) return
+
+  const subs = await prisma.pushSubscription.findMany({ where: { userId } })
+  if (!subs.length) return
+
+  const payload = JSON.stringify({ title, body, ...data })
+
+  await Promise.allSettled(
+    subs.map(s =>
+      webpush.sendNotification(
+        { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
+        payload,
+      ).catch(async err => {
+        if (err.statusCode === 404 || err.statusCode === 410) {
+          await prisma.pushSubscription.delete({ where: { id: s.id } }).catch(() => {})
+          const remaining = await prisma.pushSubscription.count({ where: { userId: s.userId } }).catch(() => 1)
+          if (remaining === 0) {
+            await prisma.user.update({ where: { id: s.userId }, data: { pushPermissao: 'revogada' } }).catch(() => {})
+          }
+        }
+        throw err
+      })
+    )
+  )
+}
+
+/**
  * Verifica se um tipo de notificação está habilitado.
  */
 export async function isEnabled(field) {

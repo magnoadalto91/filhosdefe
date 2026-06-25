@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router'
 import { LogIn, User, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import PWAGuard from './PWAGuard'
-import PresencaModal from './PresencaModal'
 
 function UserMenu() {
   const { user, logout, isAdmin } = useAuth()
@@ -97,7 +96,6 @@ export default function Layout({ children }) {
         </PWAGuard>
       </main>
 
-      <PresencaModal />
 
     </div>
   )

@@ -1,9 +1,10 @@
 ﻿import { useEffect, useState } from 'react'
-import { ChevronLeft, ChevronRight, Calendar, Users, Music, FileText, Play, ArrowLeft } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar, Users, Music, FileText, Play, ArrowLeft, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import api from '../api/axios'
 import Modal from '../components/Modal'
 import LoadingSpinner from '../components/LoadingSpinner'
+import { useAuth } from '../contexts/AuthContext'
 
 // Converte ISO datetime para Date local sem aplicar offset de fuso horário
 // (evita que 2026-06-04T00:00:00Z vire 03/06 no Brasil UTC-3)
@@ -142,14 +143,23 @@ function MusicDetailModal({ music, onClose }) {
 
 /* ── Gira Detail Modal ───────────────────────────────────── */
 function GiraDetailModal({ giraId, onClose, onEntityClick, onMusicClick }) {
-  const [gira,    setGira]    = useState(null)
-  const [loading, setLoading] = useState(false)
+  const { isAuthenticated } = useAuth()
+  const [gira,          setGira]          = useState(null)
+  const [loading,       setLoading]       = useState(false)
+  const [minhaPresenca, setMinhaPresenca] = useState(null)
+  const [presencaStep,  setPresencaStep]  = useState('choice')  // 'choice' | 'recusa'
+  const [editando,      setEditando]      = useState(false)
+  const [justificativa, setJustificativa] = useState('')
+  const [presencaError, setPresencaError] = useState('')
+  const [submitting,    setSubmitting]    = useState(false)
 
   useEffect(() => {
-    if (!giraId) { setGira(null); return }
+    setGira(null); setMinhaPresenca(null); setPresencaStep('choice')
+    setEditando(false); setJustificativa(''); setPresencaError('')
+    if (!giraId) return
     setLoading(true)
     api.get(`/giras/${giraId}`)
-      .then(r => setGira(r.data))
+      .then(r => { setGira(r.data); setMinhaPresenca(r.data.minhaPresenca || null) })
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [giraId])
@@ -161,6 +171,28 @@ function GiraDetailModal({ giraId, onClose, onEntityClick, onMusicClick }) {
     ? parseUTC(gira.data).toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
     : ''
   const timeStr = gira ? fmtHora(gira.data) : ''
+
+  const giraDateStr = gira?.data?.slice(0, 10)
+  const respondido  = !!(minhaPresenca && minhaPresenca.dataRespondida?.slice(0, 10) === giraDateStr)
+  const concluida   = gira?.status === 'CONCLUIDA'
+
+  const showChoice = (!respondido || editando) && !concluida
+  const showStatus = respondido && !editando && !concluida
+
+  const handlePresenca = async (confirmado, just = '') => {
+    setSubmitting(true); setPresencaError('')
+    try {
+      const { data } = await api.post(`/giras/${giraId}/presenca`, { confirmado, justificativa: just })
+      setMinhaPresenca(data); setEditando(false); setPresencaStep('choice'); setJustificativa('')
+    } catch (err) {
+      setPresencaError(err.response?.data?.error || 'Erro ao salvar. Tente novamente.')
+    } finally { setSubmitting(false) }
+  }
+
+  const handleEnviarRecusa = () => {
+    if (!justificativa.trim()) { setPresencaError('Por favor, informe o motivo da ausência.'); return }
+    handlePresenca(false, justificativa.trim())
+  }
 
   return (
     <Modal isOpen={!!giraId} onClose={onClose} title={gira?.titulo || '...'}>
@@ -217,8 +249,118 @@ function GiraDetailModal({ giraId, onClose, onEntityClick, onMusicClick }) {
             </div>
           )}
 
-          {entidades.length===0 && musicas.length===0 && (
+          {entidades.length===0 && musicas.length===0 && !isAuthenticated && (
             <p style={{ margin:0, fontSize:13, color:'#9ca3af' }}>Nenhum vínculo cadastrado para esta gira.</p>
+          )}
+
+          {/* Seção de presença — só para usuários autenticados */}
+          {isAuthenticated && (
+            <div style={{ borderTop:'1px solid #e5e0d8', paddingTop:16 }}>
+              <SecLabel Icon={Calendar} text="Sua Presença"/>
+
+              {/* Status atual */}
+              {showStatus && (
+                <div>
+                  {minhaPresenca.confirmado ? (
+                    <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderRadius:8, backgroundColor:'#f0fdf4', border:'1px solid #bbf7d0', color:'#166534', fontSize:13, fontWeight:600, marginBottom:10 }}>
+                      <CheckCircle size={16}/> Você confirmou presença
+                    </div>
+                  ) : (
+                    <div style={{ marginBottom:10 }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderRadius:8, backgroundColor:'#fef2f2', border:'1px solid #fecaca', color:'#dc2626', fontSize:13, fontWeight:600, marginBottom: minhaPresenca.justificativa ? 6 : 0 }}>
+                        <XCircle size={16}/> Você informou ausência
+                      </div>
+                      {minhaPresenca.justificativa && (
+                        <p style={{ margin:0, fontSize:12, color:'#6b7280', fontStyle:'italic', paddingLeft:4 }}>"{minhaPresenca.justificativa}"</p>
+                      )}
+                    </div>
+                  )}
+                  <button
+                    onClick={() => { setEditando(true); setPresencaStep('choice'); setPresencaError('') }}
+                    style={{ fontSize:13, color:'#c8972b', background:'none', border:'none', cursor:'pointer', padding:0, fontWeight:600, fontFamily:"'Poppins',sans-serif" }}>
+                    Alterar resposta
+                  </button>
+                </div>
+              )}
+
+              {/* Botões de escolha */}
+              {showChoice && presencaStep === 'choice' && (
+                <div>
+                  {presencaError && (
+                    <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderRadius:8, backgroundColor:'#fef2f2', border:'1px solid #fecaca', fontSize:13, color:'#dc2626', marginBottom:12 }}>
+                      <AlertCircle size={15}/> {presencaError}
+                    </div>
+                  )}
+                  <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                    <button
+                      onClick={() => handlePresenca(true)} disabled={submitting}
+                      style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8, padding:'12px 16px', borderRadius:8, border:'none', cursor:'pointer', backgroundColor:'#059669', color:'#fff', fontSize:14, fontWeight:700, fontFamily:"'Poppins',sans-serif", opacity:submitting?0.7:1, transition:'background 0.15s' }}
+                      onMouseEnter={e=>{ if (!submitting) e.currentTarget.style.backgroundColor='#047857' }}
+                      onMouseLeave={e=>{ e.currentTarget.style.backgroundColor='#059669' }}>
+                      <CheckCircle size={17}/> {submitting ? 'Salvando...' : 'Confirmar presença'}
+                    </button>
+                    <button
+                      onClick={() => { setPresencaStep('recusa'); setPresencaError('') }} disabled={submitting}
+                      style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8, padding:'12px 16px', borderRadius:8, border:'1px solid #fecaca', cursor:'pointer', backgroundColor:'#fff', color:'#dc2626', fontSize:14, fontWeight:600, fontFamily:"'Poppins',sans-serif", opacity:submitting?0.7:1, transition:'all 0.15s' }}
+                      onMouseEnter={e=>{ if (!submitting) e.currentTarget.style.backgroundColor='#fef2f2' }}
+                      onMouseLeave={e=>{ e.currentTarget.style.backgroundColor='#fff' }}>
+                      <XCircle size={17}/> Não poderei ir
+                    </button>
+                    {editando && (
+                      <button
+                        onClick={() => { setEditando(false); setPresencaError('') }}
+                        style={{ fontSize:13, color:'#9ca3af', background:'none', border:'none', cursor:'pointer', padding:'2px 0', fontFamily:"'Poppins',sans-serif" }}>
+                        Cancelar
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Justificativa de recusa */}
+              {showChoice && presencaStep === 'recusa' && (
+                <div>
+                  <p style={{ margin:'0 0 10px', fontSize:13, color:'#6b7280', lineHeight:1.6 }}>
+                    Informe o motivo da ausência:
+                  </p>
+                  <textarea
+                    value={justificativa}
+                    onChange={e => { setJustificativa(e.target.value); setPresencaError('') }}
+                    placeholder="Descreva o motivo..."
+                    rows={3}
+                    style={{ width:'100%', padding:'10px 12px', border:'1px solid #e5e0d8', borderRadius:8, fontSize:14, fontFamily:"'Poppins',sans-serif", color:'#2c2c3e', outline:'none', resize:'vertical', boxSizing:'border-box', backgroundColor:'#f8f5f0', transition:'border-color 0.2s' }}
+                    onFocus={e => e.currentTarget.style.borderColor='#c8972b'}
+                    onBlur={e => e.currentTarget.style.borderColor='#e5e0d8'}
+                    autoFocus
+                  />
+                  {presencaError && (
+                    <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 12px', borderRadius:8, backgroundColor:'#fef2f2', border:'1px solid #fecaca', fontSize:13, color:'#dc2626', marginTop:8 }}>
+                      <AlertCircle size={15}/> {presencaError}
+                    </div>
+                  )}
+                  <div style={{ display:'flex', gap:8, marginTop:12 }}>
+                    <button
+                      onClick={() => { setPresencaStep('choice'); setPresencaError('') }} disabled={submitting}
+                      style={{ flex:1, padding:'10px', borderRadius:8, border:'1px solid #e5e0d8', background:'#fff', fontSize:13, fontWeight:600, color:'#6b7280', cursor:'pointer', fontFamily:"'Poppins',sans-serif", transition:'all 0.15s' }}
+                      onMouseEnter={e=>{e.currentTarget.style.borderColor='#2c2c3e';e.currentTarget.style.color='#2c2c3e'}}
+                      onMouseLeave={e=>{e.currentTarget.style.borderColor='#e5e0d8';e.currentTarget.style.color='#6b7280'}}>
+                      Voltar
+                    </button>
+                    <button
+                      onClick={handleEnviarRecusa} disabled={submitting}
+                      style={{ flex:2, padding:'10px', borderRadius:8, border:'none', backgroundColor:'#dc2626', color:'#fff', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:"'Poppins',sans-serif", opacity:submitting?0.7:1, transition:'background 0.15s' }}
+                      onMouseEnter={e=>{ if (!submitting) e.currentTarget.style.backgroundColor='#b91c1c' }}
+                      onMouseLeave={e=>{ e.currentTarget.style.backgroundColor='#dc2626' }}>
+                      {submitting ? 'Salvando...' : 'Enviar justificativa'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {concluida && (
+                <p style={{ margin:0, fontSize:13, color:'#9ca3af' }}>Esta gira já foi concluída.</p>
+              )}
+            </div>
           )}
         </div>
       ) : null}
