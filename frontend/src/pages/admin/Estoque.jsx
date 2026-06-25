@@ -278,9 +278,8 @@ export default function AdminEstoque() {
         >
           <ArrowLeft size={15} /> Painel principal
         </Link>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, justifyContent: 'center' }}>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#2c2c3e', whiteSpace: 'nowrap' }}>Controle de Estoque</h1>
-          <span style={{ fontSize: 12, color: '#9ca3af', whiteSpace: 'nowrap' }}>{items.length} {items.length === 1 ? 'item' : 'itens'}</span>
+        <div style={{ textAlign: 'center' }}>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#2c2c3e' }}>Controle de Estoque</h1>
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
           <button
