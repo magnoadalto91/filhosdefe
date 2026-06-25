@@ -45,7 +45,7 @@ router.get('/:id', async (req, res) => {
 // POST /api/entidades - admin only
 router.post('/', authenticate, requireAdmin, uploadMiddleware, async (req, res) => {
   try {
-    const { nome, historia, saudacao, coresVelas, diaSemana, oferendas } = req.body;
+    const { nome, historia, saudacao, coresVelas, diaSemana, oferendas, trono, par, elementoTrabalho } = req.body;
 
     if (!nome) {
       return res.status(400).json({ error: 'nome is required' });
@@ -57,7 +57,7 @@ router.post('/', authenticate, requireAdmin, uploadMiddleware, async (req, res) 
     }
 
     const entidade = await prisma.entidade.create({
-      data: { nome, historia: historia || '', saudacao: saudacao || '', coresVelas: coresVelas || '', diaSemana: diaSemana || null, oferendas: oferendas || null, fotoUrl },
+      data: { nome, historia: historia || '', saudacao: saudacao || '', coresVelas: coresVelas || '', diaSemana: diaSemana || null, oferendas: oferendas || null, trono: trono || null, par: par || null, elementoTrabalho: elementoTrabalho || null, fotoUrl },
     });
 
     if (await isEnabled('novaEntidade')) {
@@ -79,15 +79,18 @@ router.put('/:id', authenticate, requireAdmin, uploadMiddleware, async (req, res
     const existing = await prisma.entidade.findUnique({ where: { id } });
     if (!existing) return res.status(404).json({ error: 'Entidade not found' });
 
-    const { nome, historia, saudacao, coresVelas, diaSemana, oferendas } = req.body;
+    const { nome, historia, saudacao, coresVelas, diaSemana, oferendas, trono, par, elementoTrabalho } = req.body;
     const data = {};
 
-    if (nome      !== undefined) data.nome      = nome;
-    if (historia  !== undefined) data.historia  = historia;
-    if (saudacao  !== undefined) data.saudacao  = saudacao;
-    if (coresVelas !== undefined) data.coresVelas = coresVelas;
-    if (diaSemana !== undefined) data.diaSemana = diaSemana || null;
-    if (oferendas !== undefined) data.oferendas = oferendas || null;
+    if (nome             !== undefined) data.nome             = nome;
+    if (historia         !== undefined) data.historia         = historia;
+    if (saudacao         !== undefined) data.saudacao         = saudacao;
+    if (coresVelas       !== undefined) data.coresVelas       = coresVelas;
+    if (diaSemana        !== undefined) data.diaSemana        = diaSemana || null;
+    if (oferendas        !== undefined) data.oferendas        = oferendas || null;
+    if (trono            !== undefined) data.trono            = trono || null;
+    if (par              !== undefined) data.par              = par || null;
+    if (elementoTrabalho !== undefined) data.elementoTrabalho = elementoTrabalho || null;
 
     if (req.file) {
       data.fotoUrl = await uploadToCloudinary(req.file.buffer, 'filhosdefe/entidades');

@@ -16,7 +16,7 @@ const S = {
 
 const DIAS_SEMANA = ['Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado','Domingo']
 
-const emptyForm = { nome:'', historia:'', saudacao:'', coresVelas:'', diaSemana:'', oferendas:'' }
+const emptyForm = { nome:'', historia:'', saudacao:'', coresVelas:'', diaSemana:'', trono:'', par:'', elementoTrabalho:'', oferendas:'' }
 
 function EntityForm({ form, setForm, error, preview, setPreview, fileRef }) {
   const inputRef = useRef()
@@ -56,12 +56,24 @@ function EntityForm({ form, setForm, error, preview, setPreview, fileRef }) {
         </select>
       </div>
       <div style={{ marginBottom:16 }}>
-        <label style={S.label}>História</label>
-        <textarea style={{...S.input,resize:'vertical',minHeight:100}} value={form.historia} onChange={e=>setForm(f=>({...f,historia:e.target.value}))} placeholder="História da entidade..." onFocus={focus} onBlur={blur}/>
+        <label style={S.label}>Trono</label>
+        <input style={S.input} value={form.trono} onChange={e=>setForm(f=>({...f,trono:e.target.value}))} placeholder="Ex: Oxalá" onFocus={focus} onBlur={blur}/>
       </div>
-      <div>
+      <div style={{ marginBottom:16 }}>
+        <label style={S.label}>Quem é o par</label>
+        <input style={S.input} value={form.par} onChange={e=>setForm(f=>({...f,par:e.target.value}))} placeholder="Ex: Iemanjá" onFocus={focus} onBlur={blur}/>
+      </div>
+      <div style={{ marginBottom:16 }}>
+        <label style={S.label}>Tipo de elemento de trabalho</label>
+        <input style={S.input} value={form.elementoTrabalho} onChange={e=>setForm(f=>({...f,elementoTrabalho:e.target.value}))} placeholder="Ex: Ferro, fogo, água..." onFocus={focus} onBlur={blur}/>
+      </div>
+      <div style={{ marginBottom:16 }}>
         <label style={S.label}>Oferendas</label>
         <textarea style={{...S.input,resize:'vertical',minHeight:100}} value={form.oferendas} onChange={e=>setForm(f=>({...f,oferendas:e.target.value}))} placeholder="Dicas e ensinamentos sobre as oferendas..." onFocus={focus} onBlur={blur}/>
+      </div>
+      <div>
+        <label style={S.label}>História</label>
+        <textarea style={{...S.input,resize:'vertical',minHeight:100}} value={form.historia} onChange={e=>setForm(f=>({...f,historia:e.target.value}))} placeholder="História da entidade..." onFocus={focus} onBlur={blur}/>
       </div>
     </div>
   )
@@ -88,13 +100,19 @@ function DetailModal({ entity, onClose }) {
   return (
     <Modal isOpen={!!entity} onClose={onClose} title={entity.nome}>
       {entity.fotoUrl && <img src={entity.fotoUrl} alt={entity.nome} style={{ width:'100%', borderRadius:8, marginBottom:16, objectFit:'cover', maxHeight:200, display:'block' }}/>}
-      {entity.saudacao   && <p style={{ margin:'0 0 12px', padding:'10px 14px', borderRadius:6, backgroundColor:'rgba(200,151,43,0.08)', border:'1px solid rgba(200,151,43,0.2)', fontSize:14, fontStyle:'italic', color:'#c8972b' }}>"{entity.saudacao}"</p>}
-      {entity.diaSemana  && <p style={{ margin:'0 0 12px', fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Dia da semana: </span>{entity.diaSemana}</p>}
-      {entity.coresVelas && <p style={{ margin:'0 0 12px', fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Velas: </span>{entity.coresVelas}</p>}
-      {entity.historia   && <p style={{ margin:'0 0 16px', fontSize:14, color:'#2c2c3e', lineHeight:1.7, whiteSpace:'pre-wrap' }}>{entity.historia}</p>}
-      {entity.oferendas  && <>
+      {entity.saudacao        && <p style={{ margin:'0 0 12px', padding:'10px 14px', borderRadius:6, backgroundColor:'rgba(200,151,43,0.08)', border:'1px solid rgba(200,151,43,0.2)', fontSize:14, fontStyle:'italic', color:'#c8972b' }}>"{entity.saudacao}"</p>}
+      {entity.diaSemana       && <p style={{ margin:'0 0 12px', fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Dia da semana: </span>{entity.diaSemana}</p>}
+      {entity.coresVelas      && <p style={{ margin:'0 0 12px', fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Velas: </span>{entity.coresVelas}</p>}
+      {entity.trono           && <p style={{ margin:'0 0 12px', fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Trono: </span>{entity.trono}</p>}
+      {entity.par             && <p style={{ margin:'0 0 12px', fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Par: </span>{entity.par}</p>}
+      {entity.elementoTrabalho && <p style={{ margin:'0 0 12px', fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Elemento de trabalho: </span>{entity.elementoTrabalho}</p>}
+      {entity.oferendas       && <>
         <p style={{ margin:'0 0 4px', fontSize:12, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.5px', color:'#6b7280' }}>Oferendas</p>
         <p style={{ margin:'0 0 16px', fontSize:14, color:'#2c2c3e', lineHeight:1.7, whiteSpace:'pre-wrap' }}>{entity.oferendas}</p>
+      </>}
+      {entity.historia        && <>
+        <p style={{ margin:'0 0 4px', fontSize:12, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.5px', color:'#6b7280' }}>História</p>
+        <p style={{ margin:'0 0 16px', fontSize:14, color:'#2c2c3e', lineHeight:1.7, whiteSpace:'pre-wrap' }}>{entity.historia}</p>
       </>}
       {loading ? <LoadingSpinner/> : <>
         {musicas.length>0 && (
@@ -143,7 +161,7 @@ export default function AdminEntidades() {
     setEditTarget(null); setForm(emptyForm); setPreview(''); fileRef.current=null; setFormError(''); setModalOpen(true)
   }
   const openEdit = e => {
-    setEditTarget(e); setForm({nome:e.nome||'',historia:e.historia||'',saudacao:e.saudacao||'',coresVelas:e.coresVelas||'',diaSemana:e.diaSemana||'',oferendas:e.oferendas||''})
+    setEditTarget(e); setForm({nome:e.nome||'',historia:e.historia||'',saudacao:e.saudacao||'',coresVelas:e.coresVelas||'',diaSemana:e.diaSemana||'',trono:e.trono||'',par:e.par||'',elementoTrabalho:e.elementoTrabalho||'',oferendas:e.oferendas||''})
     setPreview(e.fotoUrl||''); fileRef.current=null; setFormError(''); setModalOpen(true)
   }
 
@@ -153,11 +171,14 @@ export default function AdminEntidades() {
     try {
       const fd = new FormData()
       fd.append('nome', form.nome.trim())
-      fd.append('historia', form.historia.trim())
       fd.append('saudacao', form.saudacao.trim())
       fd.append('coresVelas', form.coresVelas.trim())
       fd.append('diaSemana', form.diaSemana || '')
+      fd.append('trono', form.trono.trim())
+      fd.append('par', form.par.trim())
+      fd.append('elementoTrabalho', form.elementoTrabalho.trim())
       fd.append('oferendas', form.oferendas.trim())
+      fd.append('historia', form.historia.trim())
       if (fileRef.current) fd.append('foto', fileRef.current)
 
       if (editTarget) {

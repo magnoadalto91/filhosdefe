@@ -104,6 +104,27 @@ function EntityDetailModal({ entity, onClose }) {
             </div>
           )}
 
+          {entity.trono && (
+            <div style={secBlock}>
+              <SecLabel text="Trono"/>
+              <div style={{ fontSize:14, color:'#2c2c3e' }}>{entity.trono}</div>
+            </div>
+          )}
+
+          {entity.par && (
+            <div style={secBlock}>
+              <SecLabel text="Quem é o par"/>
+              <div style={{ fontSize:14, color:'#2c2c3e' }}>{entity.par}</div>
+            </div>
+          )}
+
+          {entity.elementoTrabalho && (
+            <div style={secBlock}>
+              <SecLabel text="Elemento de Trabalho"/>
+              <div style={{ fontSize:14, color:'#2c2c3e' }}>{entity.elementoTrabalho}</div>
+            </div>
+          )}
+
           {entity.historia && (
             <div>
               <SecLabel text="História"/>

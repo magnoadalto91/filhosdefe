@@ -83,16 +83,34 @@ function EntityModal({ entity, onClose }) {
           <div style={{ fontSize: 14, color: '#2c2c3e' }}>{entity.coresVelas}</div>
         </div>
       )}
-      {entity.historia && (
+      {entity.trono && (
         <div style={{ marginBottom: 16 }}>
-          {secLabel('História')}
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{entity.historia}</p>
+          {secLabel('Trono')}
+          <div style={{ fontSize: 14, color: '#2c2c3e' }}>{entity.trono}</div>
+        </div>
+      )}
+      {entity.par && (
+        <div style={{ marginBottom: 16 }}>
+          {secLabel('Quem é o par')}
+          <div style={{ fontSize: 14, color: '#2c2c3e' }}>{entity.par}</div>
+        </div>
+      )}
+      {entity.elementoTrabalho && (
+        <div style={{ marginBottom: 16 }}>
+          {secLabel('Elemento de Trabalho')}
+          <div style={{ fontSize: 14, color: '#2c2c3e' }}>{entity.elementoTrabalho}</div>
         </div>
       )}
       {entity.oferendas && (
-        <div>
+        <div style={{ marginBottom: 16 }}>
           {secLabel('Oferendas')}
           <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{entity.oferendas}</p>
+        </div>
+      )}
+      {entity.historia && (
+        <div>
+          {secLabel('História')}
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{entity.historia}</p>
         </div>
       )}
     </Modal>

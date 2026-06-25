@@ -127,19 +127,22 @@ model Erva {
 }
 
 model Entidade {
-  id         Int              @id @default(autoincrement())
-  nome       String
-  historia   String
-  saudacao   String
-  coresVelas String
-  diaSemana  String?
-  oferendas  String?
-  fotoUrl    String?
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
-  musicas    EntidadeMusica[]
-  ervas      EntidadeErva[]
-  giras      GiraEntidade[]
+  id               Int              @id @default(autoincrement())
+  nome             String
+  historia         String
+  saudacao         String
+  coresVelas       String
+  diaSemana        String?
+  oferendas        String?
+  trono            String?
+  par              String?
+  elementoTrabalho String?
+  fotoUrl          String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  musicas          EntidadeMusica[]
+  ervas            EntidadeErva[]
+  giras            GiraEntidade[]
 }
 
 model Rotina {
