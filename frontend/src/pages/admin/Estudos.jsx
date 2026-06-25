@@ -390,7 +390,7 @@ function DocumentosTab() {
             <div style={{ display:'flex', gap:8, alignItems:'center' }}>
               <div style={{ flex:1, padding:'10px 14px', border:'1px solid #e5e0d8', borderRadius:6, fontSize:13, color: file ? '#2c2c3e' : '#9ca3af', backgroundColor:'#fff', cursor:'pointer', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}
                 onClick={()=>fileRef.current?.click()}>
-                {file ? file.name : 'Clique para selecionar (PDF, Word, Excel...)'}
+                {file ? file.name : 'Clique para selecionar (PDF ou imagem)'}
               </div>
               <button onClick={()=>fileRef.current?.click()} style={{ display:'flex', alignItems:'center', gap:6, padding:'10px 14px', borderRadius:6, border:'1px solid #e5e0d8', fontSize:13, fontWeight:600, color:'#6b7280', backgroundColor:'#fff', cursor:'pointer', fontFamily:"'Poppins',sans-serif", flexShrink:0, transition:'all 0.15s' }}
                 onMouseEnter={e=>{e.currentTarget.style.borderColor='#c8972b';e.currentTarget.style.color='#c8972b'}}
@@ -398,7 +398,7 @@ function DocumentosTab() {
                 <FileUp size={14}/>
               </button>
             </div>
-            <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" style={{ display:'none' }} onChange={e=>setFile(e.target.files[0]||null)}/>
+            <input ref={fileRef} type="file" accept=".pdf,image/*" style={{ display:'none' }} onChange={e=>setFile(e.target.files[0]||null)}/>
           </div>
           <div style={{ display:'flex', justifyContent:'flex-end' }}>
             <button onClick={handleUpload} disabled={uploading} style={{...S.btnPrimary, opacity:uploading?0.7:1, display:'flex', alignItems:'center', gap:8}}
