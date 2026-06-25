@@ -278,19 +278,19 @@ export default function AdminEstoque() {
         >
           <ArrowLeft size={15} /> Painel principal
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#2c2c3e', whiteSpace: 'nowrap' }}>Controle de Estoque</h1>
-            <span style={{ fontSize: 12, color: '#9ca3af', whiteSpace: 'nowrap' }}>{items.length} {items.length === 1 ? 'item' : 'itens'}</span>
-          </div>
-        <button
-          onClick={() => setModal('new')}
-          style={S.btnGold}
-          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#a67a20'}
-          onMouseLeave={e => e.currentTarget.style.backgroundColor = '#c8972b'}
-        >
-          <Plus size={15} /> Adicionar item
-        </button>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, justifyContent: 'center' }}>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#2c2c3e', whiteSpace: 'nowrap' }}>Controle de Estoque</h1>
+          <span style={{ fontSize: 12, color: '#9ca3af', whiteSpace: 'nowrap' }}>{items.length} {items.length === 1 ? 'item' : 'itens'}</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
+          <button
+            onClick={() => setModal('new')}
+            style={S.btnGold}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#a67a20'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#c8972b'}
+          >
+            <Plus size={15} /> Adicionar item
+          </button>
         </div>
       </div>
 
