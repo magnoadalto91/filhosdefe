@@ -102,13 +102,13 @@ function EntityModal({ entity, onClose }) {
         </div>
       )}
       {entity.oferendas && (
-        <div style={{ marginBottom: 16 }}>
+        <div style={{ marginBottom: 16, padding: '14px 16px', borderRadius: 8, border: '1px solid rgba(200,151,43,0.45)', backgroundColor: 'rgba(200,151,43,0.04)' }}>
           {secLabel('Oferendas')}
           <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{entity.oferendas}</p>
         </div>
       )}
       {entity.historia && (
-        <div>
+        <div style={{ padding: '14px 16px', borderRadius: 8, border: '1px solid rgba(200,151,43,0.45)', backgroundColor: 'rgba(200,151,43,0.04)' }}>
           {secLabel('História')}
           <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: '#2c2c3e', whiteSpace: 'pre-wrap' }}>{entity.historia}</p>
         </div>

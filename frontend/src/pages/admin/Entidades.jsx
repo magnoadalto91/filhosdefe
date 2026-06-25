@@ -106,14 +106,14 @@ function DetailModal({ entity, onClose }) {
       {entity.trono           && <p style={{ margin:'0 0 12px', fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Trono: </span>{entity.trono}</p>}
       {entity.par             && <p style={{ margin:'0 0 12px', fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Par: </span>{entity.par}</p>}
       {entity.elementoTrabalho && <p style={{ margin:'0 0 12px', fontSize:14, color:'#2c2c3e' }}><span style={{ color:'#6b7280' }}>Elemento de trabalho: </span>{entity.elementoTrabalho}</p>}
-      {entity.oferendas       && <>
+      {entity.oferendas       && <div style={{ padding:'12px 14px', borderRadius:8, border:'1px solid rgba(200,151,43,0.45)', backgroundColor:'rgba(200,151,43,0.04)', marginBottom:12 }}>
         <p style={{ margin:'0 0 4px', fontSize:12, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.5px', color:'#6b7280' }}>Oferendas</p>
-        <p style={{ margin:'0 0 16px', fontSize:14, color:'#2c2c3e', lineHeight:1.7, whiteSpace:'pre-wrap' }}>{entity.oferendas}</p>
-      </>}
-      {entity.historia        && <>
+        <p style={{ margin:0, fontSize:14, color:'#2c2c3e', lineHeight:1.7, whiteSpace:'pre-wrap' }}>{entity.oferendas}</p>
+      </div>}
+      {entity.historia        && <div style={{ padding:'12px 14px', borderRadius:8, border:'1px solid rgba(200,151,43,0.45)', backgroundColor:'rgba(200,151,43,0.04)', marginBottom:16 }}>
         <p style={{ margin:'0 0 4px', fontSize:12, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.5px', color:'#6b7280' }}>História</p>
-        <p style={{ margin:'0 0 16px', fontSize:14, color:'#2c2c3e', lineHeight:1.7, whiteSpace:'pre-wrap' }}>{entity.historia}</p>
-      </>}
+        <p style={{ margin:0, fontSize:14, color:'#2c2c3e', lineHeight:1.7, whiteSpace:'pre-wrap' }}>{entity.historia}</p>
+      </div>}
       {loading ? <LoadingSpinner/> : <>
         {musicas.length>0 && (
           <div style={{ marginBottom:12 }}>
