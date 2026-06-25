@@ -1,4 +1,4 @@
-const VERSION = '2'
+const VERSION = '__BUILD_TIME__'
 
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', event => event.waitUntil(self.clients.claim()))
