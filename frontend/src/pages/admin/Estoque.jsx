@@ -150,58 +150,69 @@ function ItemCard({ item, onEdit, onDelete, onToggleLista, selected, onToggleSel
   }
 
   return (
-    <div style={{ ...S.card, border: selected ? '2px solid #c8972b' : '1px solid #e5e0d8', backgroundColor: selected ? '#fef9f0' : '#fff' }}>
-      <input type="checkbox" checked={!!selected} onChange={()=>onToggleSelect?.(item.id)} style={{ cursor:'pointer', accentColor:'#c8972b', flexShrink:0, width:16, height:16 }}/>
-      {/* Foto */}
-      {item.fotoUrl
-        ? <img src={item.fotoUrl} alt={item.nome} style={{ width: 56, height: 56, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />
-        : <PhotoPlaceholder />
-      }
+    <div style={{ backgroundColor: selected ? '#fef9f0' : '#fff', borderRadius: 12, border: selected ? '2px solid #c8972b' : '1px solid #e5e0d8', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', overflow: 'hidden', fontFamily: "'Poppins', sans-serif" }}>
 
-      {/* Info */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: '#2c2c3e', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.nome}</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 7 }}>
-          <button style={S.qtyBtn} onClick={() => handleQtyChange(Math.max(0, qtd - 1))}><Minus size={13} color="#6b7280"/></button>
-          <span style={{ fontSize: 14, fontWeight: 700, color: '#2c2c3e', minWidth: 28, textAlign: 'center' }}>{qtd}</span>
-          <button style={S.qtyBtn} onClick={() => handleQtyChange(qtd + 1)}><Plus size={13} color="#6b7280"/></button>
-          {savingQtd && <span style={{ fontSize: 11, color: '#9ca3af' }}>salvando...</span>}
+      {/* Cabeçalho: checkbox + foto + nome */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px 12px' }}>
+        <input type="checkbox" checked={!!selected} onChange={() => onToggleSelect?.(item.id)}
+          style={{ cursor: 'pointer', accentColor: '#c8972b', flexShrink: 0, width: 17, height: 17 }}/>
+        {item.fotoUrl
+          ? <img src={item.fotoUrl} alt={item.nome} style={{ width: 54, height: 54, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }}/>
+          : <div style={{ width: 54, height: 54, borderRadius: 10, backgroundColor: 'rgba(200,151,43,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Package size={22} color="#d1c4b0"/>
+            </div>
+        }
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#2c2c3e', lineHeight: 1.35, wordBreak: 'break-word' }}>{item.nome}</div>
+          {savingQtd && <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 2 }}>salvando...</div>}
         </div>
       </div>
 
-      {/* Ações */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
+      {/* Controle de quantidade */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20, padding: '10px 16px', backgroundColor: '#f8f5f0', borderTop: '1px solid #f0ece5', borderBottom: '1px solid #f0ece5' }}>
         <button
-          onClick={handleToggle}
-          disabled={loadingLista}
-          title={item.precisaRepor ? 'Marcar como reposto' : 'Adicionar à lista de compras'}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px',
-            borderRadius: 7, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600,
-            fontFamily: "'Poppins', sans-serif", transition: 'all 0.15s',
-            backgroundColor: item.precisaRepor ? 'rgba(22,163,74,0.1)' : 'rgba(200,151,43,0.1)',
-            color: item.precisaRepor ? '#16a34a' : '#c8972b',
-            opacity: loadingLista ? 0.6 : 1,
-          }}
-        >
-          {item.precisaRepor ? <><Check size={13}/> Reposto</> : <><ShoppingCart size={13}/> Lista de compras</>}
+          onClick={() => handleQtyChange(Math.max(0, qtd - 1))}
+          style={{ width: 38, height: 38, borderRadius: 8, border: '1px solid #e5e0d8', backgroundColor: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = '#c8972b'; e.currentTarget.style.backgroundColor = 'rgba(200,151,43,0.06)' }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e0d8'; e.currentTarget.style.backgroundColor = '#fff' }}>
+          <Minus size={16} color="#6b7280"/>
         </button>
-        <div style={{ display: 'flex', gap: 6 }}>
-          <button onClick={() => onEdit(item)} title="Editar"
-            style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '5px 10px', borderRadius: 6, border: '1px solid #e5e0d8', backgroundColor: '#fff', cursor: 'pointer', fontSize: 12, color: '#6b7280', transition: 'all 0.15s' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = '#c8972b'; e.currentTarget.style.color = '#c8972b' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e0d8'; e.currentTarget.style.color = '#6b7280' }}
-          >
-            <Pencil size={12}/> Editar
-          </button>
-          <button onClick={() => onDelete(item)} title="Excluir"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '5px 10px', borderRadius: 6, border: '1px solid #fecaca', backgroundColor: '#fff', cursor: 'pointer', color: '#dc2626', transition: 'all 0.15s' }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fef2f2'}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#fff'}
-          >
-            <Trash2 size={13}/>
-          </button>
-        </div>
+        <span style={{ fontSize: 22, fontWeight: 800, color: '#2c2c3e', minWidth: 40, textAlign: 'center' }}>{qtd}</span>
+        <button
+          onClick={() => handleQtyChange(qtd + 1)}
+          style={{ width: 38, height: 38, borderRadius: 8, border: '1px solid #e5e0d8', backgroundColor: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = '#c8972b'; e.currentTarget.style.backgroundColor = 'rgba(200,151,43,0.06)' }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e0d8'; e.currentTarget.style.backgroundColor = '#fff' }}>
+          <Plus size={16} color="#6b7280"/>
+        </button>
+      </div>
+
+      {/* Ações */}
+      <div style={{ display: 'flex', gap: 8, padding: '10px 14px 14px' }}>
+        <button
+          onClick={handleToggle} disabled={loadingLista}
+          style={{
+            flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+            padding: '10px 12px', borderRadius: 8, border: 'none', cursor: 'pointer',
+            fontSize: 13, fontWeight: 700, fontFamily: "'Poppins', sans-serif",
+            transition: 'all 0.15s', opacity: loadingLista ? 0.6 : 1,
+            backgroundColor: item.precisaRepor ? 'rgba(22,163,74,0.12)' : 'rgba(200,151,43,0.12)',
+            color: item.precisaRepor ? '#16a34a' : '#c8972b',
+          }}>
+          {item.precisaRepor ? <><Check size={15}/> Marcar reposto</> : <><ShoppingCart size={15}/> Precisa repor</>}
+        </button>
+        <button onClick={() => onEdit(item)}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '10px 14px', borderRadius: 8, border: '1px solid #e5e0d8', backgroundColor: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: '#6b7280', transition: 'all 0.15s', flexShrink: 0, fontFamily: "'Poppins', sans-serif" }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = '#c8972b'; e.currentTarget.style.color = '#c8972b' }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e0d8'; e.currentTarget.style.color = '#6b7280' }}>
+          <Pencil size={14}/> Editar
+        </button>
+        <button onClick={() => onDelete(item)}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px 12px', borderRadius: 8, border: '1px solid #fecaca', backgroundColor: '#fff', cursor: 'pointer', color: '#dc2626', transition: 'all 0.15s', flexShrink: 0 }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fef2f2'}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = '#fff'}>
+          <Trash2 size={15}/>
+        </button>
       </div>
     </div>
   )
