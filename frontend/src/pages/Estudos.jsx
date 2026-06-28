@@ -1,4 +1,10 @@
 import { useEffect, useState, useCallback } from 'react'
+
+const API_BASE = (() => {
+  let b = import.meta.env.VITE_API_URL || '/api'
+  if (b && !b.startsWith('http') && !b.startsWith('/')) b = 'https://' + b
+  return b
+})()
 import { BookOpen, FileText, ArrowLeft, Calendar, X, ChevronLeft, ChevronRight, Download } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { Document, Page, pdfjs } from 'react-pdf'
@@ -21,34 +27,9 @@ const fmtDate  = iso => new Date(iso).toLocaleDateString('pt-BR', { day:'2-digit
 
 /* ── Publicação modal ─────────────────────────────────────── */
 function PubModal({ pub, onClose }) {
-  const [downloading, setDownloading] = useState(false)
   if (!pub) return null
-
   const Icon = pub.arquivoType === 'pdf' ? FileText : Download
-
-  // fetch + blob URL garante download com nome correto em qualquer contexto PWA/WebView
-  // (o atributo "download" não funciona para URLs cross-origin)
-  const handleDownload = async () => {
-    if (downloading) return
-    setDownloading(true)
-    try {
-      const res = await fetch(pub.arquivoUrl)
-      if (!res.ok) throw new Error('fetch failed')
-      const blob = await res.blob()
-      const objUrl = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = objUrl
-      a.download = pub.arquivoNome || 'arquivo'
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      setTimeout(() => URL.revokeObjectURL(objUrl), 60000)
-    } catch {
-      window.open(pub.arquivoUrl, '_blank')
-    } finally {
-      setDownloading(false)
-    }
-  }
+  const downloadUrl = `${API_BASE}/publicacoes/${pub.id}/arquivo`
 
   return (
     <Modal isOpen={!!pub} onClose={onClose} title={pub.titulo}>
@@ -58,17 +39,17 @@ function PubModal({ pub, onClose }) {
       {pub.arquivoUrl && (
         <div style={{ marginTop:20, paddingTop:20, borderTop:'1px solid #e5e0d8' }}>
           <p style={{ margin:'0 0 10px', fontSize:11, fontWeight:700, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'0.5px', fontFamily:"'Poppins',sans-serif" }}>Arquivo anexo</p>
-          <button onClick={handleDownload} disabled={downloading}
-            style={{ display:'flex', alignItems:'center', gap:10, width:'100%', padding:'12px 16px', borderRadius:8, border:'1px solid #e5e0d8', backgroundColor:'#f8f5f0', cursor: downloading ? 'wait' : 'pointer', textAlign:'left', fontFamily:"'Poppins',sans-serif", transition:'border-color 0.15s', opacity: downloading ? 0.7 : 1 }}
-            onMouseEnter={e=>{ if(!downloading) e.currentTarget.style.borderColor='#c8972b' }}
+          <a href={downloadUrl}
+            style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 16px', borderRadius:8, border:'1px solid #e5e0d8', backgroundColor:'#f8f5f0', textDecoration:'none', transition:'border-color 0.15s' }}
+            onMouseEnter={e=>e.currentTarget.style.borderColor='#c8972b'}
             onMouseLeave={e=>e.currentTarget.style.borderColor='#e5e0d8'}>
             <Icon size={20} color="#c8972b"/>
             <div style={{ flex:1, minWidth:0 }}>
               <div style={{ fontSize:13, fontWeight:600, color:'#2c2c3e', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{pub.arquivoNome || 'Arquivo anexo'}</div>
-              <div style={{ fontSize:11, color:'#9ca3af', marginTop:2 }}>{downloading ? 'Baixando...' : 'Toque para baixar'}</div>
+              <div style={{ fontSize:11, color:'#9ca3af', marginTop:2 }}>Toque para baixar</div>
             </div>
-            {!downloading && <Download size={16} color="#9ca3af"/>}
-          </button>
+            <Download size={16} color="#9ca3af"/>
+          </a>
         </div>
       )}
       <style>{`

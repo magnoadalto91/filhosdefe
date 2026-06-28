@@ -182,6 +182,35 @@ router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
   } catch (err) { return res.status(500).json({ error: err.message }) }
 })
 
+// GET /:id/arquivo — proxy de download com Content-Disposition correto
+// Resolve CORS e naming no WebView da PWA sem depender de fl_attachment
+router.get('/:id/arquivo', async (req, res) => {
+  try {
+    const id = Number(req.params.id)
+    if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' })
+    const item = await prisma.publicacao.findUnique({
+      where: { id },
+      select: { arquivoUrl: true, arquivoNome: true, arquivoType: true },
+    })
+    if (!item?.arquivoUrl) return res.status(404).json({ error: 'Arquivo não encontrado.' })
+
+    const upstream = await fetch(item.arquivoUrl)
+    if (!upstream.ok) return res.status(502).json({ error: 'Erro ao buscar arquivo no Cloudinary.' })
+
+    const contentType = item.arquivoType === 'pdf'
+      ? 'application/pdf'
+      : (upstream.headers.get('content-type') || 'application/octet-stream')
+
+    const filename = encodeURIComponent(item.arquivoNome || 'arquivo')
+    res.setHeader('Content-Type', contentType)
+    res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${filename}`)
+    res.setHeader('Cache-Control', 'no-store')
+
+    const buf = await upstream.arrayBuffer()
+    return res.end(Buffer.from(buf))
+  } catch (err) { return res.status(500).json({ error: err.message }) }
+})
+
 // POST /image — upload de imagem para inserir no editor
 router.post('/image', authenticate, requireAdmin, uploadMiddleware, async (req, res) => {
   try {
