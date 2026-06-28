@@ -23,7 +23,7 @@ const fmtDate  = iso => new Date(iso).toLocaleDateString('pt-BR', { day:'2-digit
 // forçando download com o nome correto mesmo dentro do WebView da PWA
 const toDownloadUrl = (url, nome) => {
   if (!url) return url
-  const safe = nome ? nome.replace(/[/:]/g, '_') : null
+  const safe = nome ? encodeURIComponent(nome.replace(/[/:]/g, '_')) : null
   const flag = safe ? `fl_attachment:${safe}` : 'fl_attachment'
   return url.replace('/upload/', `/upload/${flag}/`)
 }

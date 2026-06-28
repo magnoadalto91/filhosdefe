@@ -233,7 +233,7 @@ function PublicacoesTab() {
       fd.append('publicado', 'true')
       if (fileRef.current) fd.append('foto', fileRef.current)
       else if (removeCapa) fd.append('removeCapa', 'true')
-      if (arquivoFile) fd.append('arquivo', arquivoFile)
+      if (arquivoFile) fd.append('arquivo', arquivoFile, arquivoFile.name)
       else if (removeArquivo) fd.append('removeArquivo', 'true')
       editTarget ? await api.put(`/publicacoes/${editTarget.id}`, fd) : await api.post('/publicacoes', fd)
       setModalOpen(false); load()

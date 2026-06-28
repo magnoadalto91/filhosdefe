@@ -9,14 +9,24 @@ import { sendPushToAll, isEnabled } from '../lib/sendPush.js'
 const router = Router()
 const prisma  = new PrismaClient()
 
+function ensureExtension(originalname, mimetype) {
+  let nome = originalname || 'arquivo'
+  if (!nome.includes('.')) {
+    if (mimetype === 'application/pdf') nome += '.pdf'
+    else if (mimetype.startsWith('image/')) nome += '.' + mimetype.split('/')[1]
+  }
+  return nome
+}
+
 async function handleArquivo(file) {
   if (!file) return null
+  const nome = ensureExtension(file.originalname, file.mimetype)
   if (file.mimetype === 'application/pdf') {
-    const url = await uploadDocToCloudinary(file.buffer, file.originalname, 'filhosdefe/publicacoes')
-    return { arquivoUrl: url, arquivoType: 'pdf', arquivoNome: file.originalname, arquivoTamanho: file.size }
+    const url = await uploadDocToCloudinary(file.buffer, nome, 'filhosdefe/publicacoes')
+    return { arquivoUrl: url, arquivoType: 'pdf', arquivoNome: nome, arquivoTamanho: file.size }
   }
   const url = await uploadToCloudinary(file.buffer, 'filhosdefe/publicacoes')
-  return { arquivoUrl: url, arquivoType: file.mimetype.split('/')[1], arquivoNome: file.originalname, arquivoTamanho: file.size }
+  return { arquivoUrl: url, arquivoType: file.mimetype.split('/')[1], arquivoNome: nome, arquivoTamanho: file.size }
 }
 
 // GET / — públicas
