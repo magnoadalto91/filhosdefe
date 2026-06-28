@@ -19,9 +19,14 @@ const EXT_ICON = { pdf:'📄', doc:'📝', docx:'📝', xls:'📊', xlsx:'📊',
 const fmtSize  = b => b >= 1048576 ? `${(b/1048576).toFixed(1)} MB` : `${(b/1024).toFixed(0)} KB`
 const fmtDate  = iso => new Date(iso).toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' })
 
-// fl_attachment faz o Cloudinary servir com Content-Disposition: attachment,
-// forçando download mesmo dentro do WebView da PWA (download cross-origin não funciona via atributo HTML)
-const toDownloadUrl = url => url ? url.replace('/upload/', '/upload/fl_attachment/') : url
+// fl_attachment:nome faz o Cloudinary servir com Content-Disposition: attachment; filename="nome",
+// forçando download com o nome correto mesmo dentro do WebView da PWA
+const toDownloadUrl = (url, nome) => {
+  if (!url) return url
+  const safe = nome ? nome.replace(/[/:]/g, '_') : null
+  const flag = safe ? `fl_attachment:${safe}` : 'fl_attachment'
+  return url.replace('/upload/', `/upload/${flag}/`)
+}
 
 /* ── Publicação modal ─────────────────────────────────────── */
 function PubModal({ pub, onClose }) {
@@ -35,7 +40,7 @@ function PubModal({ pub, onClose }) {
       {pub.arquivoUrl && (
         <div style={{ marginTop:20, paddingTop:20, borderTop:'1px solid #e5e0d8' }}>
           <p style={{ margin:'0 0 10px', fontSize:11, fontWeight:700, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'0.5px', fontFamily:"'Poppins',sans-serif" }}>Arquivo anexo</p>
-          <a href={toDownloadUrl(pub.arquivoUrl)} target="_blank" rel="noopener noreferrer"
+          <a href={toDownloadUrl(pub.arquivoUrl, pub.arquivoNome)} target="_blank" rel="noopener noreferrer"
             style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 16px', borderRadius:8, border:'1px solid #e5e0d8', backgroundColor:'#f8f5f0', textDecoration:'none', transition:'border-color 0.15s' }}
             onMouseEnter={e=>e.currentTarget.style.borderColor='#c8972b'}
             onMouseLeave={e=>e.currentTarget.style.borderColor='#e5e0d8'}>
