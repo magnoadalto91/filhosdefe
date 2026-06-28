@@ -35,12 +35,10 @@ async function deleteCloudinaryAsset(url, isRaw = false) {
 
 function ensureExtension(originalname, mimetype) {
   let nome = (originalname || 'arquivo').trim()
-  console.log('[upload] originalname recebido:', originalname, '| mimetype:', mimetype)
   if (!nome.includes('.')) {
     if (mimetype === 'application/pdf') nome += '.pdf'
     else if (mimetype.startsWith('image/')) nome += '.' + mimetype.split('/')[1]
   }
-  console.log('[upload] nome final:', nome)
   return nome
 }
 
@@ -48,14 +46,10 @@ async function handleArquivo(file) {
   if (!file) return null
   const nome = ensureExtension(file.originalname, file.mimetype)
   if (file.mimetype === 'application/pdf') {
-    console.log('[upload] enviando PDF para Cloudinary:', nome)
     const url = await uploadDocToCloudinary(file.buffer, nome, 'filhosdefe/publicacoes')
-    console.log('[upload] URL Cloudinary (raw):', url)
     return { arquivoUrl: url, arquivoType: 'pdf', arquivoNome: nome, arquivoTamanho: file.size }
   }
-  console.log('[upload] enviando imagem para Cloudinary:', nome)
   const url = await uploadToCloudinary(file.buffer, 'filhosdefe/publicacoes')
-  console.log('[upload] URL Cloudinary (image):', url)
   return { arquivoUrl: url, arquivoType: file.mimetype.split('/')[1], arquivoNome: nome, arquivoTamanho: file.size }
 }
 
