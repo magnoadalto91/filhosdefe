@@ -24,9 +24,21 @@ export async function uploadToCloudinary(buffer, folder = 'filhosdefe') {
 }
 
 export async function uploadDocToCloudinary(buffer, originalname, folder = 'filhosdefe/documentos') {
+  // Normaliza o nome: remove acentos, substitui espaços e chars especiais
+  const safeName = (originalname || 'arquivo')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/\s+/g, '_')
+    .replace(/[^a-zA-Z0-9._-]/g, '_')
+    .replace(/_+/g, '_')
+  // Separa base e extensão para inserir timestamp antes da extensão
+  const dotIdx = safeName.lastIndexOf('.')
+  const base = dotIdx > 0 ? safeName.slice(0, dotIdx) : safeName
+  const ext  = dotIdx > 0 ? safeName.slice(dotIdx)    : ''
+  const publicId = `${folder}/${base}_${Date.now()}${ext}`
+
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder, resource_type: 'raw', use_filename: true, unique_filename: true, original_filename: originalname },
+      { public_id: publicId, resource_type: 'raw', overwrite: false },
       (error, result) => {
         if (error) return reject(error);
         resolve(result.secure_url);
