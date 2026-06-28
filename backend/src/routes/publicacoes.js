@@ -5,16 +5,42 @@ import uploadMiddleware from '../middleware/upload.js'
 import uploadPubMiddleware from '../middleware/uploadPub.js'
 import { uploadToCloudinary, uploadDocToCloudinary } from '../lib/uploadToCloudinary.js'
 import { sendPushToAll, isEnabled } from '../lib/sendPush.js'
+import cloudinary from '../lib/cloudinary.js'
 
 const router = Router()
 const prisma  = new PrismaClient()
 
+// Extrai o public_id de uma URL do Cloudinary para poder deletar o asset
+function extractPublicId(url, isRaw = false) {
+  if (!url) return null
+  try {
+    const match = url.match(/\/upload\/(?:v\d+\/)?(.+)$/)
+    if (!match) return null
+    let pubId = match[1]
+    if (!isRaw) pubId = pubId.replace(/\.[^.]+$/, '') // imagens: remove extensão
+    return pubId
+  } catch { return null }
+}
+
+async function deleteCloudinaryAsset(url, isRaw = false) {
+  const pubId = extractPublicId(url, isRaw)
+  if (!pubId) return
+  try {
+    const result = await cloudinary.uploader.destroy(pubId, { resource_type: isRaw ? 'raw' : 'image' })
+    console.log(`[cloudinary] delete ${isRaw ? 'raw' : 'image'} "${pubId}":`, result.result)
+  } catch (e) {
+    console.error(`[cloudinary] erro ao deletar "${pubId}":`, e.message)
+  }
+}
+
 function ensureExtension(originalname, mimetype) {
-  let nome = originalname || 'arquivo'
+  let nome = (originalname || 'arquivo').trim()
+  console.log('[upload] originalname recebido:', originalname, '| mimetype:', mimetype)
   if (!nome.includes('.')) {
     if (mimetype === 'application/pdf') nome += '.pdf'
     else if (mimetype.startsWith('image/')) nome += '.' + mimetype.split('/')[1]
   }
+  console.log('[upload] nome final:', nome)
   return nome
 }
 
@@ -22,10 +48,14 @@ async function handleArquivo(file) {
   if (!file) return null
   const nome = ensureExtension(file.originalname, file.mimetype)
   if (file.mimetype === 'application/pdf') {
+    console.log('[upload] enviando PDF para Cloudinary:', nome)
     const url = await uploadDocToCloudinary(file.buffer, nome, 'filhosdefe/publicacoes')
+    console.log('[upload] URL Cloudinary (raw):', url)
     return { arquivoUrl: url, arquivoType: 'pdf', arquivoNome: nome, arquivoTamanho: file.size }
   }
+  console.log('[upload] enviando imagem para Cloudinary:', nome)
   const url = await uploadToCloudinary(file.buffer, 'filhosdefe/publicacoes')
+  console.log('[upload] URL Cloudinary (image):', url)
   return { arquivoUrl: url, arquivoType: file.mimetype.split('/')[1], arquivoNome: nome, arquivoTamanho: file.size }
 }
 
@@ -106,13 +136,20 @@ router.put('/:id', authenticate, requireAdmin, uploadPubMiddleware, async (req, 
     if (conteudo  !== undefined) data.conteudo  = conteudo
     if (publicado !== undefined) data.publicado = publicado !== 'false' && publicado !== false
 
-    if (req.files?.foto?.[0]) data.capaUrl = await uploadToCloudinary(req.files.foto[0].buffer, 'filhosdefe/publicacoes')
-    else if (removeCapa === 'true') data.capaUrl = null
+    if (req.files?.foto?.[0]) {
+      if (existing.capaUrl) deleteCloudinaryAsset(existing.capaUrl, false)
+      data.capaUrl = await uploadToCloudinary(req.files.foto[0].buffer, 'filhosdefe/publicacoes')
+    } else if (removeCapa === 'true') {
+      if (existing.capaUrl) deleteCloudinaryAsset(existing.capaUrl, false)
+      data.capaUrl = null
+    }
 
     if (req.files?.arquivo?.[0]) {
+      if (existing.arquivoUrl) deleteCloudinaryAsset(existing.arquivoUrl, existing.arquivoType === 'pdf')
       const arquivoData = await handleArquivo(req.files.arquivo[0])
       Object.assign(data, arquivoData)
     } else if (removeArquivo === 'true') {
+      if (existing.arquivoUrl) deleteCloudinaryAsset(existing.arquivoUrl, existing.arquivoType === 'pdf')
       data.arquivoUrl = null
       data.arquivoType = null
       data.arquivoNome = null
@@ -136,6 +173,10 @@ router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
     if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' })
     const existing = await prisma.publicacao.findUnique({ where: { id } })
     if (!existing) return res.status(404).json({ error: 'Publicação não encontrada.' })
+
+    if (existing.capaUrl) deleteCloudinaryAsset(existing.capaUrl, false)
+    if (existing.arquivoUrl) deleteCloudinaryAsset(existing.arquivoUrl, existing.arquivoType === 'pdf')
+
     await prisma.publicacao.delete({ where: { id } })
     return res.status(204).end()
   } catch (err) { return res.status(500).json({ error: err.message }) }
