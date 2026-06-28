@@ -59,7 +59,8 @@ function Toolbar({ editor, onImageUpload }) {
 }
 
 /* ── Publicação Form ────────────────────────────────────────── */
-function PubForm({ form, setForm, error, preview, setPreview, fileRef, editor, uploading, onImageClick, onRemoveCover }) {
+function PubForm({ form, setForm, error, preview, setPreview, fileRef, editor, uploading, onImageClick, onRemoveCover,
+                   arquivoRef, arquivoFile, setArquivoFile, existingArquivo, onRemoveArquivo }) {
   const inputRef = useRef()
   return (
     <div>
@@ -111,6 +112,50 @@ function PubForm({ form, setForm, error, preview, setPreview, fileRef, editor, u
         <EditorContent editor={editor} style={{ padding:'14px 16px', minHeight:200, fontSize:14, lineHeight:1.7, color:'#2c2c3e', outline:'none' }}/>
       </div>
       {uploading && <p style={{ margin:'6px 0 0', fontSize:12, color:'#9ca3af' }}>Enviando imagem...</p>}
+
+      {/* Arquivo anexo */}
+      <div style={{ marginTop:20 }}>
+        <label style={S.label}>Arquivo anexo (PDF ou imagem)</label>
+        {existingArquivo && !arquivoFile ? (
+          <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 14px', border:'1px solid #e5e0d8', borderRadius:6, backgroundColor:'#f8f5f0' }}>
+            <FileText size={15} color="#c8972b"/>
+            <span style={{ flex:1, fontSize:13, color:'#2c2c3e', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{existingArquivo}</span>
+            <button type="button" onClick={onRemoveArquivo}
+              style={{ display:'flex', padding:4, border:'none', background:'none', cursor:'pointer', color:'#9ca3af', transition:'color 0.15s' }}
+              onMouseEnter={e=>e.currentTarget.style.color='#dc2626'}
+              onMouseLeave={e=>e.currentTarget.style.color='#9ca3af'}>
+              <X size={14}/>
+            </button>
+          </div>
+        ) : (
+          <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+            <div style={{ flex:1, padding:'10px 14px', border:'1px solid #e5e0d8', borderRadius:6, fontSize:13, color: arquivoFile ? '#2c2c3e' : '#9ca3af', backgroundColor:'#fff', cursor:'pointer', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}
+              onClick={()=>arquivoRef.current?.click()}>
+              {arquivoFile ? arquivoFile.name : 'Clique para selecionar (PDF ou imagem)'}
+            </div>
+            <button type="button" onClick={()=>arquivoRef.current?.click()}
+              style={{ display:'flex', alignItems:'center', padding:'10px 14px', borderRadius:6, border:'1px solid #e5e0d8', color:'#6b7280', backgroundColor:'#fff', cursor:'pointer', transition:'all 0.15s' }}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor='#c8972b';e.currentTarget.style.color='#c8972b'}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor='#e5e0d8';e.currentTarget.style.color='#6b7280'}}>
+              <FileUp size={14}/>
+            </button>
+          </div>
+        )}
+        <input ref={arquivoRef} type="file" accept=".pdf,image/*" style={{ display:'none' }} onChange={e => {
+          const f = e.target.files[0]; if(!f) return
+          setArquivoFile(f)
+        }}/>
+        {arquivoFile && (
+          <div style={{ display:'flex', alignItems:'center', gap:6, marginTop:6 }}>
+            <FileText size={13} color="#c8972b"/>
+            <span style={{ fontSize:12, color:'#6b7280' }}>{arquivoFile.name}</span>
+            <button type="button" onClick={()=>setArquivoFile(null)}
+              style={{ display:'flex', border:'none', background:'none', cursor:'pointer', color:'#9ca3af', padding:2 }}>
+              <X size={12}/>
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -130,8 +175,12 @@ function PublicacoesTab() {
   const [selectedIds,    setSelectedIds]    = useState(new Set())
   const [showBulkConfirm,setShowBulkConfirm]= useState(false)
   const [uploading,   setUploading]   = useState(false)
-  const fileRef  = useRef(null)
-  const imgInput = useRef(null)
+  const [arquivoFile,    setArquivoFile]    = useState(null)
+  const [existingArquivo,setExistingArquivo]= useState('')
+  const [removeArquivo,  setRemoveArquivo]  = useState(false)
+  const fileRef    = useRef(null)
+  const imgInput   = useRef(null)
+  const arquivoRef = useRef(null)
 
   const editor = useEditor({
     extensions: [
@@ -151,11 +200,17 @@ function PublicacoesTab() {
 
   const openAdd = () => {
     setEditTarget(null); setForm({ titulo:'' }); setPreview(''); fileRef.current=null; setRemoveCapa(false)
+    setArquivoFile(null); setExistingArquivo(''); setRemoveArquivo(false)
     editor?.commands.setContent(''); setFormError(''); setModalOpen(true)
   }
   const openEdit = async (item) => {
-    setEditTarget(item); setForm({ titulo:item.titulo }); setPreview(item.capaUrl||''); fileRef.current=null; setRemoveCapa(false); setFormError(''); setModalOpen(true)
-    try { const r = await api.get(`/publicacoes/${item.id}`); editor?.commands.setContent(r.data.conteudo||'') } catch {}
+    setEditTarget(item); setForm({ titulo:item.titulo }); setPreview(item.capaUrl||''); fileRef.current=null; setRemoveCapa(false)
+    setArquivoFile(null); setExistingArquivo(''); setRemoveArquivo(false); setFormError(''); setModalOpen(true)
+    try {
+      const r = await api.get(`/publicacoes/${item.id}`)
+      editor?.commands.setContent(r.data.conteudo||'')
+      setExistingArquivo(r.data.arquivoNome || (r.data.arquivoUrl ? 'Arquivo existente' : ''))
+    } catch {}
   }
 
   const handleImageUpload = async (file) => {
@@ -178,6 +233,8 @@ function PublicacoesTab() {
       fd.append('publicado', 'true')
       if (fileRef.current) fd.append('foto', fileRef.current)
       else if (removeCapa) fd.append('removeCapa', 'true')
+      if (arquivoFile) fd.append('arquivo', arquivoFile)
+      else if (removeArquivo) fd.append('removeArquivo', 'true')
       editTarget ? await api.put(`/publicacoes/${editTarget.id}`, fd) : await api.post('/publicacoes', fd)
       setModalOpen(false); load()
     } catch (err) { setFormError(err.response?.data?.error || 'Erro ao salvar.') }
@@ -260,7 +317,10 @@ function PublicacoesTab() {
       >
         <PubForm form={form} setForm={setForm} error={formError} preview={preview} setPreview={setPreview}
           fileRef={fileRef} editor={editor} uploading={uploading} onImageClick={()=>imgInput.current?.click()}
-          onRemoveCover={() => { setPreview(''); fileRef.current = null; setRemoveCapa(true) }}/>
+          onRemoveCover={() => { setPreview(''); fileRef.current = null; setRemoveCapa(true) }}
+          arquivoRef={arquivoRef} arquivoFile={arquivoFile} setArquivoFile={setArquivoFile}
+          existingArquivo={removeArquivo ? '' : existingArquivo}
+          onRemoveArquivo={() => { setExistingArquivo(''); setArquivoFile(null); setRemoveArquivo(true) }}/>
       </Modal>
 
       <ConfirmModal isOpen={!!deleteTarget} onClose={()=>setDeleteTarget(null)} onConfirm={handleDelete}

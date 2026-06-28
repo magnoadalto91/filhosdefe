@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { BookOpen, FileText, ArrowLeft, Calendar, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { BookOpen, FileText, ArrowLeft, Calendar, X, ChevronLeft, ChevronRight, Download, Paperclip } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
@@ -20,13 +20,43 @@ const fmtSize  = b => b >= 1048576 ? `${(b/1048576).toFixed(1)} MB` : `${(b/1024
 const fmtDate  = iso => new Date(iso).toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' })
 
 /* ── Publicação modal ─────────────────────────────────────── */
-function PubModal({ pub, onClose }) {
+function PubModal({ pub, onClose, onOpenPdf }) {
   if (!pub) return null
+  const isPdf = pub.arquivoType === 'pdf'
   return (
     <Modal isOpen={!!pub} onClose={onClose} title={pub.titulo}>
       {pub.capaUrl && <img src={pub.capaUrl} alt="" style={{ width:'100%', borderRadius:8, marginBottom:16, objectFit:'cover', maxHeight:220, display:'block' }}/>}
       <p style={{ margin:'0 0 16px', fontSize:12, color:'#9ca3af' }}>{fmtDate(pub.createdAt)}</p>
       <div style={{ fontSize:14, lineHeight:1.8, color:'#2c2c3e' }} dangerouslySetInnerHTML={{ __html: pub.conteudo }}/>
+      {pub.arquivoUrl && (
+        <div style={{ marginTop:20, paddingTop:20, borderTop:'1px solid #e5e0d8' }}>
+          <p style={{ margin:'0 0 10px', fontSize:11, fontWeight:700, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'0.5px', fontFamily:"'Poppins',sans-serif" }}>Arquivo anexo</p>
+          {isPdf ? (
+            <button onClick={() => onOpenPdf({ nome: pub.arquivoNome || pub.titulo, fileUrl: pub.arquivoUrl })}
+              style={{ display:'flex', alignItems:'center', gap:10, width:'100%', padding:'12px 16px', borderRadius:8, border:'1px solid #e5e0d8', backgroundColor:'#f8f5f0', cursor:'pointer', fontFamily:"'Poppins',sans-serif", textAlign:'left', transition:'border-color 0.15s' }}
+              onMouseEnter={e=>e.currentTarget.style.borderColor='#c8972b'}
+              onMouseLeave={e=>e.currentTarget.style.borderColor='#e5e0d8'}>
+              <FileText size={20} color="#c8972b"/>
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{ fontSize:13, fontWeight:600, color:'#2c2c3e', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{pub.arquivoNome || 'Documento PDF'}</div>
+                <div style={{ fontSize:11, color:'#9ca3af', marginTop:2 }}>PDF · Toque para abrir</div>
+              </div>
+            </button>
+          ) : (
+            <a href={pub.arquivoUrl} target="_blank" rel="noopener noreferrer"
+              style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 16px', borderRadius:8, border:'1px solid #e5e0d8', backgroundColor:'#f8f5f0', textDecoration:'none', transition:'border-color 0.15s' }}
+              onMouseEnter={e=>e.currentTarget.style.borderColor='#c8972b'}
+              onMouseLeave={e=>e.currentTarget.style.borderColor='#e5e0d8'}>
+              <Paperclip size={20} color="#c8972b"/>
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{ fontSize:13, fontWeight:600, color:'#2c2c3e', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{pub.arquivoNome || 'Arquivo anexo'}</div>
+                <div style={{ fontSize:11, color:'#9ca3af', marginTop:2 }}>Toque para abrir</div>
+              </div>
+              <Download size={16} color="#9ca3af"/>
+            </a>
+          )}
+        </div>
+      )}
       <style>{`
         .pub-content h2 { font-size:20px; font-weight:700; margin:16px 0 8px; }
         .pub-content h3 { font-size:17px; font-weight:700; margin:14px 0 6px; }
@@ -44,6 +74,7 @@ function PublicacoesTab() {
   const [loading,    setLoading]    = useState(true)
   const [selected,   setSelected]   = useState(null)
   const [loadingPub, setLoadingPub] = useState(false)
+  const [viewingPdf, setViewingPdf] = useState(null)
 
   useEffect(() => {
     api.get('/publicacoes')
@@ -95,7 +126,10 @@ function PublicacoesTab() {
           </button>
         ))}
       </div>
-      <PubModal pub={selected} onClose={() => setSelected(null)}/>
+      <PubModal pub={selected} onClose={() => setSelected(null)} onOpenPdf={doc => { setSelected(null); setViewingPdf(doc) }}/>
+      {viewingPdf && (
+        <PdfViewer doc={viewingPdf} onClose={() => setViewingPdf(null)} onConcluded={() => {}}/>
+      )}
     </>
   )
 }

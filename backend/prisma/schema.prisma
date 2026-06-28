@@ -43,13 +43,17 @@ model PushSubscription {
 }
 
 model Publicacao {
-  id        Int      @id @default(autoincrement())
-  titulo    String
-  conteudo  String
-  capaUrl   String?
-  publicado Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             Int      @id @default(autoincrement())
+  titulo         String
+  conteudo       String
+  capaUrl        String?
+  arquivoUrl     String?
+  arquivoType    String?
+  arquivoNome    String?
+  arquivoTamanho Int?
+  publicado      Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Documento {

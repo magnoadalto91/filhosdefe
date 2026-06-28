@@ -2,11 +2,22 @@ import { Router } from 'express'
 import { PrismaClient } from '@prisma/client'
 import { authenticate, requireAdmin } from '../middleware/auth.js'
 import uploadMiddleware from '../middleware/upload.js'
-import { uploadToCloudinary } from '../lib/uploadToCloudinary.js'
+import uploadPubMiddleware from '../middleware/uploadPub.js'
+import { uploadToCloudinary, uploadDocToCloudinary } from '../lib/uploadToCloudinary.js'
 import { sendPushToAll, isEnabled } from '../lib/sendPush.js'
 
 const router = Router()
 const prisma  = new PrismaClient()
+
+async function handleArquivo(file) {
+  if (!file) return null
+  if (file.mimetype === 'application/pdf') {
+    const url = await uploadDocToCloudinary(file.buffer, file.originalname, 'filhosdefe/publicacoes')
+    return { arquivoUrl: url, arquivoType: 'pdf', arquivoNome: file.originalname, arquivoTamanho: file.size }
+  }
+  const url = await uploadToCloudinary(file.buffer, 'filhosdefe/publicacoes')
+  return { arquivoUrl: url, arquivoType: file.mimetype.split('/')[1], arquivoNome: file.originalname, arquivoTamanho: file.size }
+}
 
 // GET / — públicas
 router.get('/', async (_req, res) => {
@@ -25,7 +36,7 @@ router.get('/all', authenticate, requireAdmin, async (_req, res) => {
   try {
     const list = await prisma.publicacao.findMany({
       orderBy: { createdAt: 'desc' },
-      select: { id: true, titulo: true, capaUrl: true, publicado: true, createdAt: true },
+      select: { id: true, titulo: true, capaUrl: true, arquivoUrl: true, arquivoNome: true, publicado: true, createdAt: true },
     })
     return res.json(list)
   } catch (err) { return res.status(500).json({ error: err.message }) }
@@ -43,16 +54,24 @@ router.get('/:id', async (req, res) => {
 })
 
 // POST / — admin
-router.post('/', authenticate, requireAdmin, uploadMiddleware, async (req, res) => {
+router.post('/', authenticate, requireAdmin, uploadPubMiddleware, async (req, res) => {
   try {
     const { titulo, conteudo, publicado } = req.body
     if (!titulo?.trim()) return res.status(400).json({ error: 'Título é obrigatório.' })
 
     let capaUrl = null
-    if (req.file) capaUrl = await uploadToCloudinary(req.file.buffer, 'filhosdefe/publicacoes')
+    if (req.files?.foto?.[0]) capaUrl = await uploadToCloudinary(req.files.foto[0].buffer, 'filhosdefe/publicacoes')
+
+    const arquivoData = await handleArquivo(req.files?.arquivo?.[0])
 
     const item = await prisma.publicacao.create({
-      data: { titulo: titulo.trim(), conteudo: conteudo || '', capaUrl, publicado: publicado !== 'false' },
+      data: {
+        titulo: titulo.trim(),
+        conteudo: conteudo || '',
+        capaUrl,
+        publicado: publicado !== 'false',
+        ...arquivoData,
+      },
     })
 
     if (await isEnabled('novaPublicacao')) {
@@ -64,21 +83,31 @@ router.post('/', authenticate, requireAdmin, uploadMiddleware, async (req, res) 
 })
 
 // PUT /:id — admin
-router.put('/:id', authenticate, requireAdmin, uploadMiddleware, async (req, res) => {
+router.put('/:id', authenticate, requireAdmin, uploadPubMiddleware, async (req, res) => {
   try {
     const id = Number(req.params.id)
     if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' })
     const existing = await prisma.publicacao.findUnique({ where: { id } })
     if (!existing) return res.status(404).json({ error: 'Publicação não encontrada.' })
 
-    const { titulo, conteudo, publicado, removeCapa } = req.body
+    const { titulo, conteudo, publicado, removeCapa, removeArquivo } = req.body
     const data = {}
     if (titulo    !== undefined) data.titulo    = titulo.trim()
     if (conteudo  !== undefined) data.conteudo  = conteudo
     if (publicado !== undefined) data.publicado = publicado !== 'false' && publicado !== false
 
-    if (req.file) data.capaUrl = await uploadToCloudinary(req.file.buffer, 'filhosdefe/publicacoes')
+    if (req.files?.foto?.[0]) data.capaUrl = await uploadToCloudinary(req.files.foto[0].buffer, 'filhosdefe/publicacoes')
     else if (removeCapa === 'true') data.capaUrl = null
+
+    if (req.files?.arquivo?.[0]) {
+      const arquivoData = await handleArquivo(req.files.arquivo[0])
+      Object.assign(data, arquivoData)
+    } else if (removeArquivo === 'true') {
+      data.arquivoUrl = null
+      data.arquivoType = null
+      data.arquivoNome = null
+      data.arquivoTamanho = null
+    }
 
     const item = await prisma.publicacao.update({ where: { id }, data })
 
