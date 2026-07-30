@@ -1,12 +1,11 @@
 import { Router } from 'express'
-import { PrismaClient } from '@prisma/client'
+import prisma from '../lib/prisma.js'
 import { authenticate, requireAdmin } from '../middleware/auth.js'
 import uploadDocMiddleware from '../middleware/uploadDoc.js'
 import { uploadDocToCloudinary } from '../lib/uploadToCloudinary.js'
 import { sendPushToAll, isEnabled } from '../lib/sendPush.js'
 
 const router = Router()
-const prisma  = new PrismaClient()
 
 // GET / — requer auth; retorna lista com abertura + conclusão do usuário
 router.get('/', authenticate, async (req, res) => {

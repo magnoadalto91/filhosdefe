@@ -1,10 +1,9 @@
 import { Router } from 'express'
-import { PrismaClient } from '@prisma/client'
+import prisma from '../lib/prisma.js'
 import bcrypt from 'bcryptjs'
 import { authenticate, requireAdmin } from '../middleware/auth.js'
 
 const router = Router()
-const prisma = new PrismaClient()
 
 // GET / — listar todos os usuários (admin)
 router.get('/', authenticate, requireAdmin, async (req, res) => {

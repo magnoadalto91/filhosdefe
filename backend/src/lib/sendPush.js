@@ -1,7 +1,6 @@
-import { PrismaClient } from '@prisma/client'
+import prisma from './prisma.js'
 import webpush from './webpush.js'
 
-const prisma = new PrismaClient()
 
 /**
  * Envia push para todos os subscribers cadastrados.

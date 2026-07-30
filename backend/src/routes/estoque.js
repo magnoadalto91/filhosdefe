@@ -1,11 +1,10 @@
 import { Router } from 'express'
-import { PrismaClient } from '@prisma/client'
+import prisma from '../lib/prisma.js'
 import { authenticate, requireAdmin } from '../middleware/auth.js'
 import uploadMiddleware from '../middleware/upload.js'
 import { uploadToCloudinary } from '../lib/uploadToCloudinary.js'
 
 const router = Router()
-const prisma = new PrismaClient()
 
 // GET /api/estoque
 router.get('/', authenticate, requireAdmin, async (_req, res) => {

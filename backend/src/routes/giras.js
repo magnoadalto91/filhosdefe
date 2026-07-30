@@ -1,11 +1,10 @@
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js'
 import { authenticate, requireAdmin } from '../middleware/auth.js';
 import { sendPushToAll, isEnabled } from '../lib/sendPush.js';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 const giraFullInclude = {
   entidades: { include: { entidade: true } },

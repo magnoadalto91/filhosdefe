@@ -1,9 +1,8 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js'
 import { sendPushToUser } from '../lib/sendPush.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 function sameDay(d1, d2) {
   return d1.getFullYear() === d2.getFullYear()

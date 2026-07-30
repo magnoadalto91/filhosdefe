@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { PrismaClient } from '@prisma/client'
+import prisma from '../lib/prisma.js'
 import { authenticate, requireAdmin } from '../middleware/auth.js'
 import uploadMiddleware from '../middleware/upload.js'
 import uploadPubMiddleware from '../middleware/uploadPub.js'
@@ -8,7 +8,6 @@ import { sendPushToAll, isEnabled } from '../lib/sendPush.js'
 import cloudinary from '../lib/cloudinary.js'
 
 const router = Router()
-const prisma  = new PrismaClient()
 
 // Extrai o public_id de uma URL do Cloudinary para poder deletar o asset
 function extractPublicId(url, isRaw = false) {

@@ -1,8 +1,7 @@
 import cron from 'node-cron'
-import { PrismaClient } from '@prisma/client'
+import prisma from '../lib/prisma.js'
 import { sendPushToUser } from '../lib/sendPush.js'
 
-const prisma = new PrismaClient()
 
 function sameDay(d1, d2) {
   return d1.getFullYear() === d2.getFullYear()

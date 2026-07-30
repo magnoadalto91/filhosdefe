@@ -1,10 +1,9 @@
 import { Router } from 'express'
-import { PrismaClient } from '@prisma/client'
+import prisma from '../lib/prisma.js'
 import { authenticate, requireAdmin } from '../middleware/auth.js'
 import { sendPushToAll, isEnabled } from '../lib/sendPush.js'
 
 const router = Router()
-const prisma = new PrismaClient()
 
 const include = { agregador: { select: { id: true, nome: true, ordem: true } } }
 
