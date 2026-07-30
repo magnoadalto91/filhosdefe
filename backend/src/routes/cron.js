@@ -17,8 +17,9 @@ function addDays(date, days) {
   return d;
 }
 
-// POST /api/cron/giras-reminder — chamado pelo Vercel Cron (diariamente às 11:00 UTC = 08:00 BRT)
-router.post('/giras-reminder', async (req, res) => {
+// GET /api/cron/giras-reminder — chamado pelo Vercel Cron (diariamente às 11:00 UTC = 08:00 BRT)
+// Vercel Cron Jobs sempre disparam via GET, então a rota precisa aceitar esse método.
+router.get('/giras-reminder', async (req, res) => {
   const authHeader = req.headers.authorization;
   if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return res.status(401).json({ error: 'Unauthorized' });

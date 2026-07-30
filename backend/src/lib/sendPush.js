@@ -51,7 +51,7 @@ export async function sendPushToUser(userId, title, body, data = {}) {
 
   const payload = JSON.stringify({ title, body, ...data })
 
-  await Promise.allSettled(
+  const results = await Promise.allSettled(
     subs.map(s =>
       webpush.sendNotification(
         { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
@@ -68,6 +68,11 @@ export async function sendPushToUser(userId, title, body, data = {}) {
       })
     )
   )
+
+  const failed = results.filter(r => r.status === 'rejected')
+  if (failed.length) {
+    console.error(`[push] ${title} → userId ${userId}: ${failed.length}/${subs.length} falha(s)`, failed[0].reason?.message)
+  }
 }
 
 /**

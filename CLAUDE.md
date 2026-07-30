@@ -41,7 +41,7 @@ Site para gerenciar / controlar as obrigações no terreiro de umbanda, o nome d
 - **Backend:** Vercel (projeto separado) — `backend/vercel.json` roteia tudo para `server.js`
   - Build command: `prisma generate && prisma migrate deploy` (script `vercel-build`)
   - Migrations rodam automaticamente em cada deploy
-  - Cron job de lembretes de Gira: `POST /api/cron/giras-reminder` — agendado às 11:00 UTC (08:00 BRT) via Vercel Crons
+  - Cron job de lembretes de Gira: `GET /api/cron/giras-reminder` — agendado às 11:00 UTC (08:00 BRT) via Vercel Crons (Vercel Cron sempre dispara via GET, não POST)
 - **Frontend:** Vercel (projeto separado) — `frontend/vercel.json` redireciona tudo para `index.html` (SPA)
   - Env var obrigatória no painel Vercel: `VITE_API_URL=<url-do-backend-vercel>`
 
@@ -49,7 +49,7 @@ Site para gerenciar / controlar as obrigações no terreiro de umbanda, o nome d
 - `DATABASE_URL` — URL do Neon (pooler)
 - `JWT_SECRET`
 - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
-- `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_MAILTO`
+- `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_EMAIL` (o código lê `VAPID_EMAIL`, não `VAPID_MAILTO`)
 - `RESEND_API_KEY`
 - `CRON_SECRET` — gerado automaticamente pelo Vercel (protege o endpoint de cron)
 
